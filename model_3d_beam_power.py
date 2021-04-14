@@ -9,11 +9,11 @@ GitHub: https://github.com/liuyuchen777
 """
 
 # framework package
+import time
+
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
 import numpy as np
-import math
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 
@@ -48,27 +48,27 @@ class BSNet(nn.Module):
         return out
 
 
-def beam_loss(y_predicted, y):
+def beam_loss(y_predict, y):
     loss = nn.CrossEntropyLoss()
     total_beam_loss = 0
     for bs in range(bs_num):
         true_beam = y[:, bs_num * len(P_cb) + b * len(precoding_matrices):bs_num * len(P_cb) + (b + 1) * len(
             precoding_matrices)]
         true_beam_label = true_beam.argmax(dim=1)
-        each_beam = y_predicted[:, bs_num * len(P_cb) + b * len(precoding_matrices):bs_num * len(P_cb) + (b + 1) * len(
+        each_beam = y_predict[:, bs_num * len(P_cb) + b * len(precoding_matrices):bs_num * len(P_cb) + (b + 1) * len(
             precoding_matrices)]
         total_beam_loss += loss(each_beam, true_beam_label)
 
     return total_beam_loss
 
 
-def power_loss(y_predicted, y):
+def power_loss(y_predict, y):
     loss = nn.CrossEntropyLoss()
     total_power_loss = 0
     for bs in range(bs_num):
         true_power = y[:, b * len(P_cb):(b + 1) * len(P_cb)]
         true_power_label = true_power.argmax(dim=1)
-        each_power = y_predicted[:, b * len(P_cb):(b + 1) * len(P_cb)]
+        each_power = y_predict[:, b * len(P_cb):(b + 1) * len(P_cb)]
         # 根据each_power_softmax和true power计算cross entropy
         # nn.CrossEntropyLoss doesn't need to do softmax
         total_power_loss += loss(each_power, true_power_label)
@@ -76,11 +76,16 @@ def power_loss(y_predicted, y):
     # 计算total_power_loss
     return total_power_loss
 
+
+"""
 def total_loss(y_predicted, y):
     return theta * beam_loss(y_predicted, y) + (1 - theta) * power_loss(y_predicted, y)
+"""
+
 
 # main function
 if __name__ == "__main__":
+    mylog = logger()
     # 0) load data
     x_train, x_test, y_train, y_test = data_loader(data_path)
     # print(y_train.shape)    # (16000, 39)
@@ -128,20 +133,20 @@ if __name__ == "__main__":
             optimizer.zero_grad()
 
         # print out loss
-        print(f'epoch = {epoch+1}: ')
-        print(f'    epoch_loss ----- {epoch_loss}')
-        print(f'    epoch_power_loss ----- {epoch_power_loss}')
-        print(f'    epoch_beam_loss ----- {epoch_beam_loss}')
+        mylog.log(f'epoch = {epoch+1}: ')
+        mylog.log(f'    epoch_loss ----- {epoch_loss}')
+        mylog.log(f'    epoch_power_loss ----- {epoch_power_loss}')
+        mylog.log(f'    epoch_beam_loss ----- {epoch_beam_loss}')
         # cross validation
         y_validate = model(x_test)
         validate_beam_loss = beam_loss(y_validate, y_test)
         validate_power_loss = power_loss(y_validate, y_test)
         validate_loss = theta * validate_beam_loss + (1 - theta) * validate_power_loss
         # print out validation loss
-        print(f'  cross validation: ')
-        print(f'    validation_loss ----- {validate_loss}')
-        print(f'    validation_power_loss ----- {validate_power_loss}')
-        print(f'    validation_beam_loss ----- {validate_power_loss}')
+        mylog.log(f'  cross validation: ')
+        mylog.log(f'    validation_loss ----- {validate_loss}')
+        mylog.log(f'    validation_power_loss ----- {validate_power_loss}')
+        mylog.log(f'    validation_beam_loss ----- {validate_power_loss}')
         # record loss
         beam_loss_record.append(epoch_beam_loss)
         power_loss_record.append(epoch_power_loss)
@@ -150,6 +155,7 @@ if __name__ == "__main__":
 
     # 3) plt
 
-
     # 4) save model
-
+    save_path_now = save_path + time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()) + ".pth"
+    torch.save(model, save_path_now)
+    logging.info("----------------------------FINISH----------------------------------\n\n")

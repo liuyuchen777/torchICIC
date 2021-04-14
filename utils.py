@@ -1,6 +1,11 @@
+import logging
+import time
+
 import numpy as np
 import math
 from const import *
+from torch.utils.data import Dataset, DataLoader
+from hyper_parameter import *
 
 
 def random_mini_batches(X, Y, mini_batch_size):
@@ -108,3 +113,20 @@ def data_loader(file_path):
 
     return x_train, x_test, y_train, y_test
 
+
+class logger():
+    def __init__(self):
+        # set path
+        log_file_path = log_path + time.strftime("%Y-%m-%d") + ".log"
+        logging.basicConfig(filename=log_file_path, format='%(message)s', level=logging.DEBUG)
+        # starting write some information
+        logging.info("-----------------------NETWORK CONFIG-------------------------------")
+        logging.info(f'DATE: {time.strftime("%Y-%m-%d", time.localtime())}, TIME: {time.strftime("%H:%M:%S", time.localtime())}')
+        logging.info(f'reg_beta = {reg_beta}, drop_out_rate = {dropout_rate}, learning_rate = {learning_rate}\n'
+                     f'num_epochs = {num_epochs}, theta = {theta}, mini_batch_size = {mini_batch_size},\n'
+                     f'layer1_unit = {full_con_layer1_unit}, layer2_unit = {full_con_layer2_unit}')
+        logging.info("-----------------------------END------------------------------------")
+
+    def log(self, log_item):
+        print(log_item)
+        logging.info(log_item)
