@@ -1,0 +1,24 @@
+-----------------------NETWORK CONFIG-------------------------------
+DATE: 2021-04-18, TIME: 11:03:52
+reg_beta = 0.01, drop_out_rate = 0.5, learning_rate = 0.0001
+num_epochs = 100, theta = 0.5, mini_batch_size = 16,
+layer1_unit = 1024, layer2_unit = 1024
+-----------------------------END------------------------------------
+-----------------------NETWORK CONFIG-------------------------------
+DATE: 2021-04-18, TIME: 12:01:21
+reg_beta = 0.01, drop_out_rate = 0.5, learning_rate = 0.0001
+num_epochs = 100, theta = 0.5, mini_batch_size = 16,
+layer1_unit = 1024, layer2_unit = 1024
+-----------------------------END------------------------------------
+-----------------------NETWORK CONFIG-------------------------------
+DATE: 2021-04-18, TIME: 12:01:59
+reg_beta = 0.01, drop_out_rate = 0.5, learning_rate = 0.0001
+num_epochs = 100, theta = 0.5, mini_batch_size = 16,
+layer1_unit = 1024, layer2_unit = 1024
+-----------------------------END------------------------------------
+-----------------------NETWORK CONFIG-------------------------------
+DATE: 2021-04-18, TIME: 12:11:07
+reg_beta = 0.01, drop_out_rate = 0.5, learning_rate = 0.0001
+num_epochs = 100, theta = 0.5, mini_batch_size = 16,
+layer1_unit = 1024, layer2_unit = 1024
+-----------------------------END------------------------------------
