@@ -1,6 +1,8 @@
+# ES
 import numpy as np
 from const import bs_num, P_cb, precoding_matrices
-from NN.channel_capacity import system_capacity, system_throughput
+from channel_capacity import system_capacity, system_throughput
+
 
 def convert_num_to_list(x, n):
     '''
@@ -23,6 +25,7 @@ def convert_num_to_list(x, n):
 
     return l
 
+
 def convert_one_hot(l):
     '''
     This function convert list of number in to one-hot-coded array
@@ -40,7 +43,8 @@ def convert_one_hot(l):
         cnt += len(P_cb) * len(precoding_matrices)
     return one_hot
 
-def greedy_capacity(G, pair):
+
+def greedy_capacity(G):
     '''
     This function calculate a optimal power configuration for each BS by greedy algorithm
     This configuration maximizes system capacity
@@ -65,7 +69,7 @@ def greedy_capacity(G, pair):
         signal_pow = [P_cb[m] for m in signal_pow_index]
         for f in range(len(precoding_matrices)**bs_num):
             precoding_index = convert_num_to_list(f, len(precoding_matrices))
-            temp_capacity = system_capacity(G, pair, signal_pow, precoding_index)
+            temp_capacity = system_capacity(G, signal_pow, precoding_index)
 
             capacity[index] = temp_capacity
             index += 1
@@ -78,7 +82,7 @@ def greedy_capacity(G, pair):
     return one_hot, max_config, np.real(max_capacity), np.real(capacity)
 
 
-def greedy_throughput(G, pair):
+def greedy_throughput(G):
     '''
     This function calculate a optimal power configuration for each BS by greedy algorithm
     This configuration maximizes system throughput
@@ -104,7 +108,7 @@ def greedy_throughput(G, pair):
         
         for f in range(len(precoding_matrices)**bs_num):
             precoding_index = convert_num_to_list(f, len(precoding_matrices))
-            temp_throughput, temp_CQI = system_throughput(G, pair, signal_pow, precoding_index)
+            temp_throughput, temp_CQI = system_throughput(G, signal_pow, precoding_index)
             
             throughput[index] = temp_throughput
             index += 1
@@ -118,7 +122,7 @@ def greedy_throughput(G, pair):
     return one_hot, max_config, max_throughput, throughput
 
 
-def greedy(G, pair, mode):
+def greedy(G, mode):
     '''
     This funciton is a wrapper of greedy_capacity and greedy_throughput
     
@@ -127,9 +131,9 @@ def greedy(G, pair, mode):
     '''
     
     if mode == 'capacity':
-        return greedy_capacity(G, pair)
+        return greedy_capacity(G)
     elif mode == 'throughput':
-        return greedy_throughput(G, pair)
+        return greedy_throughput(G)
     else:
         print("ERROR: invalid greedy mode")
 

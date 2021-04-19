@@ -1,11 +1,12 @@
 import numpy as np
 
-from const import bs_num, ut_num, n_r, n_t, n_stream, P_cb, check_valid_system, NOISE_POW, precoding_matrices, is_beamforming
-from NN.system_generator import system_generator
-from NN.greedy_algorithm import greedy
+from const import bs_num, ut_num, n_r, n_t, n_stream, P_cb, check_valid_system, NOISE_POW, precoding_matrices, is_beam_forming
+from system_generator import system_generator
+from greedy_algorithm import greedy
+
 
 def cal_cdf(raw_data):
-    '''
+    """
     This function calculate cdf for input data
 
     Arguments:
@@ -14,11 +15,12 @@ def cal_cdf(raw_data):
     Returns:
     x -- np array in shape of (#data, 1), x of the cdf
     y -- np array in shape of (#data, 1), y of the cdf
-    '''
+    """
     num_data = raw_data.shape[0]
     x = np.sort(raw_data, axis = 0)
     y = (1 + np.arange(num_data)) / num_data
     return x, y
+
 
 def pair_to_one_hot(pair):
     '''
@@ -37,6 +39,7 @@ def pair_to_one_hot(pair):
         one_hot_pair[p[0] * ut_num + i][0] = 1
 
     return one_hot_pair
+
 
 def train_data_generator(num_data, mode):
     '''
@@ -64,9 +67,8 @@ def train_data_generator(num_data, mode):
     
 
     for i in range(num_data):
-        # FIXME pair object is no longer needed, delete it in future
-        pair = [[0],[1],[2]]
-        one_hot, max_config, max_capacity, capacity = greedy(G_all[i], pair, mode)
+        print(f"[train_data_generator] iter #{i}")
+        one_hot, max_config, max_capacity, capacity = greedy(G_all[i], mode)
         Y[i, :] = np.transpose(one_hot.reshape(bs_num*len(P_cb)*len(precoding_matrices)))
 
     return X, Y
@@ -94,10 +96,11 @@ def test_data_generator(num_data):
     G_all = np.zeros(shape=(num_data, bs_num, ut_num, len(precoding_matrices), n_r, n_stream), dtype=complex)
     G_ori = np.zeros(shape=(num_data, bs_num, ut_num, n_r, n_t), dtype=complex)
     for i in range(num_data):
+        print(f"[test_data_generator] iter #{i}")
         G, _ = system_generator(ifplot = False)
         G_ori[i] = G
         
-        if is_beamforming:
+        if is_beam_forming:
             for j, F in enumerate(precoding_matrices):
                 # G in shape of (bs_num, ut_num, n_r, n_t)
                 # generate input for NNs
@@ -124,11 +127,11 @@ def test_data_generator(num_data):
             
     X = X.reshape((num_data,-1))
 
-    return X, G_all, G_ori
+    return X, G_all
 
 
 if __name__ == '__main__':
-    num_data = 1000
+    num_data = 10
     train_data_generator(num_data, 'capacity')
 
     

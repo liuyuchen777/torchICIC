@@ -114,7 +114,7 @@ def data_loader(file_path):
     return x_train, x_test, y_train, y_test
 
 
-class logger():
+class Logger:
     def __init__(self):
         # set path
         log_file_path = log_path + time.strftime("%Y-%m-%d") + ".log"

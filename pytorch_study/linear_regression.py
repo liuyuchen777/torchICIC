@@ -27,13 +27,16 @@ class ThreeLayerNN(nn.Module):
         input_layer_unit = 10
         hidden_layer_unit = 20
         self.inLayer = nn.Linear(input_dim, input_layer_unit)
+        self.ReLu = nn.ReLU()
         self.hideLayer = nn.Linear(input_layer_unit, hidden_layer_unit)
         self.outLayer = nn.Linear(hidden_layer_unit, output_dim)
 
     def forward(self, x):
         tmp1 = self.inLayer(x)
-        tmp2 = self.hideLayer(tmp1)
-        return self.outLayer(tmp2)
+        tmp1 = self.ReLu(tmp1)
+        tmp1 = self.hideLayer(tmp1)
+        tmp1 = self.ReLu(tmp1)
+        return self.outLayer(tmp1)
 
 
 model = ThreeLayerNN(input_size, output_size)

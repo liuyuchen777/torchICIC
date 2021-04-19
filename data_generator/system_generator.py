@@ -2,7 +2,7 @@ from const import *
 import numpy as np
 import matplotlib.pyplot as plt
 
-from NN.channel_generator_3d import single_channel_generator_3d
+from channel_generator_3d import single_channel_generator_3d
 
 
 def place_ut():

@@ -17,6 +17,6 @@ my_log(f'hello {str}')
 """
 
 
-mylog = logger()
+mylog = Logger()
 str = "lyc"
 mylog.log(f'Hello {str}!')
