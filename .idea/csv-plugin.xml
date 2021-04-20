@@ -38,6 +38,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\multi-agent-DQN\dqn.py">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\multi-agent-DQN\q_learning.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\pytorch_study\cross_entropy.py">
           <value>
             <Attribute>
