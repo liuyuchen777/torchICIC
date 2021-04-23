@@ -75,23 +75,24 @@ def train_data_generator(num_data, mode):
 
 
 def test_data_generator(num_data):
-    '''
+    """
     This function generate testing data
     Arguments:
     num_data -- int, number of wanted examples
     IC -- boolean, if True IC is enabled
-    SMIR_after_IC_dB -- after IC, the interference signal of the most power will 
+    SMIR_after_IC_dB -- after IC, the interference signal of the most power will
                         have a 10log10(-SMIR_after_IC_dB/10) times power of the desiring recieving signal
 
     Returns:
     X -- np array in shape of (num_data, bs_num*ut_num*len(precoding_matrices)), this is for NNs
     G_all -- np array of shape (num_data, bs_num, ut_num, len(precoding_matrices), n_r, n_stream), dtype = complex
              all channels of the test data
-    '''
+    """
     if not check_valid_system():
         print('Invalid global parameters!')
         exit()
 
+    # why (bs_num * ut_num + 1)
     X = np.zeros(shape=(num_data, (bs_num * ut_num + 1), len(precoding_matrices)))
     G_all = np.zeros(shape=(num_data, bs_num, ut_num, len(precoding_matrices), n_r, n_stream), dtype=complex)
     G_ori = np.zeros(shape=(num_data, bs_num, ut_num, n_r, n_t), dtype=complex)

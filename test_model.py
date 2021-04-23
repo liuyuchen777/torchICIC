@@ -24,13 +24,27 @@ def softmax_to_index(softmax_vector):
     return p_config, b_config
 
 
-def softmax_to_index2(softmax_vector):
-    size = softmax_vector.shape[0]
+def softmax_to_index2(y_predict):
+    # power
+    p_config_pred = np.zeros(shape=(y_predict.shape[0], bs_num), dtype=int)
+    for bs in range(bs_num):
+        each_power = y_predict[:, bs * len(P_cb):(bs + 1) * len(P_cb)]
+        each_power = np.argmax(each_power, axis=1)
+        p_config_pred[:, bs] = each_power
+    # beam
+    b_config_pred = np.zeros(shape=(y_predict.shape[0], bs_num), dtype=int)
+    for bs in range(bs_num):
+        each_beam = y_predict[:, bs_num * len(P_cb) + bs * len(precoding_matrices):bs_num * len(P_cb) + (bs + 1) * len(
+            precoding_matrices)]
+        each_beam = np.argmax(each_beam, axis=1)
+        b_config_pred[:, bs] = each_beam
+
+    return p_config_pred, b_config_pred
 
 
 if __name__ == "__main__":
     # 0) simple load model
-    model = torch.load("../model/2021-04-14_17-09-54.pth")
+    model = torch.load("../model/2021-04-19_16-55-53.pth")
     model.eval()
 
     # 1) load test data
@@ -39,13 +53,14 @@ if __name__ == "__main__":
     Y = data['Y']   # 1000 * 120
     G_all = data['G_all']
 
-    # 3) convert Y to signal_pow and precoding_index
+    # 3) use ES
+    # 3-1) convert Y to signal_pow and precoding_index
     p_config, b_config = softmax_to_index(Y)
     signal_pow = np.zeros(p_config.shape, dtype=np.float32)
     for i in range(p_config.shape[0]):
         for j in range(p_config.shape[1]):
             signal_pow[i][j] = P_cb[p_config[i][j]]
-    # 4) calculate ES system capacity
+    # 3-2) calculate ES system capacity
     C_ES = np.zeros(Y.shape[0], dtype=np.float32)
     for i in range(Y.shape[0]):
         C_ES[i] = system_capacity(G_all[i], signal_pow[i], b_config[i])
@@ -55,6 +70,18 @@ if __name__ == "__main__":
     X_in = torch.tensor(X, dtype=torch.float32)
     Y_predict = model(X_in)
     # 4-2) convert Y_predict (1000 * 39) to p_config, b_config
+    y_predict = Y_predict.detach().numpy()
+    p_config_pred, b_config_pred = softmax_to_index2(y_predict)
+    signal_pow_pred = np.zeros(p_config_pred.shape, dtype=np.float32)
+    for i in range(p_config.shape[0]):
+        for j in range(p_config.shape[1]):
+            signal_pow_pred[i][j] = P_cb[p_config[i][j]]
+    # 4-3) calculate NN system capacity
+    C_NN = np.zeros(y_predict.shape[0], dtype=np.float32)
+    for i in range(y_predict.shape[0]):
+        C_NN[i] = system_capacity(G_all[i], signal_pow_pred[i], b_config_pred[i])
+    # 5) random choose
+    # 5-1) random generate p_config and b_config
 
 
     print("done")

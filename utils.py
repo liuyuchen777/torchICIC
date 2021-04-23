@@ -124,7 +124,7 @@ class Logger:
         logging.info(f'DATE: {time.strftime("%Y-%m-%d", time.localtime())}, TIME: {time.strftime("%H:%M:%S", time.localtime())}')
         logging.info(f'reg_beta = {reg_beta}, drop_out_rate = {dropout_rate}, learning_rate = {learning_rate}\n'
                      f'num_epochs = {num_epochs}, theta = {theta}, mini_batch_size = {mini_batch_size},\n'
-                     f'layer1_unit = {full_con_layer1_unit}, layer2_unit = {full_con_layer2_unit}')
+                     f'layer1_unit = {full_con_layer1_unit}, layer2_unit = {full_con_layer2_unit}, mode = {mode}')
         logging.info("-----------------------------END------------------------------------")
 
     def log(self, log_item):

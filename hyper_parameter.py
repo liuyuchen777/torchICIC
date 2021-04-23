@@ -10,3 +10,4 @@ full_con_layer2_unit = 1024
 data_path = "../data/train_data_3d/greedy_capacity_b_p_ES_train.npz"
 save_path = "../model/"
 log_path = "./log/"
+mode = "initial"

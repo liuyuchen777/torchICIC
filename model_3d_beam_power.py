@@ -86,152 +86,80 @@ def total_loss(y_predicted, y):
 # main function
 if __name__ == "__main__":
     mylog = Logger()
-    mode = "retrain"
+    # 0) load data
+    x_train, x_test, y_train, y_test = data_loader(data_path)
+    # print(y_train.shape)    # (16000, 39)
+    x_samples, x_features = x_train.shape
+    y_samples, y_features = y_train.shape
+    # convert to torch tensor
+    x_train = torch.from_numpy(x_train.astype(np.float32))
+    y_train = torch.from_numpy(y_train.astype(np.float32))
+    x_test = torch.from_numpy(x_test.astype(np.float32))
+    y_test = torch.from_numpy(y_test.astype(np.float32))
+
+    # 1) define optimizer and loss function
     if mode == "initial":
-        # 0) load data
-        x_train, x_test, y_train, y_test = data_loader(data_path)
-        # print(y_train.shape)    # (16000, 39)
-        x_samples, x_features = x_train.shape
-        y_samples, y_features = y_train.shape
-        # convert to torch tensor
-        x_train = torch.from_numpy(x_train.astype(np.float32))
-        y_train = torch.from_numpy(y_train.astype(np.float32))
-        x_test = torch.from_numpy(x_test.astype(np.float32))
-        y_test = torch.from_numpy(y_test.astype(np.float32))
-
-        # 1) define optimizer and loss function
         model = BSNet(x_features, y_features)
-        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=reg_beta)
+    else:
+        model = torch.load("../model/2021-04-19_16-55-53.pth")
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=reg_beta)
 
-        # 2) training loop
-        # use mini batch, train data size is 16000, too large in 1 epoch
-        beam_loss_record = []
-        power_loss_record = []
-        validate_beam_loss_record = []
-        validate_power_loss_record = []
+    # 2) training loop
+    # use mini batch, train data size is 16000, too large in 1 epoch
+    beam_loss_record = []
+    power_loss_record = []
+    validate_beam_loss_record = []
+    validate_power_loss_record = []
 
-        for epoch in range(num_epochs):
-            epoch_loss = 0.
-            epoch_beam_loss = 0.
-            epoch_power_loss = 0.
-            num_minibatches = int(x_train.shape[0] / mini_batch_size)
-            mini_batches = random_mini_batches(x_train, y_train, mini_batch_size)
+    for epoch in range(num_epochs):
+        epoch_loss = 0.
+        epoch_beam_loss = 0.
+        epoch_power_loss = 0.
+        num_minibatches = int(x_train.shape[0] / mini_batch_size)
+        mini_batches = random_mini_batches(x_train, y_train, mini_batch_size)
 
-            for (minibatch_x, minibatch_y) in mini_batches:
-                # forward pass
-                y_predicted = model(minibatch_x)
+        for (minibatch_x, minibatch_y) in mini_batches:
+            # forward pass
+            y_predicted = model(minibatch_x)
 
-                # backward pass, cal gradient
-                batch_beam_loss = beam_loss(y_predicted, minibatch_y)
-                batch_power_loss = power_loss(y_predicted, minibatch_y)
-                batch_loss = theta * batch_beam_loss + (1 - theta) * batch_power_loss
+            # backward pass, cal gradient
+            batch_beam_loss = beam_loss(y_predicted, minibatch_y)
+            batch_power_loss = power_loss(y_predicted, minibatch_y)
+            batch_loss = theta * batch_beam_loss + (1 - theta) * batch_power_loss
+            with torch.no_grad():
                 epoch_beam_loss += batch_beam_loss / num_minibatches
                 epoch_power_loss += batch_power_loss / num_minibatches
                 epoch_loss += batch_loss / num_minibatches
 
-                # update
-                batch_loss.backward()
-                optimizer.step()
-                optimizer.zero_grad()
+            # update
+            batch_loss.backward()
+            optimizer.step()
+            optimizer.zero_grad()
 
-            # print out loss
-            mylog.log(f'epoch = {epoch+1}: ')
-            mylog.log(f'    epoch_loss ----- {epoch_loss}')
-            mylog.log(f'    epoch_power_loss ----- {epoch_power_loss}')
-            mylog.log(f'    epoch_beam_loss ----- {epoch_beam_loss}')
-            # cross validation
-            y_validate = model(x_test)
-            validate_beam_loss = beam_loss(y_validate, y_test)
-            validate_power_loss = power_loss(y_validate, y_test)
-            validate_loss = theta * validate_beam_loss + (1 - theta) * validate_power_loss
-            # print out validation loss
-            mylog.log(f'  cross validation: ')
-            mylog.log(f'    validation_loss ----- {validate_loss}')
-            mylog.log(f'    validation_power_loss ----- {validate_power_loss}')
-            mylog.log(f'    validation_beam_loss ----- {validate_power_loss}')
-            # record loss
-            beam_loss_record.append(epoch_beam_loss)
-            power_loss_record.append(epoch_power_loss)
-            validate_beam_loss_record.append(validate_beam_loss)
-            validate_power_loss_record.append(validate_power_loss)
+        # print out loss
+        mylog.log(f'epoch = {epoch+1}: ')
+        mylog.log(f'    epoch_loss ----- {epoch_loss}')
+        mylog.log(f'    epoch_power_loss ----- {epoch_power_loss}')
+        mylog.log(f'    epoch_beam_loss ----- {epoch_beam_loss}')
+        # cross validation
+        y_validate = model(x_test)
+        validate_beam_loss = beam_loss(y_validate, y_test)
+        validate_power_loss = power_loss(y_validate, y_test)
+        validate_loss = theta * validate_beam_loss + (1 - theta) * validate_power_loss
+        # print out validation loss
+        mylog.log(f'  cross validation: ')
+        mylog.log(f'    validation_loss ----- {validate_loss}')
+        mylog.log(f'    validation_power_loss ----- {validate_power_loss}')
+        mylog.log(f'    validation_beam_loss ----- {validate_power_loss}')
+        # record loss
+        beam_loss_record.append(epoch_beam_loss)
+        power_loss_record.append(epoch_power_loss)
+        validate_beam_loss_record.append(validate_beam_loss)
+        validate_power_loss_record.append(validate_power_loss)
 
-        # 3) plt
+    # 3) plt
 
-        # 4) save model
-        save_path_now = save_path + time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()) + ".pth"
-        torch.save(model, save_path_now)
-        logging.info("----------------------------FINISH----------------------------------\n\n")
-    elif mode == "retrain":
-        # 0) load data
-        x_train, x_test, y_train, y_test = data_loader(data_path)
-        # print(y_train.shape)    # (16000, 39)
-        x_samples, x_features = x_train.shape
-        y_samples, y_features = y_train.shape
-        # convert to torch tensor
-        x_train = torch.from_numpy(x_train.astype(np.float32))
-        y_train = torch.from_numpy(y_train.astype(np.float32))
-        x_test = torch.from_numpy(x_test.astype(np.float32))
-        y_test = torch.from_numpy(y_test.astype(np.float32))
-
-        # 1) define optimizer and loss function
-        model = torch.load("../model/2021-04-14_17-09-54.pth")
-        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=reg_beta)
-
-        # 2) training loop
-        # use mini batch, train data size is 16000, too large in 1 epoch
-        beam_loss_record = []
-        power_loss_record = []
-        validate_beam_loss_record = []
-        validate_power_loss_record = []
-
-        for epoch in range(num_epochs):
-            epoch_loss = 0.
-            epoch_beam_loss = 0.
-            epoch_power_loss = 0.
-            num_minibatches = int(x_train.shape[0] / mini_batch_size)
-            mini_batches = random_mini_batches(x_train, y_train, mini_batch_size)
-
-            for (minibatch_x, minibatch_y) in mini_batches:
-                # forward pass
-                y_predicted = model(minibatch_x)
-
-                # backward pass, cal gradient
-                batch_beam_loss = beam_loss(y_predicted, minibatch_y)
-                batch_power_loss = power_loss(y_predicted, minibatch_y)
-                batch_loss = theta * batch_beam_loss + (1 - theta) * batch_power_loss
-                epoch_beam_loss += batch_beam_loss / num_minibatches
-                epoch_power_loss += batch_power_loss / num_minibatches
-                epoch_loss += batch_loss / num_minibatches
-
-                # update
-                batch_loss.backward()
-                optimizer.step()
-                optimizer.zero_grad()
-
-            # print out loss
-            mylog.log(f'epoch = {epoch + 1}: ')
-            mylog.log(f'    epoch_loss ----- {epoch_loss}')
-            mylog.log(f'    epoch_power_loss ----- {epoch_power_loss}')
-            mylog.log(f'    epoch_beam_loss ----- {epoch_beam_loss}')
-            # cross validation
-            y_validate = model(x_test)
-            validate_beam_loss = beam_loss(y_validate, y_test)
-            validate_power_loss = power_loss(y_validate, y_test)
-            validate_loss = theta * validate_beam_loss + (1 - theta) * validate_power_loss
-            # print out validation loss
-            mylog.log(f'  cross validation: ')
-            mylog.log(f'    validation_loss ----- {validate_loss}')
-            mylog.log(f'    validation_power_loss ----- {validate_power_loss}')
-            mylog.log(f'    validation_beam_loss ----- {validate_power_loss}')
-            # record loss
-            beam_loss_record.append(epoch_beam_loss)
-            power_loss_record.append(epoch_power_loss)
-            validate_beam_loss_record.append(validate_beam_loss)
-            validate_power_loss_record.append(validate_power_loss)
-
-        # 3) plt
-
-        # 4) save model
-        save_path_now = save_path + time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()) + ".pth"
-        torch.save(model, save_path_now)
-        logging.info("----------------------------FINISH----------------------------------\n\n")
+    # 4) save model
+    save_path_now = save_path + time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()) + ".pth"
+    torch.save(model, save_path_now)
+    logging.info("----------------------------FINISH----------------------------------\n\n")
