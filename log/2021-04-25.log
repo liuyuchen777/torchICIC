@@ -1,0 +1,815 @@
+-----------------------NETWORK CONFIG-------------------------------
+DATE: 2021-04-25, TIME: 17:22:02
+reg_beta = 1e-05, drop_out_rate = 0.5, learning_rate = 0.0001
+num_epochs = 100, theta = 0.5, mini_batch_size = 16,
+layer1_unit = 1024, layer2_unit = 1024, mode = initial
+-----------------------------END------------------------------------
+-----------------------NETWORK CONFIG-------------------------------
+DATE: 2021-04-25, TIME: 17:24:36
+reg_beta = 1e-05, drop_out_rate = 0.5, learning_rate = 0.0001
+num_epochs = 100, theta = 0.5, mini_batch_size = 16,
+layer1_unit = 1024, layer2_unit = 1024, mode = initial
+-----------------------------END------------------------------------
+epoch = 1: 
+    epoch_loss ----- 4.895050048828125
+    epoch_power_loss ----- 3.7677559852600098
+    epoch_beam_loss ----- 6.022346019744873
+  cross validation: 
+    validation_loss ----- 4.626270294189453
+    validation_power_loss ----- 3.469977378845215
+    validation_beam_loss ----- 5.78256368637085
+epoch = 2: 
+    epoch_loss ----- 4.422783851623535
+    epoch_power_loss ----- 3.262917995452881
+    epoch_beam_loss ----- 5.582649230957031
+  cross validation: 
+    validation_loss ----- 4.255255699157715
+    validation_power_loss ----- 3.249171257019043
+    validation_beam_loss ----- 5.261340141296387
+epoch = 3: 
+    epoch_loss ----- 4.096338748931885
+    epoch_power_loss ----- 3.182699203491211
+    epoch_beam_loss ----- 5.009983539581299
+  cross validation: 
+    validation_loss ----- 4.044309616088867
+    validation_power_loss ----- 3.240601062774658
+    validation_beam_loss ----- 4.848018169403076
+epoch = 4: 
+    epoch_loss ----- 3.893848419189453
+    epoch_power_loss ----- 3.1335620880126953
+    epoch_beam_loss ----- 4.654139041900635
+  cross validation: 
+    validation_loss ----- 3.8692269325256348
+    validation_power_loss ----- 3.1780242919921875
+    validation_beam_loss ----- 4.560429573059082
+epoch = 5: 
+    epoch_loss ----- 3.7876083850860596
+    epoch_power_loss ----- 3.0976510047912598
+    epoch_beam_loss ----- 4.477563381195068
+  cross validation: 
+    validation_loss ----- 3.8062334060668945
+    validation_power_loss ----- 3.135995388031006
+    validation_beam_loss ----- 4.476471424102783
+epoch = 6: 
+    epoch_loss ----- 3.704648017883301
+    epoch_power_loss ----- 3.062638759613037
+    epoch_beam_loss ----- 4.346654891967773
+  cross validation: 
+    validation_loss ----- 3.7101147174835205
+    validation_power_loss ----- 3.1110644340515137
+    validation_beam_loss ----- 4.309165000915527
+epoch = 7: 
+    epoch_loss ----- 3.649484157562256
+    epoch_power_loss ----- 3.0354747772216797
+    epoch_beam_loss ----- 4.263495445251465
+  cross validation: 
+    validation_loss ----- 3.6917247772216797
+    validation_power_loss ----- 3.1179866790771484
+    validation_beam_loss ----- 4.265462875366211
+epoch = 8: 
+    epoch_loss ----- 3.5897128582000732
+    epoch_power_loss ----- 3.025881290435791
+    epoch_beam_loss ----- 4.153545379638672
+  cross validation: 
+    validation_loss ----- 3.6423683166503906
+    validation_power_loss ----- 3.1061434745788574
+    validation_beam_loss ----- 4.178593158721924
+epoch = 9: 
+    epoch_loss ----- 3.5463950634002686
+    epoch_power_loss ----- 2.9954652786254883
+    epoch_beam_loss ----- 4.0973219871521
+  cross validation: 
+    validation_loss ----- 3.6089248657226562
+    validation_power_loss ----- 3.085195541381836
+    validation_beam_loss ----- 4.132654190063477
+epoch = 10: 
+    epoch_loss ----- 3.4962289333343506
+    epoch_power_loss ----- 2.97721529006958
+    epoch_beam_loss ----- 4.015246868133545
+  cross validation: 
+    validation_loss ----- 3.5097548961639404
+    validation_power_loss ----- 3.018324375152588
+    validation_beam_loss ----- 4.001185417175293
+epoch = 11: 
+    epoch_loss ----- 3.470672607421875
+    epoch_power_loss ----- 2.9649667739868164
+    epoch_beam_loss ----- 3.9763877391815186
+  cross validation: 
+    validation_loss ----- 3.569359064102173
+    validation_power_loss ----- 3.076596736907959
+    validation_beam_loss ----- 4.062121391296387
+epoch = 12: 
+    epoch_loss ----- 3.434701919555664
+    epoch_power_loss ----- 2.945735216140747
+    epoch_beam_loss ----- 3.923665761947632
+  cross validation: 
+    validation_loss ----- 3.5238900184631348
+    validation_power_loss ----- 3.073672294616699
+    validation_beam_loss ----- 3.9741077423095703
+epoch = 13: 
+    epoch_loss ----- 3.41106915473938
+    epoch_power_loss ----- 2.941176414489746
+    epoch_beam_loss ----- 3.8809609413146973
+  cross validation: 
+    validation_loss ----- 3.494236469268799
+    validation_power_loss ----- 3.013728618621826
+    validation_beam_loss ----- 3.9747443199157715
+epoch = 14: 
+    epoch_loss ----- 3.3955471515655518
+    epoch_power_loss ----- 2.9282872676849365
+    epoch_beam_loss ----- 3.862807512283325
+  cross validation: 
+    validation_loss ----- 3.487908124923706
+    validation_power_loss ----- 3.0226659774780273
+    validation_beam_loss ----- 3.9531502723693848
+epoch = 15: 
+    epoch_loss ----- 3.366851329803467
+    epoch_power_loss ----- 2.909102439880371
+    epoch_beam_loss ----- 3.824596643447876
+  cross validation: 
+    validation_loss ----- 3.448760747909546
+    validation_power_loss ----- 2.9831531047821045
+    validation_beam_loss ----- 3.9143683910369873
+epoch = 16: 
+    epoch_loss ----- 3.347350597381592
+    epoch_power_loss ----- 2.8922622203826904
+    epoch_beam_loss ----- 3.802435874938965
+  cross validation: 
+    validation_loss ----- 3.4374632835388184
+    validation_power_loss ----- 3.0049118995666504
+    validation_beam_loss ----- 3.8700146675109863
+epoch = 17: 
+    epoch_loss ----- 3.3361027240753174
+    epoch_power_loss ----- 2.8871538639068604
+    epoch_beam_loss ----- 3.785050868988037
+  cross validation: 
+    validation_loss ----- 3.4405417442321777
+    validation_power_loss ----- 3.002042531967163
+    validation_beam_loss ----- 3.8790407180786133
+epoch = 18: 
+    epoch_loss ----- 3.3116519451141357
+    epoch_power_loss ----- 2.87117338180542
+    epoch_beam_loss ----- 3.7521326541900635
+  cross validation: 
+    validation_loss ----- 3.41230845451355
+    validation_power_loss ----- 2.970625877380371
+    validation_beam_loss ----- 3.8539910316467285
+epoch = 19: 
+    epoch_loss ----- 3.292282819747925
+    epoch_power_loss ----- 2.8553295135498047
+    epoch_beam_loss ----- 3.7292380332946777
+  cross validation: 
+    validation_loss ----- 3.4383044242858887
+    validation_power_loss ----- 3.0144028663635254
+    validation_beam_loss ----- 3.862205982208252
+epoch = 20: 
+    epoch_loss ----- 3.2844350337982178
+    epoch_power_loss ----- 2.8511455059051514
+    epoch_beam_loss ----- 3.7177228927612305
+  cross validation: 
+    validation_loss ----- 3.4214277267456055
+    validation_power_loss ----- 2.989708662033081
+    validation_beam_loss ----- 3.853146553039551
+epoch = 21: 
+    epoch_loss ----- 3.268624782562256
+    epoch_power_loss ----- 2.8358795642852783
+    epoch_beam_loss ----- 3.7013726234436035
+  cross validation: 
+    validation_loss ----- 3.4367170333862305
+    validation_power_loss ----- 3.004403829574585
+    validation_beam_loss ----- 3.869029998779297
+epoch = 22: 
+    epoch_loss ----- 3.258005380630493
+    epoch_power_loss ----- 2.8359930515289307
+    epoch_beam_loss ----- 3.680023193359375
+  cross validation: 
+    validation_loss ----- 3.3801326751708984
+    validation_power_loss ----- 2.9504570960998535
+    validation_beam_loss ----- 3.8098082542419434
+epoch = 23: 
+    epoch_loss ----- 3.2420613765716553
+    epoch_power_loss ----- 2.826899290084839
+    epoch_beam_loss ----- 3.657219648361206
+  cross validation: 
+    validation_loss ----- 3.3821969032287598
+    validation_power_loss ----- 2.9527785778045654
+    validation_beam_loss ----- 3.811615467071533
+epoch = 24: 
+    epoch_loss ----- 3.2197821140289307
+    epoch_power_loss ----- 2.815248489379883
+    epoch_beam_loss ----- 3.6243157386779785
+  cross validation: 
+    validation_loss ----- 3.418149471282959
+    validation_power_loss ----- 2.97160005569458
+    validation_beam_loss ----- 3.864698886871338
+epoch = 25: 
+    epoch_loss ----- 3.215632677078247
+    epoch_power_loss ----- 2.8095109462738037
+    epoch_beam_loss ----- 3.621760129928589
+  cross validation: 
+    validation_loss ----- 3.3925273418426514
+    validation_power_loss ----- 2.97420072555542
+    validation_beam_loss ----- 3.810853958129883
+epoch = 26: 
+    epoch_loss ----- 3.2008113861083984
+    epoch_power_loss ----- 2.797187566757202
+    epoch_beam_loss ----- 3.604431390762329
+  cross validation: 
+    validation_loss ----- 3.3903794288635254
+    validation_power_loss ----- 2.9767937660217285
+    validation_beam_loss ----- 3.8039653301239014
+epoch = 27: 
+    epoch_loss ----- 3.176299571990967
+    epoch_power_loss ----- 2.7794861793518066
+    epoch_beam_loss ----- 3.5731122493743896
+  cross validation: 
+    validation_loss ----- 3.365814685821533
+    validation_power_loss ----- 2.9648284912109375
+    validation_beam_loss ----- 3.76680064201355
+epoch = 28: 
+    epoch_loss ----- 3.1762938499450684
+    epoch_power_loss ----- 2.775322675704956
+    epoch_beam_loss ----- 3.577261447906494
+  cross validation: 
+    validation_loss ----- 3.3622283935546875
+    validation_power_loss ----- 2.9725098609924316
+    validation_beam_loss ----- 3.7519469261169434
+epoch = 29: 
+    epoch_loss ----- 3.1602942943573
+    epoch_power_loss ----- 2.774308919906616
+    epoch_beam_loss ----- 3.54628324508667
+  cross validation: 
+    validation_loss ----- 3.366516590118408
+    validation_power_loss ----- 2.9788928031921387
+    validation_beam_loss ----- 3.7541403770446777
+epoch = 30: 
+    epoch_loss ----- 3.151564836502075
+    epoch_power_loss ----- 2.764571189880371
+    epoch_beam_loss ----- 3.5385591983795166
+  cross validation: 
+    validation_loss ----- 3.394331455230713
+    validation_power_loss ----- 2.9997432231903076
+    validation_beam_loss ----- 3.788919687271118
+epoch = 31: 
+    epoch_loss ----- 3.147712230682373
+    epoch_power_loss ----- 2.759232997894287
+    epoch_beam_loss ----- 3.536194086074829
+  cross validation: 
+    validation_loss ----- 3.338405132293701
+    validation_power_loss ----- 2.928601026535034
+    validation_beam_loss ----- 3.748208999633789
+epoch = 32: 
+    epoch_loss ----- 3.135753870010376
+    epoch_power_loss ----- 2.7474725246429443
+    epoch_beam_loss ----- 3.524036169052124
+  cross validation: 
+    validation_loss ----- 3.341752052307129
+    validation_power_loss ----- 2.9604036808013916
+    validation_beam_loss ----- 3.723100185394287
+epoch = 33: 
+    epoch_loss ----- 3.1251370906829834
+    epoch_power_loss ----- 2.7407033443450928
+    epoch_beam_loss ----- 3.5095677375793457
+  cross validation: 
+    validation_loss ----- 3.315460443496704
+    validation_power_loss ----- 2.9065043926239014
+    validation_beam_loss ----- 3.724416494369507
+epoch = 34: 
+    epoch_loss ----- 3.1129720211029053
+    epoch_power_loss ----- 2.7311086654663086
+    epoch_beam_loss ----- 3.494832992553711
+  cross validation: 
+    validation_loss ----- 3.3183951377868652
+    validation_power_loss ----- 2.9034605026245117
+    validation_beam_loss ----- 3.733330011367798
+epoch = 35: 
+    epoch_loss ----- 3.1099281311035156
+    epoch_power_loss ----- 2.7335610389709473
+    epoch_beam_loss ----- 3.486301898956299
+  cross validation: 
+    validation_loss ----- 3.3283917903900146
+    validation_power_loss ----- 2.9212639331817627
+    validation_beam_loss ----- 3.7355196475982666
+epoch = 36: 
+    epoch_loss ----- 3.1026484966278076
+    epoch_power_loss ----- 2.7192628383636475
+    epoch_beam_loss ----- 3.486037015914917
+  cross validation: 
+    validation_loss ----- 3.3867855072021484
+    validation_power_loss ----- 2.975449800491333
+    validation_beam_loss ----- 3.7981209754943848
+epoch = 37: 
+    epoch_loss ----- 3.104095935821533
+    epoch_power_loss ----- 2.723212957382202
+    epoch_beam_loss ----- 3.4849727153778076
+  cross validation: 
+    validation_loss ----- 3.314269542694092
+    validation_power_loss ----- 2.9064278602600098
+    validation_beam_loss ----- 3.722111463546753
+epoch = 38: 
+    epoch_loss ----- 3.0933308601379395
+    epoch_power_loss ----- 2.7237141132354736
+    epoch_beam_loss ----- 3.4629454612731934
+  cross validation: 
+    validation_loss ----- 3.3156673908233643
+    validation_power_loss ----- 2.9480271339416504
+    validation_beam_loss ----- 3.683307647705078
+epoch = 39: 
+    epoch_loss ----- 3.0692355632781982
+    epoch_power_loss ----- 2.7035865783691406
+    epoch_beam_loss ----- 3.434884548187256
+  cross validation: 
+    validation_loss ----- 3.3583016395568848
+    validation_power_loss ----- 2.9759902954101562
+    validation_beam_loss ----- 3.740612745285034
+epoch = 40: 
+    epoch_loss ----- 3.065661907196045
+    epoch_power_loss ----- 2.6950747966766357
+    epoch_beam_loss ----- 3.436251401901245
+  cross validation: 
+    validation_loss ----- 3.3128108978271484
+    validation_power_loss ----- 2.912811756134033
+    validation_beam_loss ----- 3.7128098011016846
+epoch = 41: 
+    epoch_loss ----- 3.0579936504364014
+    epoch_power_loss ----- 2.691985607147217
+    epoch_beam_loss ----- 3.4240055084228516
+  cross validation: 
+    validation_loss ----- 3.3487658500671387
+    validation_power_loss ----- 2.9558143615722656
+    validation_beam_loss ----- 3.7417173385620117
+epoch = 42: 
+    epoch_loss ----- 3.0465340614318848
+    epoch_power_loss ----- 2.683000326156616
+    epoch_beam_loss ----- 3.410069227218628
+  cross validation: 
+    validation_loss ----- 3.3110618591308594
+    validation_power_loss ----- 2.922818660736084
+    validation_beam_loss ----- 3.6993050575256348
+epoch = 43: 
+    epoch_loss ----- 3.042565107345581
+    epoch_power_loss ----- 2.6763999462127686
+    epoch_beam_loss ----- 3.408726453781128
+  cross validation: 
+    validation_loss ----- 3.315798759460449
+    validation_power_loss ----- 2.9188852310180664
+    validation_beam_loss ----- 3.712712287902832
+epoch = 44: 
+    epoch_loss ----- 3.034059762954712
+    epoch_power_loss ----- 2.6711606979370117
+    epoch_beam_loss ----- 3.396953582763672
+  cross validation: 
+    validation_loss ----- 3.314445734024048
+    validation_power_loss ----- 2.9383134841918945
+    validation_beam_loss ----- 3.690577983856201
+epoch = 45: 
+    epoch_loss ----- 3.023099422454834
+    epoch_power_loss ----- 2.664612293243408
+    epoch_beam_loss ----- 3.3815884590148926
+  cross validation: 
+    validation_loss ----- 3.3250582218170166
+    validation_power_loss ----- 2.9587607383728027
+    validation_beam_loss ----- 3.6913557052612305
+epoch = 46: 
+    epoch_loss ----- 3.0063068866729736
+    epoch_power_loss ----- 2.6622962951660156
+    epoch_beam_loss ----- 3.350313901901245
+  cross validation: 
+    validation_loss ----- 3.3098645210266113
+    validation_power_loss ----- 2.945218801498413
+    validation_beam_loss ----- 3.6745100021362305
+epoch = 47: 
+    epoch_loss ----- 3.0162911415100098
+    epoch_power_loss ----- 2.6590445041656494
+    epoch_beam_loss ----- 3.3735389709472656
+  cross validation: 
+    validation_loss ----- 3.2927491664886475
+    validation_power_loss ----- 2.901293992996216
+    validation_beam_loss ----- 3.684204339981079
+epoch = 48: 
+    epoch_loss ----- 3.0038347244262695
+    epoch_power_loss ----- 2.6548964977264404
+    epoch_beam_loss ----- 3.3527750968933105
+  cross validation: 
+    validation_loss ----- 3.2926955223083496
+    validation_power_loss ----- 2.894432544708252
+    validation_beam_loss ----- 3.6909587383270264
+epoch = 49: 
+    epoch_loss ----- 2.9959051609039307
+    epoch_power_loss ----- 2.6467366218566895
+    epoch_beam_loss ----- 3.345071315765381
+  cross validation: 
+    validation_loss ----- 3.3195669651031494
+    validation_power_loss ----- 2.912140369415283
+    validation_beam_loss ----- 3.7269935607910156
+epoch = 50: 
+    epoch_loss ----- 2.990988254547119
+    epoch_power_loss ----- 2.6433703899383545
+    epoch_beam_loss ----- 3.338604211807251
+  cross validation: 
+    validation_loss ----- 3.337350845336914
+    validation_power_loss ----- 2.95640230178833
+    validation_beam_loss ----- 3.718299388885498
+epoch = 51: 
+    epoch_loss ----- 2.9742324352264404
+    epoch_power_loss ----- 2.632169008255005
+    epoch_beam_loss ----- 3.3162968158721924
+  cross validation: 
+    validation_loss ----- 3.328840732574463
+    validation_power_loss ----- 2.959266424179077
+    validation_beam_loss ----- 3.6984152793884277
+epoch = 52: 
+    epoch_loss ----- 2.9758737087249756
+    epoch_power_loss ----- 2.6403303146362305
+    epoch_beam_loss ----- 3.311415195465088
+  cross validation: 
+    validation_loss ----- 3.3222453594207764
+    validation_power_loss ----- 2.935662269592285
+    validation_beam_loss ----- 3.7088284492492676
+epoch = 53: 
+    epoch_loss ----- 2.965552568435669
+    epoch_power_loss ----- 2.625138998031616
+    epoch_beam_loss ----- 3.3059685230255127
+  cross validation: 
+    validation_loss ----- 3.314943552017212
+    validation_power_loss ----- 2.9256672859191895
+    validation_beam_loss ----- 3.7042198181152344
+epoch = 54: 
+    epoch_loss ----- 2.9651737213134766
+    epoch_power_loss ----- 2.6256392002105713
+    epoch_beam_loss ----- 3.3047056198120117
+  cross validation: 
+    validation_loss ----- 3.313307762145996
+    validation_power_loss ----- 2.931471824645996
+    validation_beam_loss ----- 3.695143699645996
+epoch = 55: 
+    epoch_loss ----- 2.9609928131103516
+    epoch_power_loss ----- 2.6166505813598633
+    epoch_beam_loss ----- 3.305338144302368
+  cross validation: 
+    validation_loss ----- 3.3296093940734863
+    validation_power_loss ----- 2.962151050567627
+    validation_beam_loss ----- 3.6970674991607666
+epoch = 56: 
+    epoch_loss ----- 2.9428887367248535
+    epoch_power_loss ----- 2.602454900741577
+    epoch_beam_loss ----- 3.283320903778076
+  cross validation: 
+    validation_loss ----- 3.3526663780212402
+    validation_power_loss ----- 2.9957845211029053
+    validation_beam_loss ----- 3.709547996520996
+epoch = 57: 
+    epoch_loss ----- 2.943854331970215
+    epoch_power_loss ----- 2.606459379196167
+    epoch_beam_loss ----- 3.2812447547912598
+  cross validation: 
+    validation_loss ----- 3.334425449371338
+    validation_power_loss ----- 2.9741568565368652
+    validation_beam_loss ----- 3.6946940422058105
+epoch = 58: 
+    epoch_loss ----- 2.9453892707824707
+    epoch_power_loss ----- 2.6062095165252686
+    epoch_beam_loss ----- 3.2845687866210938
+  cross validation: 
+    validation_loss ----- 3.3376495838165283
+    validation_power_loss ----- 2.9514245986938477
+    validation_beam_loss ----- 3.723874568939209
+epoch = 59: 
+    epoch_loss ----- 2.9259536266326904
+    epoch_power_loss ----- 2.598621129989624
+    epoch_beam_loss ----- 3.2532854080200195
+  cross validation: 
+    validation_loss ----- 3.398332118988037
+    validation_power_loss ----- 2.9961061477661133
+    validation_beam_loss ----- 3.800558090209961
+epoch = 60: 
+    epoch_loss ----- 2.9279587268829346
+    epoch_power_loss ----- 2.5938801765441895
+    epoch_beam_loss ----- 3.262037992477417
+  cross validation: 
+    validation_loss ----- 3.3140320777893066
+    validation_power_loss ----- 2.8929505348205566
+    validation_beam_loss ----- 3.7351136207580566
+epoch = 61: 
+    epoch_loss ----- 2.9119181632995605
+    epoch_power_loss ----- 2.5806069374084473
+    epoch_beam_loss ----- 3.2432265281677246
+  cross validation: 
+    validation_loss ----- 3.2987585067749023
+    validation_power_loss ----- 2.9252500534057617
+    validation_beam_loss ----- 3.672266960144043
+epoch = 62: 
+    epoch_loss ----- 2.90628719329834
+    epoch_power_loss ----- 2.579575777053833
+    epoch_beam_loss ----- 3.2329976558685303
+  cross validation: 
+    validation_loss ----- 3.3095383644104004
+    validation_power_loss ----- 2.953451156616211
+    validation_beam_loss ----- 3.66562557220459
+epoch = 63: 
+    epoch_loss ----- 2.902404308319092
+    epoch_power_loss ----- 2.574523448944092
+    epoch_beam_loss ----- 3.230287790298462
+  cross validation: 
+    validation_loss ----- 3.2967844009399414
+    validation_power_loss ----- 2.9175753593444824
+    validation_beam_loss ----- 3.6759934425354004
+epoch = 64: 
+    epoch_loss ----- 2.8972902297973633
+    epoch_power_loss ----- 2.5733706951141357
+    epoch_beam_loss ----- 3.22121000289917
+  cross validation: 
+    validation_loss ----- 3.349241256713867
+    validation_power_loss ----- 2.9695630073547363
+    validation_beam_loss ----- 3.728919506072998
+epoch = 65: 
+    epoch_loss ----- 2.900941848754883
+    epoch_power_loss ----- 2.5679681301116943
+    epoch_beam_loss ----- 3.2339158058166504
+  cross validation: 
+    validation_loss ----- 3.3052968978881836
+    validation_power_loss ----- 2.9549803733825684
+    validation_beam_loss ----- 3.655613422393799
+epoch = 66: 
+    epoch_loss ----- 2.8924834728240967
+    epoch_power_loss ----- 2.572894811630249
+    epoch_beam_loss ----- 3.212071657180786
+  cross validation: 
+    validation_loss ----- 3.3315486907958984
+    validation_power_loss ----- 2.9500818252563477
+    validation_beam_loss ----- 3.713015556335449
+epoch = 67: 
+    epoch_loss ----- 2.8785274028778076
+    epoch_power_loss ----- 2.555299758911133
+    epoch_beam_loss ----- 3.201754570007324
+  cross validation: 
+    validation_loss ----- 3.3404157161712646
+    validation_power_loss ----- 2.9600539207458496
+    validation_beam_loss ----- 3.7207775115966797
+epoch = 68: 
+    epoch_loss ----- 2.8792805671691895
+    epoch_power_loss ----- 2.5511112213134766
+    epoch_beam_loss ----- 3.207449436187744
+  cross validation: 
+    validation_loss ----- 3.3423280715942383
+    validation_power_loss ----- 2.9878010749816895
+    validation_beam_loss ----- 3.696854829788208
+epoch = 69: 
+    epoch_loss ----- 2.878883123397827
+    epoch_power_loss ----- 2.5564122200012207
+    epoch_beam_loss ----- 3.2013542652130127
+  cross validation: 
+    validation_loss ----- 3.333130121231079
+    validation_power_loss ----- 2.977411985397339
+    validation_beam_loss ----- 3.6888482570648193
+epoch = 70: 
+    epoch_loss ----- 2.869544506072998
+    epoch_power_loss ----- 2.548755407333374
+    epoch_beam_loss ----- 3.1903328895568848
+  cross validation: 
+    validation_loss ----- 3.3804140090942383
+    validation_power_loss ----- 2.9741370677948
+    validation_beam_loss ----- 3.7866907119750977
+epoch = 71: 
+    epoch_loss ----- 2.850484848022461
+    epoch_power_loss ----- 2.5354154109954834
+    epoch_beam_loss ----- 3.165559768676758
+  cross validation: 
+    validation_loss ----- 3.327876567840576
+    validation_power_loss ----- 2.9645743370056152
+    validation_beam_loss ----- 3.691178560256958
+epoch = 72: 
+    epoch_loss ----- 2.845107078552246
+    epoch_power_loss ----- 2.531289577484131
+    epoch_beam_loss ----- 3.158928632736206
+  cross validation: 
+    validation_loss ----- 3.3447060585021973
+    validation_power_loss ----- 2.9617984294891357
+    validation_beam_loss ----- 3.7276134490966797
+epoch = 73: 
+    epoch_loss ----- 2.8357725143432617
+    epoch_power_loss ----- 2.534921884536743
+    epoch_beam_loss ----- 3.136620283126831
+  cross validation: 
+    validation_loss ----- 3.352489948272705
+    validation_power_loss ----- 2.9872260093688965
+    validation_beam_loss ----- 3.7177538871765137
+epoch = 74: 
+    epoch_loss ----- 2.846015691757202
+    epoch_power_loss ----- 2.540260076522827
+    epoch_beam_loss ----- 3.151768445968628
+  cross validation: 
+    validation_loss ----- 3.341411590576172
+    validation_power_loss ----- 2.940476655960083
+    validation_beam_loss ----- 3.7423462867736816
+epoch = 75: 
+    epoch_loss ----- 2.831321954727173
+    epoch_power_loss ----- 2.518986463546753
+    epoch_beam_loss ----- 3.1436612606048584
+  cross validation: 
+    validation_loss ----- 3.338724136352539
+    validation_power_loss ----- 2.9590206146240234
+    validation_beam_loss ----- 3.7184276580810547
+epoch = 76: 
+    epoch_loss ----- 2.8327691555023193
+    epoch_power_loss ----- 2.5257205963134766
+    epoch_beam_loss ----- 3.139822244644165
+  cross validation: 
+    validation_loss ----- 3.361084461212158
+    validation_power_loss ----- 2.9894826412200928
+    validation_beam_loss ----- 3.7326862812042236
+epoch = 77: 
+    epoch_loss ----- 2.821838140487671
+    epoch_power_loss ----- 2.514611005783081
+    epoch_beam_loss ----- 3.129063606262207
+  cross validation: 
+    validation_loss ----- 3.33353853225708
+    validation_power_loss ----- 2.9649722576141357
+    validation_beam_loss ----- 3.7021050453186035
+epoch = 78: 
+    epoch_loss ----- 2.8214621543884277
+    epoch_power_loss ----- 2.513188123703003
+    epoch_beam_loss ----- 3.129737138748169
+  cross validation: 
+    validation_loss ----- 3.3279285430908203
+    validation_power_loss ----- 2.967078685760498
+    validation_beam_loss ----- 3.6887786388397217
+epoch = 79: 
+    epoch_loss ----- 2.800032377243042
+    epoch_power_loss ----- 2.4946045875549316
+    epoch_beam_loss ----- 3.1054580211639404
+  cross validation: 
+    validation_loss ----- 3.386185646057129
+    validation_power_loss ----- 3.0164003372192383
+    validation_beam_loss ----- 3.7559709548950195
+epoch = 80: 
+    epoch_loss ----- 2.8032989501953125
+    epoch_power_loss ----- 2.4977052211761475
+    epoch_beam_loss ----- 3.1088979244232178
+  cross validation: 
+    validation_loss ----- 3.3708903789520264
+    validation_power_loss ----- 2.9780030250549316
+    validation_beam_loss ----- 3.763777732849121
+epoch = 81: 
+    epoch_loss ----- 2.7971997261047363
+    epoch_power_loss ----- 2.4955952167510986
+    epoch_beam_loss ----- 3.0988011360168457
+  cross validation: 
+    validation_loss ----- 3.3392586708068848
+    validation_power_loss ----- 2.9438509941101074
+    validation_beam_loss ----- 3.734666109085083
+epoch = 82: 
+    epoch_loss ----- 2.791306495666504
+    epoch_power_loss ----- 2.4822044372558594
+    epoch_beam_loss ----- 3.1004135608673096
+  cross validation: 
+    validation_loss ----- 3.316288948059082
+    validation_power_loss ----- 2.9473233222961426
+    validation_beam_loss ----- 3.6852543354034424
+epoch = 83: 
+    epoch_loss ----- 2.786151885986328
+    epoch_power_loss ----- 2.4766921997070312
+    epoch_beam_loss ----- 3.095613479614258
+  cross validation: 
+    validation_loss ----- 3.366004467010498
+    validation_power_loss ----- 2.9827864170074463
+    validation_beam_loss ----- 3.749222755432129
+epoch = 84: 
+    epoch_loss ----- 2.7726802825927734
+    epoch_power_loss ----- 2.4743306636810303
+    epoch_beam_loss ----- 3.0710318088531494
+  cross validation: 
+    validation_loss ----- 3.359253168106079
+    validation_power_loss ----- 3.0184803009033203
+    validation_beam_loss ----- 3.700026035308838
+epoch = 85: 
+    epoch_loss ----- 2.7738499641418457
+    epoch_power_loss ----- 2.478257417678833
+    epoch_beam_loss ----- 3.0694401264190674
+  cross validation: 
+    validation_loss ----- 3.3706588745117188
+    validation_power_loss ----- 3.0081136226654053
+    validation_beam_loss ----- 3.733203887939453
+epoch = 86: 
+    epoch_loss ----- 2.7637441158294678
+    epoch_power_loss ----- 2.458329200744629
+    epoch_beam_loss ----- 3.0691637992858887
+  cross validation: 
+    validation_loss ----- 3.3703269958496094
+    validation_power_loss ----- 3.0123260021209717
+    validation_beam_loss ----- 3.728327751159668
+epoch = 87: 
+    epoch_loss ----- 2.7590718269348145
+    epoch_power_loss ----- 2.462899923324585
+    epoch_beam_loss ----- 3.0552408695220947
+  cross validation: 
+    validation_loss ----- 3.416290283203125
+    validation_power_loss ----- 3.0265984535217285
+    validation_beam_loss ----- 3.8059823513031006
+epoch = 88: 
+    epoch_loss ----- 2.7609777450561523
+    epoch_power_loss ----- 2.458517551422119
+    epoch_beam_loss ----- 3.0634331703186035
+  cross validation: 
+    validation_loss ----- 3.3555140495300293
+    validation_power_loss ----- 2.9714231491088867
+    validation_beam_loss ----- 3.739604949951172
+epoch = 89: 
+    epoch_loss ----- 2.755218267440796
+    epoch_power_loss ----- 2.4561562538146973
+    epoch_beam_loss ----- 3.0542795658111572
+  cross validation: 
+    validation_loss ----- 3.3628745079040527
+    validation_power_loss ----- 3.001040458679199
+    validation_beam_loss ----- 3.7247085571289062
+epoch = 90: 
+    epoch_loss ----- 2.750861644744873
+    epoch_power_loss ----- 2.4581949710845947
+    epoch_beam_loss ----- 3.0435283184051514
+  cross validation: 
+    validation_loss ----- 3.3648924827575684
+    validation_power_loss ----- 2.9651143550872803
+    validation_beam_loss ----- 3.7646703720092773
+epoch = 91: 
+    epoch_loss ----- 2.7424092292785645
+    epoch_power_loss ----- 2.4558911323547363
+    epoch_beam_loss ----- 3.028928518295288
+  cross validation: 
+    validation_loss ----- 3.346215009689331
+    validation_power_loss ----- 2.9658589363098145
+    validation_beam_loss ----- 3.7265710830688477
+epoch = 92: 
+    epoch_loss ----- 2.732649326324463
+    epoch_power_loss ----- 2.442267656326294
+    epoch_beam_loss ----- 3.0230345726013184
+  cross validation: 
+    validation_loss ----- 3.353672504425049
+    validation_power_loss ----- 2.9566588401794434
+    validation_beam_loss ----- 3.7506861686706543
+epoch = 93: 
+    epoch_loss ----- 2.7292063236236572
+    epoch_power_loss ----- 2.4328861236572266
+    epoch_beam_loss ----- 3.0255229473114014
+  cross validation: 
+    validation_loss ----- 3.355210065841675
+    validation_power_loss ----- 2.989166021347046
+    validation_beam_loss ----- 3.7212541103363037
+epoch = 94: 
+    epoch_loss ----- 2.7322144508361816
+    epoch_power_loss ----- 2.439244031906128
+    epoch_beam_loss ----- 3.0251882076263428
+  cross validation: 
+    validation_loss ----- 3.4079816341400146
+    validation_power_loss ----- 3.0221729278564453
+    validation_beam_loss ----- 3.793790340423584
+epoch = 95: 
+    epoch_loss ----- 2.71463680267334
+    epoch_power_loss ----- 2.425693988800049
+    epoch_beam_loss ----- 3.003577709197998
+  cross validation: 
+    validation_loss ----- 3.335179328918457
+    validation_power_loss ----- 2.9718456268310547
+    validation_beam_loss ----- 3.6985132694244385
+epoch = 96: 
+    epoch_loss ----- 2.7127580642700195
+    epoch_power_loss ----- 2.4222023487091064
+    epoch_beam_loss ----- 3.003312587738037
+  cross validation: 
+    validation_loss ----- 3.391235113143921
+    validation_power_loss ----- 2.9824533462524414
+    validation_beam_loss ----- 3.8000168800354004
+epoch = 97: 
+    epoch_loss ----- 2.710498809814453
+    epoch_power_loss ----- 2.4212863445281982
+    epoch_beam_loss ----- 2.9997143745422363
+  cross validation: 
+    validation_loss ----- 3.3946382999420166
+    validation_power_loss ----- 3.0265579223632812
+    validation_beam_loss ----- 3.762718677520752
+epoch = 98: 
+    epoch_loss ----- 2.6963722705841064
+    epoch_power_loss ----- 2.4044620990753174
+    epoch_beam_loss ----- 2.9882822036743164
+  cross validation: 
+    validation_loss ----- 3.3729190826416016
+    validation_power_loss ----- 2.9929611682891846
+    validation_beam_loss ----- 3.7528772354125977
+epoch = 99: 
+    epoch_loss ----- 2.7039310932159424
+    epoch_power_loss ----- 2.4169180393218994
+    epoch_beam_loss ----- 2.9909424781799316
+  cross validation: 
+    validation_loss ----- 3.3768460750579834
+    validation_power_loss ----- 2.996363639831543
+    validation_beam_loss ----- 3.757328510284424
+epoch = 100: 
+    epoch_loss ----- 2.689074754714966
+    epoch_power_loss ----- 2.409513473510742
+    epoch_beam_loss ----- 2.9686334133148193
+  cross validation: 
+    validation_loss ----- 3.3825385570526123
+    validation_power_loss ----- 3.000462532043457
+    validation_beam_loss ----- 3.7646145820617676
+----------------------------FINISH----------------------------------
+
+

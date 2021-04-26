@@ -1,5 +1,5 @@
 # define hyper parameter of system
-reg_beta = 0.01   # 正则化，加在损失函数里
+reg_beta = 1e-5   # 正则化，加在损失函数里
 dropout_rate = 0.5
 num_epochs = 100    # num of epochs
 learning_rate = 0.0001
@@ -11,3 +11,4 @@ data_path = "../data/train_data_3d/greedy_capacity_b_p_ES_train.npz"
 save_path = "../model/"
 log_path = "./log/"
 mode = "initial"
+retrain_path = "../model/2021-04-22_18-59-43.pth"

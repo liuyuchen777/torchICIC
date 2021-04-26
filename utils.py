@@ -49,7 +49,7 @@ def random_mini_batches(X, Y, mini_batch_size):
 
 
 def softmax_to_index(mini_batch_size, softmax_vector):
-    '''
+    """
     This function convert a minibatch of softmax vectors of all bs to
     an array of indecies indicating the max numbers in each vector
 
@@ -59,7 +59,7 @@ def softmax_to_index(mini_batch_size, softmax_vector):
 
     Returns:
     power_config -- np array in shape of (minibatch_size,bs_num), each column is power config for all bs
-    '''
+    """
     p_config = np.zeros(shape=(mini_batch_size, bs_num), dtype=int)
     b_config = np.zeros(shape=(mini_batch_size, bs_num), dtype=int)
     for b in range(bs_num):
@@ -88,10 +88,12 @@ def data_loader(file_path):
     # get data
     x_data = data['X']
     y_data = data['Y']
+    """
     g_all = data['G_all']
     g_power = np.sum(np.abs(g_all) ** 2, axis=(-1, -2))
     g_power = np.swapaxes(g_power, 1, 2)
     g_power = g_power.reshape((g_all.shape[0], ut_num, -1))
+    """
 
     # divide data to test and train
     x_train = x_data[:16000]

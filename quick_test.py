@@ -1,6 +1,8 @@
 import time
 import logging
 from utils import *
+from torch import nn
+import torch
 
 """
 def my_log(str):
@@ -16,7 +18,11 @@ logging.info(f'hello {str}')
 my_log(f'hello {str}')
 """
 
-
-mylog = Logger()
-str = "lyc"
-mylog.log(f'Hello {str}!')
+loss = nn.CrossEntropyLoss()
+input = torch.randn(3, 5, requires_grad=True)
+label = torch.argmax(input, dim=1)
+target = torch.empty(3, dtype=torch.long).random_(5)
+print(label)
+print(target)
+output = loss(input, target)
+print(output)

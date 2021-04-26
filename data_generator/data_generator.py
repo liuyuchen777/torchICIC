@@ -118,7 +118,6 @@ def test_data_generator(num_data):
             X[i, -1, 0] = NOISE_POW
             G_all[i, :, :, 0, :, :] = tmp   
 
-  
         # normalization
         X[i, :, :] /= np.amax(X[i, :, :])
         if np.any(X[i, :, :]==0):
