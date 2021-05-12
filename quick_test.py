@@ -18,11 +18,17 @@ logging.info(f'hello {str}')
 my_log(f'hello {str}')
 """
 
-loss = nn.CrossEntropyLoss()
-input = torch.randn(3, 5, requires_grad=True)
-label = torch.argmax(input, dim=1)
-target = torch.empty(3, dtype=torch.long).random_(5)
-print(label)
-print(target)
-output = loss(input, target)
-print(output)
+# loss = nn.CrossEntropyLoss()
+# input = torch.randn(3, 5, requires_grad=True)
+# label = torch.argmax(input, dim=1)
+# target = torch.empty(3, dtype=torch.long).random_(5)
+# print(label)
+# print(target)
+# output = loss(input, target)
+# print(output)
+
+print(torch.cuda.is_available())
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+print(device)

@@ -126,10 +126,10 @@ if __name__ == "__main__":
     x_samples, x_features = x_train.shape
     y_samples, y_features = y_train.shape
     # convert to torch tensor
-    x_train = torch.from_numpy(x_train.astype(np.float64))
-    y_train = torch.from_numpy(y_train.astype(np.float64))
-    x_test = torch.from_numpy(x_test.astype(np.float64))
-    y_test = torch.from_numpy(y_test.astype(np.float64))
+    x_train = torch.from_numpy(x_train.astype(np.float32))
+    y_train = torch.from_numpy(y_train.astype(np.float32))
+    x_test = torch.from_numpy(x_test.astype(np.float32))
+    y_test = torch.from_numpy(y_test.astype(np.float32))
     # print(x_train)
     # print('requires_grad:', x_train.requires_grad)
     # print('test')
