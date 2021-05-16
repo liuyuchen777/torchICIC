@@ -61,7 +61,7 @@ class Agent(object):
         x = np.zeros((batch_size, self.state_size))
         y = np.zeros((batch_size, self.action_size))
         for i, b in enumerate(batch):
-            s = b[0 ]
+            s = b[0]
             a = b[1][self.agent_id]
             r = b[2]
 
@@ -88,5 +88,10 @@ class Agent(object):
         self.q_network.train(x, y)
 
     def save_model(self, model_id):
-        path = model_path + str(model_id) + "/" + str(self.agent_id) + ".pth"
+        dir_path = model_path + str(model_id)
+        try:
+            os.mkdir(dir_path)
+        except:
+            pass
+        path = dir_path + "/" + str(self.agent_id) + ".pth"
         self.q_network.save(path)
