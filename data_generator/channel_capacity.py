@@ -21,13 +21,15 @@ def channel_capacity_per_user(G, u, signal_pow, precoding_index):
 	bs = u
 	for b in range(bs_num):
 		if b != bs:
-			temp = 1 / 1000 * np.power(10, signal_pow[b] / 10) / n_t / n_stream * abs(G[bs, u, precoding_index[bs]].T.conj()@G[b, u, precoding_index[b]])**2
+			temp = 1 / 1000 * np.power(10, signal_pow[b] / 10) / n_t / \
+				   n_stream * abs(G[bs, u, precoding_index[bs]].T.conj()@G[b, u, precoding_index[b]])**2
 			if check_nan(temp):
 				print('nan')
 			interference_power += temp
 	interference_power += NOISE_POW * np.sum(np.abs(G[bs, u, precoding_index[bs]])**2)
 
-	desired_power = 1 / 1000 * np.power(10, signal_pow[bs] / 10) / n_t / n_stream * abs(G[bs, u, precoding_index[bs]].T.conj()@G[bs, u, precoding_index[bs]])**2
+	desired_power = 1 / 1000 * np.power(10, signal_pow[bs] / 10) / n_t / \
+					n_stream * abs(G[bs, u, precoding_index[bs]].T.conj()@G[bs, u, precoding_index[bs]])**2
 
 	SINR = desired_power / interference_power
 	C = np.log2(np.linalg.det(1 + SINR))
@@ -58,10 +60,11 @@ def system_capacity(G, signal_pow, precoding_index):
 	return C / bs_num
 
 
+# actually don't use system throughput
 def channel_throughput_per_user(G, u, signal_pow, precoding_index):
-	'''
+	"""
 	This function calculate channel throughput for a user
-		
+
 	Argument:
 	R -- np array(double), channel corelation matrices of the system at a single time instant, pathloss already included.
 		 in shape of (bs_num, ut_num, len(precoding_matrices),n_r, n_stream)
@@ -72,7 +75,7 @@ def channel_throughput_per_user(G, u, signal_pow, precoding_index):
 	Returns:
 	throughput -- float, channel throughput for user u
 	CQI -- int, CQI of this user under the given power configuration
-	'''
+	"""
 
 	interference_power = 0.
 	bs = u
@@ -107,6 +110,7 @@ def channel_throughput_per_user(G, u, signal_pow, precoding_index):
 	CQI = max(CQI, 0)
 	throughput = CQI_to_throughput[CQI]
 	return throughput, CQI
+
 
 def system_throughput(G, signal_pow, precoding_index):
 	'''

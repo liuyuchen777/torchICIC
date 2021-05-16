@@ -15,8 +15,8 @@ def Laplace_rand(mu, phi, m, n):
     Returns:
         Laplace_mat -- np matrix in (m, n), all elements in the matrix are iid Laplace random variable
     """
-    U_1 = np.random.rand(m, n) # uniform distribution in [0,1)
-    U_2 = 2 * np.random.randint(0, 2, size=(m, n)) - 1 # generate -1 and 1 with probability 0.5 respectively
+    U_1 = np.random.rand(m, n)  # uniform distribution in [0,1)
+    U_2 = 2 * np.random.randint(0, 2, size=(m, n)) - 1  # generate -1 and 1 with probability 0.5 respectively
     Laplace_mat = mu - np.log(U_1) * phi * U_2
     return Laplace_mat
 
@@ -32,7 +32,7 @@ def exp_rand(phi, m, n):
     Returns:
         exprand_mat -- np matrix in (m, n), all elements in the matrix are iid random variables of exponetial distribution
     """
-    U = np.random.rand(m, n) # uniform distribution in [0,1)
+    U = np.random.rand(m, n)  # uniform distribution in [0,1)
     exprand_mat = -np.log(U) * phi
     return exprand_mat
 
@@ -65,53 +65,54 @@ def single_channel_generator_3d(K_factor, N_path, N_component, max_delay, AoD, A
     Delay = np.zeros(shape=(N_component, N_path), dtype=int)
     x = np.zeros(shape=(N_component, N_path), dtype=complex)
 
-    K = 10**(K_factor / 10)  # Rician factor
+    K = 10 ** (K_factor / 10)  # Rician factor
 
     Delay[0, 0] = 1
     while True:
-        x_LOS = np.random.randn(1)+np.random.randn(1)*1j
-        power_temp = np.abs(x_LOS)**2
-        if power_temp > 1e-12: # prevent power_temp == 0.
+        x_LOS = np.random.randn(1) + np.random.randn(1) * 1j
+        power_temp = np.abs(x_LOS) ** 2
+        if power_temp > 1e-12:  # prevent power_temp == 0.
             break
-    x_LOS = (K / (K + 1))**0.5 * x_LOS / (power_temp**0.5)
-    x[0,0] = x_LOS
+    x_LOS = (K / (K + 1)) ** 0.5 * x_LOS / (power_temp ** 0.5)
+    x[0, 0] = x_LOS
 
     for I in range(1, N_path):
-        Delay_temp = np.ceil(exp_rand(17.60, 1, 1)) + Delay[0,I-1] # Lambda
+        Delay_temp = np.ceil(exp_rand(17.60, 1, 1)) + Delay[0, I - 1]  # Lambda
         if Delay_temp > max_delay:
             break
-        Delay[0,I] = Delay_temp
+        Delay[0, I] = Delay_temp
 
-        x_temp = np.exp(-(Delay[0,I] - 1) / 24.55) # Gamma
-        x[0,I] = x_temp * (np.random.randn(1) + np.random.randn(1)*1j) / 2**0.5
-        
+        x_temp = np.exp(-(Delay[0, I] - 1) / 24.55)  # Gamma
+        x[0, I] = x_temp * (np.random.randn(1) + np.random.randn(1) * 1j) / 2 ** 0.5
+
         for J in range(1, N_component):
-            Delay_temp = np.round(exp_rand(6.77, 1, 1)) + Delay[J-1,I] # Lambda
+            Delay_temp = np.round(exp_rand(6.77, 1, 1)) + Delay[J - 1, I]  # Lambda
             if Delay_temp > max_delay:
                 break
             Delay[J, I] = Delay_temp
             # Higher delay leads to fewer channel power
-            x[J,I] = x_temp * np.exp(-(Delay[J,I] - Delay[0,I]) / 19.80) * (np.random.randn(1) + np.random.randn(1)*1j) / 2**0.5 # Gamma
-    
-    IR_NLOS_temp = np.zeros(shape=(max_delay,1), dtype=complex) # Impulse Response
+            x[J, I] = x_temp * np.exp(-(Delay[J, I] - Delay[0, I]) / 19.80) * (
+                        np.random.randn(1) + np.random.randn(1) * 1j) / 2 ** 0.5  # Gamma
+
+    IR_NLOS_temp = np.zeros(shape=(max_delay, 1), dtype=complex)  # Impulse Response
     for I in range(1, N_path):
         for J in range(N_component):
             if Delay[J, I] == 0:
                 break
-            IR_NLOS_temp[Delay[J, I]-1] += x[J, I]
-    power_temp = np.sum(np.abs(IR_NLOS_temp)**2)
-    
+            IR_NLOS_temp[Delay[J, I] - 1] += x[J, I]
+    power_temp = np.sum(np.abs(IR_NLOS_temp) ** 2)
+
     if power_temp < 1e-12:
         x[:, 1:] = 0 * x[:, 1:]  # prevent power_temp == 0.
     else:
-        x[:, 1:] = (1 / (K + 1))**0.5 * x[:, 1:] / (power_temp**0.5)
- 
+        x[:, 1:] = (1 / (K + 1)) ** 0.5 * x[:, 1:] / (power_temp ** 0.5)
+
     # Delay_mean = np.sum(Delay * np.abs(x)**2) / np.sum(np.abs(x)**2)
     # Delay_spread = (np.sum((Delay - Delay_mean)**2 * np.abs(x)**2) / np.sum(np.abs(x)**2))**0.5
 
     # if check_nan(Delay_spread):
     #     print('NaN occurs in Delay_spread')
-    
+
     Angle_scaler = 0.57
     # AoD and AoA of each component is generated
     Phi = np.zeros(shape=(N_component, N_path, 2))
@@ -120,7 +121,7 @@ def single_channel_generator_3d(K_factor, N_path, N_component, max_delay, AoD, A
     Phi[0, 0, 1] = AoA
     Theta[0, 0] = AoD[0]
     for I in range(1, N_path):
-        if Delay[0,I] == 0:
+        if Delay[0, I] == 0:
             break
         Phi[0, I, 0] = 2 * np.pi * np.random.rand(1)
         Phi[0, I, 1] = 2 * np.pi * np.random.rand(1)
@@ -135,8 +136,8 @@ def single_channel_generator_3d(K_factor, N_path, N_component, max_delay, AoD, A
     # Phi_mean = np.sum(Phi * np.abs(x)**2) / np.sum(np.abs(x)**2)
     # Phi_spread = (np.sum((Phi - Phi_mean)**2 * np.abs(x)**2) / np.sum(np.abs(x)**2))**0.5
 
-    H = np.zeros(shape=(N_component,N_path,n_r,n_t), dtype=complex)
-    IR = np.zeros(shape=(max_delay,n_r,n_t), dtype=complex)
+    H = np.zeros(shape=(N_component, N_path, n_r, n_t), dtype=complex)
+    IR = np.zeros(shape=(max_delay, n_r, n_t), dtype=complex)
     for I in range(N_path):
         if Delay[0, I] == 0:
             break
@@ -144,16 +145,18 @@ def single_channel_generator_3d(K_factor, N_path, N_component, max_delay, AoD, A
             if Delay[J, I] == 0:
                 break
             # Array factor of transmitting antennas
-            AF_t = np.exp(1j * np.arange(n_t_z) * 2 * np.pi * n_interval * np.cos(Theta[J, I])).reshape((n_t_z,1)) \
-                * np.exp(1j * np.arange(n_t_y) * 2 * np.pi * n_interval * np.sin(Phi[J, I, 0]) * np.sin(Theta[J, I])).reshape((1,n_t_y))
-            AF_t = AF_t.reshape((1,-1))
+            AF_t = np.exp(1j * np.arange(n_t_z) * 2 * np.pi * n_interval * np.cos(Theta[J, I])).reshape((n_t_z, 1)) \
+                   * np.exp(
+                1j * np.arange(n_t_y) * 2 * np.pi * n_interval * np.sin(Phi[J, I, 0]) * np.sin(Theta[J, I])).reshape(
+                (1, n_t_y))
+            AF_t = AF_t.reshape((1, -1))
             # Array factor of recieving antennas
-            #AF_r = np.ones(n_r).reshape((n_r,1))
-            AF_r = np.exp(1j * np.arange(n_r) * 2 * np.pi * n_interval * np.sin(Phi[J, I, 1])).reshape((n_r,1))
-            #Chnnel on each component and path
-            H[J,I,:,:] = np.dot(AF_r, AF_t) * x[J,I]
-            #Impulse response on each time tap
-            IR[Delay[J,I]-1,:,:] += H[J,I,:,:]
+            # AF_r = np.ones(n_r).reshape((n_r,1))
+            AF_r = np.exp(1j * np.arange(n_r) * 2 * np.pi * n_interval * np.sin(Phi[J, I, 1])).reshape((n_r, 1))
+            # Chnnel on each component and path
+            H[J, I, :, :] = np.dot(AF_r, AF_t) * x[J, I]
+            # Impulse response on each time tap
+            IR[Delay[J, I] - 1, :, :] += H[J, I, :, :]
     return IR, H, Delay
 
 
@@ -165,9 +168,9 @@ if __name__ == '__main__':
         G = np.sum(IR, axis=0)
 
         GF = np.dot(G, precoding_matrices[2])
-        teemp = np.matmul(GF, np.swapaxes(GF,-1,-2).conj())   
+        teemp = np.matmul(GF, np.swapaxes(GF, -1, -2).conj())
 
-        if np.where(teemp!=0)[0].shape[0]==0:
+        if np.where(teemp != 0)[0].shape[0] == 0:
             cnt0 += 1
         else:
             cnt1 += 1

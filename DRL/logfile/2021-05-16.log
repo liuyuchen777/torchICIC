@@ -1,0 +1,9 @@
+-----------------------NETWORK CONFIG-------------------------------
+DATE: 2021-05-16, TIME: 12:40:15
+num_exp = 10, learning_rate = 0.001
+num_of_iterations = 100, mini_batch_size = 16,
+layers = [1024, 1024, 1024, 1024]
+-----------------------------END------------------------------------
+start overall process 1:
+iter= 1, reward= 4.71, time elapsed= 27 (s)
+iter= 2, reward= 4.74, time elapsed= 55 (s)

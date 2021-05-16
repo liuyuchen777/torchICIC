@@ -1,11 +1,11 @@
 # ES
 import numpy as np
 from const import bs_num, P_cb, precoding_matrices
-from channel_capacity import system_capacity, system_throughput
+from data_generator.channel_capacity import system_capacity, system_throughput
 
 
 def convert_num_to_list(x, n):
-    '''
+    """
     This function convert x to a list of number in base n.
     Example: x=6, n=2 returns [1,1,0]
 
@@ -15,7 +15,7 @@ def convert_num_to_list(x, n):
 
     Returns:
     l -- python list
-    '''
+    """
     l = []
     while x > 0:
         l = [x % n] + l
@@ -45,21 +45,21 @@ def convert_one_hot(l):
 
 
 def greedy_capacity(G):
-    '''
+    """
     This function calculate a optimal power configuration for each BS by greedy algorithm
     This configuration maximizes system capacity
-    
+
     Arguments:
     G -- np array, channel matrix of all BSs and UTs in shape of (bs_num, ut_num, len(precoding_matrices), n_r, n_stream), pathloss already included.
     pair -- python list, indicates the BS-UT pairs.
             Each element is a python list of user index assigned to that BS.
-    
+
     Returns:
     one_hot -- np array(int), optimal power configuration in shape of (bs_num * len(P_cb), 1), one hot coded for each BS.
     max_config -- python list, optimal power and precoding configuration  in shape of (bs_num,)
     max_capacity -- double, the max average capcacity under all possible power and precoding configuration
     capacity -- python list, average capcacity of all possible power and precoding configuration
-    '''
+    """
 
     capacity = np.zeros(len(P_cb)**bs_num * len(precoding_matrices)**bs_num)
     index = 0
@@ -83,22 +83,22 @@ def greedy_capacity(G):
 
 
 def greedy_throughput(G):
-    '''
+    """
     This function calculate a optimal power configuration for each BS by greedy algorithm
     This configuration maximizes system throughput
-    
+
     Arguments:
     G -- np array, channel matrix of all BSs and UTs in shape of (bs_num, ut_num, len(precoding_matrices), n_r, n_stream), pathloss already included.
     pair -- python list, indicates the BS-UT pairs.
             Each element is a python list of user index assigned to that BS.
-    
+
     Returns:
-    one_hot -- np array(int), optimal power and precoding configuration 
+    one_hot -- np array(int), optimal power and precoding configuration
                in shape of (bs_num * len(P_cb) * len(precoding_matrices), 1), one hot coded for each BS.
     max_config -- python list, optimal power and precoding configuration  in shape of (bs_num,)
     max_throughput -- double, the max average throughput under all possible power and precoding configuration
     throughput -- python list, average throughput of all possible power and precoding configuration
-    '''
+    """
     throughput = np.zeros(len(P_cb)**bs_num * len(precoding_matrices)**bs_num)
     index = 0
     max_throughput = -1
@@ -123,12 +123,12 @@ def greedy_throughput(G):
 
 
 def greedy(G, mode):
-    '''
-    This funciton is a wrapper of greedy_capacity and greedy_throughput
-    
+    """
+    This function is a wrapper of greedy_capacity and greedy_throughput
+
     Arguments:
     mode -- python string, 'capacity' or 'throughput'
-    '''
+    """
     
     if mode == 'capacity':
         return greedy_capacity(G)

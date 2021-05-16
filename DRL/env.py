@@ -11,17 +11,17 @@ from data_generator.channel_capacity import system_capacity
 action_space = list(range(len(P_cb) * len(precoding_matrices)))
 
 
-def onehot(index, size):
-    r = np.zeros((size,))
-    r[index] = 1
-    return r
-
-
 class Env(object):
-    def __init__(self, args):
-        self.num_agents = args['num_agents']
-        self.state_size = test_data_generator(1)[0].shape[1]
+    def __init__(self, num_of_agents):
+        self.num_agents = num_of_agents
+        self.state_size = test_data_generator(1)[0].shape[1]  # （5+8）*3
         self.action_size = len(action_space)
+
+    def get_state_size(self):
+        return self.state_size
+
+    def get_action_size(self):
+        return self.action_size
 
     def effective_actions(self, agent_actions):
         for i in range(self.num_agents):
@@ -48,9 +48,10 @@ class Env(object):
 
     def step(self, agent_actions):
         self.effective_actions(agent_actions)
+        # get signal power and beamforming index from action state
         signal_pow = [P_cb[m] for m in list(self.power_index)]
         precoding_index_list = list(self.precoding_index)
-        reward = system_capacity(self.G[0], [0, 1, 2], signal_pow, precoding_index_list)
+        reward = system_capacity(self.G[0], signal_pow, precoding_index_list)
         self.last_actions = agent_actions
         return reward
 
