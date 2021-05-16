@@ -13,7 +13,7 @@ class Logger:
         logging.info(f'DATE: {time.strftime("%Y-%m-%d", time.localtime())}, '
                      f'TIME: {time.strftime("%H:%M:%S", time.localtime())}')
         logging.info(f'num_exp = {num_exp}, learning_rate = {learning_rate}\n'
-                     f'num_of_iterations = {iteration}, mini_batch_size = {minibatch_size},\n'
+                     f'num_of_iterations = {iteration},\n'
                      f'layers = {nodes_num}')
         logging.info("-----------------------------END------------------------------------")
 

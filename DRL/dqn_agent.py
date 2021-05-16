@@ -6,6 +6,7 @@ from memory_models import MemoryPool
 from hyper_parameter import *
 import torch
 
+
 class Agent(object):
     def __init__(self, state_size, action_size, agent_id, path=""):
         """
@@ -34,42 +35,37 @@ class Agent(object):
         :return: action
         """
         state = state.reshape(1, -1)
-        # state_tensor = torch.from_numpy(state.astype(np.float32))
         if self.mode == "Test":
             # Test Mode: directly choose optimal action
-            return np.argmax(self.q_network.predict(state.reshape(1, -1)))
+            return np.argmax(self.q_network.predict(state))
         else:
             if np.random.rand() <= self.epsilon:
                 return np.random.randint(self.action_size)
             else:
                 # need to convert tensor to np
-                return np.argmax(torch.detach(self.q_network.predict(state.reshape(1, -1))).numpy())
+                return np.argmax(self.q_network.predict(state))
 
     def get_td_target(self, batch):
         """
         generate train data
-        :param batch: ?
+        :param batch: (state, actions, reward)
         :return: network input x and network output y
         """
-        batch_size = len(batch)
         states = np.array([b[0] for b in batch])
-        # convert states from ndarray to tensor
-        # states_tensor = torch.from_numpy(states.astype(np.float32))
-        p_tensor = self.q_network.predict(states)
-        p = torch.detach(p_tensor).numpy()
+        p = self.q_network.predict(states)
         # generate input x and output y
         x = np.zeros((batch_size, self.state_size))
         y = np.zeros((batch_size, self.action_size))
         for i, b in enumerate(batch):
-            s = b[0]
-            a = b[1][self.agent_id]
-            r = b[2]
+            state = b[0]
+            action = b[1][self.agent_id]
+            reward = b[2]
 
-            t = p[i]
-            t[a] = r
+            temp = p[i]
+            temp[action] = reward
 
-            x[i] = s
-            y[i] = t
+            x[i] = state
+            y[i] = temp
         return [x, y]
 
     def remember(self, sample):

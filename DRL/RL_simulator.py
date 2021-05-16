@@ -19,6 +19,7 @@ class RLSimulator(object):
         for i in range(iteration):
             # generate training data
             for _ in range(batch_size):
+                # generate 1600 data items
                 state, reward = self.env.reset()
                 actions = []
                 for agent in agents:

@@ -51,19 +51,22 @@ class QNetwork(object):
         # convert x, y to tensor
         x_tensor = torch.from_numpy(x.astype(np.float32))
         y_tensor = torch.from_numpy(y.astype(np.float32))
-
+        # predict and compute loss
         y_predicted = self.model(x_tensor)
-        minibatch_loss = self.loss(y_tensor, y_predicted)
-        minibatch_loss.backward()
+        loss = self.loss(y_tensor, y_predicted)
+        # update network
+        loss.backward()
         self.optimizer.step()
         self.optimizer.zero_grad()
-        return minibatch_loss
+        return loss
 
     def predict(self, x):
         # convert x to tensor
         x_tensor = torch.from_numpy(x.astype(np.float32))
+        with torch.no_grad():
+            y_predict = self.model(x_tensor)
 
-        return self.model(x_tensor)
+        return torch.detach(y_predict).numpy()
 
     def save(self, save_path):
         torch.save(self.model, save_path)
