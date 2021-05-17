@@ -1,8 +1,9 @@
 iteration = 100
 batch_size = 1600
-epsilon = 0.3
+epsilon = 1
 epsilon_decay = 0.96
-# minibatch_size = 16
+minibatch_size = 16
+num_of_epochs = 30
 nodes_num = [1024, 1024, 1024, 1024]
 epochs_num = 30
 learning_rate = 0.001

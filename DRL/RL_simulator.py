@@ -33,6 +33,7 @@ class RLSimulator(object):
                 agent.memory_pool.reset()
                 # decay epsilon (optional)
                 # agent.decay_epsilon()
+                agent.epsilon = max(1 - ((i + 1) / 30.), 0.1)
             # cross validation
             rewards = self.test(agents)
             time_elapsed = time.time() - start
@@ -59,7 +60,7 @@ class RLSimulator(object):
                 state, _ = self.env.reset()
                 actions = []
                 for agent in agents:
-                    actions.append(agent.select_action(state))
+                    actions.append(agent.select_action(state, False))
                 rewards[i] = self.env.step(actions)
             return rewards
         else:

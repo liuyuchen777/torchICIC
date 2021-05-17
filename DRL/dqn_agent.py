@@ -23,19 +23,18 @@ class Agent(object):
         self.memory_pool = MemoryPool(memory_pool_size)
         if path == "":
             self.q_network = QNetwork(self.state_size, self.action_size, path="")
-            self.mode = "Train"
         else:
             self.q_network = QNetwork(self.state_size, self.action_size, path=path)
-            self.mode = "Test"
 
-    def select_action(self, state):
+    def select_action(self, state, mode=True):
         """
         select action based on epsilon-greedy policy
         :param state: state of radio_wave
+        :param mode: true is for train, false is for test
         :return: action
         """
         state = state.reshape(1, -1)
-        if self.mode == "Test":
+        if not mode:
             # Test Mode: directly choose optimal action
             return np.argmax(self.q_network.predict(state))
         else:
@@ -66,6 +65,7 @@ class Agent(object):
 
             x[i] = state
             y[i] = temp
+
         return [x, y]
 
     def remember(self, sample):
