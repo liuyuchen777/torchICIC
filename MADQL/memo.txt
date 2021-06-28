@@ -1,3 +1,3 @@
-this generator is for new signal model
-3 sectors base station
+[Signal Model] 3 sectors base station
 suppose each base station have three sectors and each sectors don't interfere with each other
+each base station only get interfere from neighbor cells

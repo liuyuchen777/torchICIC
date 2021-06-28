@@ -1,7 +1,12 @@
-"""
-configuration of simulation
-"""
-
+'''
+Author: Liu Yuchen
+Date: 2021-06-22 15:29:47
+LastEditors: Liu Yuchen
+LastEditTime: 2021-06-22 15:57:23
+Description: config file for communication and hyperparameters in DRL
+FilePath: /torch_ICIC/MADQL/config.py
+GitHub: https://github.com/liuyuchen777
+'''
 
 class Config:
     def __init__(self):
@@ -12,11 +17,14 @@ class Config:
         self.UT_height = 1.5
         self.CU_length = 30.
 
-        # action set
-        self.max_power = 10.     # dbm
+        # power level list
+        self.max_power = 10.     # num
         self.power_level = 5
+        self.power_list = []
         self._get_power_list_()
+        # beamforming vector list
         self.codebook_size = 10
+        self.beamform_list = []
         self._get_code_list_()
 
         # channel
@@ -31,7 +39,6 @@ class Config:
 
     def _get_power_list_(self):
         power_gap = self.max_power * 2 / (self.power_level - 1)
-        self.power_list = []
         tmp_power = self.max_power
         for i in range(self.power_level):
             self.power_list.append(tmp_power)

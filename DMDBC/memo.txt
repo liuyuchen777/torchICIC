@@ -1,0 +1,6 @@
+!!! Simulation Code for Dynamic MISO Downlink-Beamforming Coordination !!!
+
+fp_algorithm.py greedy.py drl.py can be independently executed
+
+the main entry of simulation code: drl.py
+
