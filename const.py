@@ -46,7 +46,6 @@ N_path = 6
 N_component = 8
 max_delay = 32
 COMPONENT = 8               # Rayleigh channel component
-N_pk = 10                   # number of packet per transmission, during a transmission pathloss doesn't change
 P_cb = [-10, -5, 0, 5, 10]  # [important] dBm power code book for BS to choose from
 
 NOISE_POW = 1e-13           # 1e-13
