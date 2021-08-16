@@ -20,11 +20,13 @@ class Config:
         self.beamform_list = np.zeros(shape=[self.BS_antenna, self.codebook_size], dtype=np.cdouble)
         self._cal_code_list_()
 
-        # channel
-        self.Rician_factor = 10
-        self.LOS_path = 6
-        self.all_component = 8
-        self.max_delay = 32
+        # wireless channel
+        self.alpha = 4  # path loss exponent
+        self.log_normal_sigma = 8   # db
+        self.Gaussian_sigma = 10    # db
+        self.wave_length = 0.6  # m, 500 MHz
+        self.noise_power = 1e-13
+        self.path_number = 6    # LOS path number
 
         # cellular network
         self.cell_length = 200. # m

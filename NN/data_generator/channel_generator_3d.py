@@ -1,5 +1,5 @@
 import numpy as np
-from const import check_nan, bs_num, ut_num, link_num, n_t, n_t_y, n_t_z, n_r, n_interval, precoding_matrices
+from ..const import check_nan, bs_num, ut_num, link_num, n_t, n_t_y, n_t_z, n_r, n_interval, precoding_matrices
 
 
 def Laplace_rand(mu, phi, m, n):

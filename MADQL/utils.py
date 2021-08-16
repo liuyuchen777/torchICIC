@@ -16,6 +16,16 @@ def num2dB(num):
     return dB
 
 
+def decode_index(index):
+    """
+    compose of CU decision index: [S1 decision index, S2 decision index, S3 decision index]
+    decision index = power level used * 10 + beamformer used
+    """
+    power_level = index / 10
+    beamformer_index = index % 10
+    return [power_level, beamformer_index]
+
+
 class Logger:
     def __init__(self, log_path="./log/", debug_tag=False):
         # set path

@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from coordination_unit import CU
 from memory_pool import MemoryPool
-from DecisionMaker import DecisionMaker
+from decision_maker import DecisionMaker
+from environment import Environment
 
 
 class MobileNetwork:
@@ -15,6 +16,7 @@ class MobileNetwork:
         self._generate_CUs_()
         self.mp = MemoryPool()
         self.dm = DecisionMaker(algorithm)
+        self.env = Environment(config=self.config, logger=self.logger)
 
     def _generate_CUs_(self):
         # max support 7 cells
