@@ -1,9 +1,9 @@
 import logging
+import sys
 from enum import Enum
-
 import numpy as np
-import time
 from config import Config
+import time
 
 
 def dB2num(dB):
@@ -16,6 +16,26 @@ def num2dB(num):
     return dB
 
 
+def index2str(index):
+    return f'{index[0]},{index[1]},{index[2]},{index[3]}'
+
+
+def set_logger():
+    config = Config()
+    log_file_path = "./log/" + time.strftime("%Y-%m-%d") + ".log"
+    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%Y-%m-%d:%H:%M:%S', level=logging.DEBUG,
+                        handlers=[logging.FileHandler(log_file_path), logging.StreamHandler()])
+    # initial log
+    logging.info("----------------------------CONFIG--------------------------------------------")
+    logging.info(f'DATE: {time.strftime("%Y-%m-%d", time.localtime())}, '
+                 f'TIME: {time.strftime("%H:%M:%S", time.localtime())}')
+    logging.info(f'Power Level: {config.power_level}, Codebook Size: {config.codebook_size}, '
+                 f'Cell Length: {config.cell_length}')
+    # network config information
+    logging.info("-----------------------------END----------------------------------------------")
+
+
 def decode_index(index):
     """
     compose of CU decision index: [S1 decision index, S2 decision index, S3 decision index]
@@ -24,42 +44,6 @@ def decode_index(index):
     power_level = index / 10
     beamformer_index = index % 10
     return [power_level, beamformer_index]
-
-
-class Logger:
-    def __init__(self, log_path="./log/", debug_tag=False):
-        # set path
-        self.config = Config()
-        self.log_file_path = log_path + time.strftime("%Y-%m-%d") + ".log"
-        logging.basicConfig(filename=self.log_file_path, format='%(message)s', level=logging.DEBUG)
-        self.debug = debug_tag
-        self._log_start_()
-
-    def _log_start_(self):
-        # starting write some information
-        self.log("----------------------------CONFIG----------------------------------")
-        self.log(f'DATE: {time.strftime("%Y-%m-%d", time.localtime())}, '
-                 f'TIME: {time.strftime("%H:%M:%S", time.localtime())}')
-        self.log(f'Power Level: {self.config.power_level}, Codebook Size: {self.config.codebook_size}, '
-                 f'Cell Length: {self.config.cell_length}')
-        # network config information
-        self.log("-----------------------------END------------------------------------")
-
-    def log(self, log_item):
-        print(log_item)
-        logging.info(log_item)
-
-    def log_l(self, log_item):
-        print("[Learning]", log_item)
-        logging.info("[Learning] " + log_item)
-
-    def log_c(self, log_item):
-        print("[Communication]", log_item)
-        logging.info("[Communication] " + log_item)
-
-    def log_d(self, log_item):
-        if self.debug:
-            print("[DEBUG]", f'[{__file__}]', log_item)
 
 
 class Algorithm(Enum):
@@ -71,7 +55,6 @@ class Algorithm(Enum):
 
 if __name__ == "__main__":
     # test Logger
-    log = Logger(debug_tag=True)
-    log.log_l("Hello World!")
-    log.log("Hello World!")
-    log.log_d("Hello World!")
+    set_logger()
+    logger = logging.getLogger(__name__)
+    logger.debug("Hello World")

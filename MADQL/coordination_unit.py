@@ -1,18 +1,18 @@
+import logging
 import numpy as np
 from config import Config
 from sector import Sector
 import time
 import random
-from utils import Logger
 from user_equipment import UE
 
 
 class CU:
-    def __init__(self, index, pos, logger):
+    def __init__(self, index, pos):
         self.index = index
         self.pos = pos  # [x, y]
         self.config = Config()
-        self.logger = logger
+        self.logger = logging.getLogger(__name__)
         self.sectors = []
         self._generate_sectors_()
         self.UEs = []
@@ -30,8 +30,6 @@ class CU:
         self.sectors.append(Sector(0, self.index, [self.pos[0] - r / 2, self.pos[1] + r / 2 * np.sqrt(3), h]))
         self.sectors.append(Sector(1, self.index, [self.pos[0] - r / 2, self.pos[1] - r / 2 * np.sqrt(3), h]))
         self.sectors.append(Sector(2, self.index, [self.pos[0] + r, self.pos[1], h]))
-        for sector in self.sectors:
-            self.logger.log_d(f'sector {sector.index}\'s position is {sector.pos}')
 
     def _generate_UEs_(self):
         # random generate UE and fix position
@@ -40,14 +38,10 @@ class CU:
         for i in range(3):
             r = R * random.random()
             theta = (random.randint((120 * i + 240) % 360, (120 * i + 359) % 360)) / 360 * 2 * np.pi
-            self.logger.log_d(f'r = {r}, theta = {theta}')
             pos_x = self.sectors[i].pos[0] + r * np.cos(theta)
             pos_y = self.sectors[i].pos[1] + r * np.sin(theta)
             # append UE in UEs
             self.UEs.append(UE(i, self.index, [pos_x, pos_y, h]))
-
-        for item in self.UEs:
-            self.logger.log_d(item.pos)
 
     def get_sectors(self):
         return self.sectors

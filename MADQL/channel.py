@@ -1,9 +1,9 @@
+import logging
 from config import Config
-from utils import Logger, dB2num
+from utils import dB2num, set_logger
 import numpy as np
 from sector import Sector
 from user_equipment import UE
-import time
 
 """
 bs_antenna = N
@@ -22,6 +22,7 @@ class Channel:
         self.csi = self._cal_csi_()
         self.csi_history = self.csi
         np.random.seed(seed=None)
+        self.logger = logging.getLogger(__name__)
 
     def _cal_distance_(self):
         dis = (self.sector.pos[0] - self.ue.pos[0]) ** 2 \
@@ -67,6 +68,7 @@ class Channel:
 
 
 if __name__ == "__main__":
-    logger = Logger()
+    set_logger()
+    logger = logging.getLogger(__name__)
     channel = Channel(sector=Sector(0, 0, [0., 0., 100.]), ue=UE(0, 0, [100., 0., 10.]))
     print("distance: ", channel.distance)

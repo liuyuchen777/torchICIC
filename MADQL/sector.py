@@ -1,5 +1,4 @@
 from config import Config
-from utils import Logger
 
 
 class Sector:

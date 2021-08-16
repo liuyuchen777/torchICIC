@@ -25,7 +25,7 @@ class Config:
         self.log_normal_sigma = 8   # db
         self.Gaussian_sigma = 10    # db
         self.wave_length = 0.6  # m, 500 MHz
-        self.noise_power = 1e-13
+        self.noise_power = 1e-13    # Gaussian white noise
         self.path_number = 6    # LOS path number
 
         # cellular network
