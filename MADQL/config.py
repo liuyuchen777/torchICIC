@@ -31,8 +31,15 @@ class Config:
         # cellular network
         self.cell_length = 200. # m
         self.cell_number = 7
+        self.R_min = 40.
+        self.R_max = 100.
+
+        # memory pool
+        self.mp_max_size = 10000
+        self.batch_size = 1000
 
         # deep learning hyper-parameter
+        self.total_time_slot = 1000000
 
     def _cal_power_list_(self):
         power_gap = self.max_power * 2 / (self.power_level - 1)

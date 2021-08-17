@@ -34,8 +34,7 @@ class Channel:
     def _cal_csi_(self):
         index = self.index[1]
         # large scale
-        beta = 1 / dB2num(120.9 + 37.6 * np.log10(self.distance / 1000)
-                          + np.random.normal(0, self.config.log_normal_sigma))
+        beta = dB2num(120.9 + 37.6 * np.log10(self.distance / 1000) + np.random.normal(0, self.config.log_normal_sigma))
         # empty csi
         csi = np.zeros(shape=[self.config.UT_antenna, self.config.BS_antenna], dtype=complex)
         for i in range(self.config.path_number):
@@ -44,16 +43,17 @@ class Channel:
             # Angle of Departure
             AoD = np.zeros(shape=[1, self.config.BS_antenna], dtype=complex)
             # Average Distribution
-            theta = (np.random.rand() * 120 + 240 + 120 * index) / 360 * 2 * np.pi
+            theta_s = (np.random.rand() * 120 + 120 * index) / 360 * 2 * np.pi
             for n in range(self.config.BS_antenna):
-                AoD[0][n] = np.exp(-2*np.pi*self.distance*np.cos(theta)/self.config.wave_length*1j*(n-1))
+                AoD[0][n] = np.exp(-2*np.pi*self.distance*np.sin(theta_s)/self.config.wave_length*1j*(n-1))
+            theta_r = np.random.rand() * 2 * np.pi
             for m in range(self.config.UT_antenna):
-                AoA[0][m] = np.exp(-2*np.pi*self.distance*np.cos(theta)/self.config.wave_length*1j*(m-1))
+                AoA[0][m] = np.exp(-2*np.pi*self.distance*np.sin(theta_r)/self.config.wave_length*1j*(m-1))
             # complex Gaussian random variable
             h = np.random.normal(loc=0., scale=dB2num(self.config.Gaussian_sigma), size=(1, 2)).view(dtype=complex)
             # print("h: ", h)
             csi += h * AoA * np.transpose(AoD)
-        csi *= beta
+        csi /= np.sqrt(beta * self.config.path_number)
         return csi
 
     def step(self):
@@ -68,7 +68,6 @@ class Channel:
 
 
 if __name__ == "__main__":
-    set_logger()
-    logger = logging.getLogger(__name__)
     channel = Channel(sector=Sector(0, 0, [0., 0., 100.]), ue=UE(0, 0, [100., 0., 10.]))
     print("distance: ", channel.distance)
+    print("csi: \n", channel.get_csi())

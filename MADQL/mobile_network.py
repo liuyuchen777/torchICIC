@@ -4,9 +4,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 from coordination_unit import CU
 from memory_pool import MemoryPool
-from decision_maker import DecisionMaker
+from decision_maker import MaxPower, MADQL, Random
 from environment import Environment
 import logging
+
+
+def set_decision_maker(algorithm):
+    if algorithm == Algorithm.RANDOM:
+        return Random()
+    elif algorithm == Algorithm.MAX_POWER:
+        return MaxPower()
+    elif algorithm == Algorithm.MADQL:
+        return MADQL()
 
 
 class MobileNetwork:
@@ -16,9 +25,11 @@ class MobileNetwork:
         self.CUs = []
         self._generate_CUs_()
         self.mp = MemoryPool()
-        self.dm = DecisionMaker(algorithm)
+        self.algorithm = algorithm
+        self.dm = set_decision_maker(algorithm)
         # generate environment
         self.env = Environment(self.CUs)
+        self.reward_record = []
 
     def _generate_CUs_(self):
         # max support 7 cells
@@ -37,23 +48,38 @@ class MobileNetwork:
             logging.info(f'Position of {i}th CU is: {self.CUs[i].pos}')
 
     def plot_CU_position(self):
-        logging.info("---------------Plot CUs--------------")
         CU_pos_x = []
         CU_pos_y = []
         for CU in self.CUs:
             CU_pos_x.append(CU.pos[0])
             CU_pos_y.append(CU.pos[1])
-        fig, ax = plt.subplots()
         plt.scatter(CU_pos_x, CU_pos_y, c='r')
-        # set axis
-        ax.spines['right'].set_visible(False)
-        ax.spines['top'].set_color('none')
-        ax.xaxis.set_ticks_position('bottom')
-        ax.spines['bottom'].set_position(('data', 0))
-        ax.yaxis.set_ticks_position('left')
-        ax.spines['left'].set_position(('data', 0))
         # show figure
         plt.show()
+
+    def plot_mobile_network(self):
+        for cu in self.CUs:
+            cu.plot_CU(plt=plt)
+        plt.show()
+
+    def build_state(self, cu_index):
+        print("Under Construct")
+
+    def step(self):
+        if self.algorithm <= Algorithm.FP:
+            for ts in range(self.config.total_time_slot):
+                for cu in self.CUs:
+                    # take action
+                    cu.set_decision_index(self.dm.take_action())
+                    # get reward base on action
+                    ts_reward = self.env.cal_reward()
+                    # record reward
+                    self.reward_record.append(ts_reward)
+                    # update environment
+                    self.env.step()
+        else:
+            # MADQL
+            print("Under Construct")
 
 
 if __name__ == "__main__":
@@ -62,3 +88,6 @@ if __name__ == "__main__":
     # mn.print_CU_position()
     # mn.plot_CU_position()
     # mn.env.print_channel()
+    # mn.plot_mobile_network()
+    reward = mn.env.cal_reward()
+    print(reward)
