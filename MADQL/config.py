@@ -25,7 +25,7 @@ class Config:
         self.log_normal_sigma = 8   # db
         self.Gaussian_sigma = 10    # db
         self.wave_length = 0.6  # m, 500 MHz
-        self.noise_power = 1e-13    # Gaussian white noise
+        self.noise_power = -100    # Gaussian white noise, dBm
         self.path_number = 6    # LOS path number
 
         # cellular network
@@ -39,7 +39,7 @@ class Config:
         self.batch_size = 1000
 
         # deep learning hyper-parameter
-        self.total_time_slot = 1000000
+        self.total_time_slot = 1000
 
     def _cal_power_list_(self):
         power_gap = self.max_power * 2 / (self.power_level - 1)

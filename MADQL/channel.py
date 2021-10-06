@@ -4,6 +4,9 @@ from utils import dB2num, set_logger
 import numpy as np
 from sector import Sector
 from user_equipment import UE
+import matplotlib.pyplot as plt
+from scipy.stats.kde import gaussian_kde
+from numpy import linspace
 
 """
 bs_antenna = N
@@ -20,7 +23,7 @@ class Channel:
         self.index = [sector.CU_index, sector.index, ue.CU_index, ue.index]  # (CU of sector, sector, CU of ue, ue)
         self.distance = self._cal_distance_()
         self.csi = self._cal_csi_()
-        self.csi_history = self.csi
+        self.csi_history = self.csi     # csi in last time slot
         np.random.seed(seed=None)
         self.logger = logging.getLogger(__name__)
 
@@ -67,7 +70,22 @@ class Channel:
         return self.csi_history
 
 
+def plot_pdf(data):
+    # this create the kernel, given an array it will estimate the probability over that values
+    kde = gaussian_kde(data)
+    # these are the values over wich your kernel will be evaluated
+    dist_space = linspace(min(data), max(data), 100)
+    # plot the results
+    plt.plot(dist_space, kde(dist_space))
+    plt.show()
+
+
 if __name__ == "__main__":
-    channel = Channel(sector=Sector(0, 0, [0., 0., 100.]), ue=UE(0, 0, [100., 0., 10.]))
-    print("distance: ", channel.distance)
-    print("csi: \n", channel.get_csi())
+    mSector = Sector(0, 0, [0., 0., 100.])
+    mUE = UE(0, 0, [100., 0., 10.])
+    channels = []
+    for i in range(1000):
+        channel = Channel(sector=mSector, ue=mUE)
+        norm = np.linalg.norm(channel.get_csi())
+        channels.append(norm)
+    plot_pdf(channels)

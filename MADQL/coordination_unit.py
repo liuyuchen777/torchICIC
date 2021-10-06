@@ -81,7 +81,7 @@ class CU:
         plt.scatter(sectors_pos_x, sectors_pos_y, c='r')
         plt.scatter(UEs_pos_x, UEs_pos_y, c='b')
         plt.scatter([self.pos[0]], [self.pos[1]], c='y')
-        # 画六边形
+        # draw Hexagon
         theta = np.linspace(0, 2 * np.pi, 13)
         x = np.cos(theta)
         x[1::2] *= 0.5

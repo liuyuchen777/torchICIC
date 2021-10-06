@@ -5,6 +5,11 @@ from config import Config
 import time
 
 
+def dBm2num(dB):
+    num = 10 ** (dB / 10) / 1000
+    return num
+
+
 def dB2num(dB):
     num = 10 ** (dB / 10)
     return num
@@ -27,7 +32,7 @@ def str2index(index_str):
     return index
 
 
-def set_logger(file=True, debug=True):
+def set_logger(file=True, debug=False):
     config = Config()
     if debug:
         log_level = logging.DEBUG
@@ -68,7 +73,8 @@ class Algorithm(Enum):
     RANDOM = 1
     MAX_POWER = 2
     FP = 3
-    MADQL = 4
+    WMMSE = 4
+    MADQL = 5
 
 
 neighbor_table = [
@@ -83,7 +89,7 @@ neighbor_table = [
 
 
 def judge_skip(index):
-    print("Under Construct")
+    # print("[Judge Skip] Under Construct")
 
     return False
 

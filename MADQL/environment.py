@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 from config import Config
-from utils import index2str, neighbor_table, judge_skip
+from utils import index2str, neighbor_table, judge_skip, dBm2num
 from channel import Channel
 
 
@@ -51,43 +51,46 @@ class Environment:
         """
         reward = []
         for cu in self.CUs:
+            # main loop calculate reward in each CU
             action_index = cu.get_decision_index()
             r = 0.
             for sector in cu.sectors:
-                # calculate SINR
-                w_i_k = self.config.beamform_list[action_index[sector.index][0]] \
-                        * self.config.power_list[action_index[sector.index][1]]
+                w_i_k = self.config.beamform_list[action_index[sector.index][0]]
+                # 1. direct channel (up)
                 direct_channel = self.channels[index2str([cu.index, sector.index, cu.index, sector.index])].get_csi()
-                up = np.linalg.norm(np.matmul(direct_channel, w_i_k)) ** 4
-                bottom = self.config.noise_power * np.linalg.norm(np.matmul(direct_channel, w_i_k)) ** 2
-                # intra CU interference
+                w_i_k = np.matmul(direct_channel, w_i_k)
+                up = dBm2num(self.config.power_list[action_index[sector.index][1]]) * np.linalg.norm(w_i_k) ** 4
+                # 2.1 Gaussian noise
+                bottom = dBm2num(self.config.noise_power) * np.linalg.norm(w_i_k) ** 2
+                # 2.2 intra-CU interference
                 for other_sector in cu.sectors:
                     if sector.index != other_sector.index:
-                        w_j_k = self.config.beamform_list[action_index[other_sector.index][0]] \
-                                * self.config.power_list[action_index[other_sector.index][1]]
+                        w_j_k = self.config.beamform_list[action_index[other_sector.index][0]]
                         # same cu channel
                         sc_channel = self.channels[index2str([cu.index, other_sector.index, cu.index, sector.index])] \
                             .get_csi()
-                        bottom += np.linalg.norm(np.matmul(np.matmul(
-                            np.matmul(np.transpose(w_j_k), np.transpose(sc_channel)), sc_channel),w_j_k)) ** 2
-                # inter CU interference
+                        bottom += dBm2num(self.config.power_list[action_index[other_sector.index][1]]) \
+                            * np.linalg.norm(np.matmul(np.matmul(np.matmul(np.transpose(w_j_k),
+                            np.transpose(sc_channel)), sc_channel), w_j_k)) ** 2
+                # 2.3 inter-CU interference
                 neighbor = neighbor_table[cu.index]
                 for other_cu_index in neighbor:
                     other_cu = self.CUs[other_cu_index]
                     for other_cu_sector in other_cu.sectors:
                         index = [cu.index, sector.index, other_cu.index, other_cu_sector.index]
                         if judge_skip(index):
+                            # if inter-CU sector can't interfere current sector, skip!
                             continue
-                        w_j_l = self.config.beamform_list[action_index[other_cu_sector.index][0]] \
-                                * self.config.power_list[action_index[other_cu_sector.index][1]]
+                        w_j_l = self.config.beamform_list[action_index[other_cu_sector.index][0]]
                         ocs_channel = self.channels[index2str(index)].get_csi()
-                        bottom += np.linalg.norm(np.matmul(np.matmul(
-                            np.matmul(np.transpose(w_j_l), np.transpose(ocs_channel)), ocs_channel), w_j_l)) ** 2
-                # use SINR calculate capacity
+                        bottom += dBm2num(self.config.power_list[action_index[other_cu_sector.index][1]]) * \
+                            np.linalg.norm(np.matmul(np.matmul(np.matmul(np.transpose(w_j_l),
+                            np.transpose(ocs_channel)), ocs_channel), w_j_l)) ** 2
+                # 3. use SINR calculate capacity
                 SINR = up / bottom
                 cap = np.log2(1 + SINR)
                 r += cap
-            # calculate reward
+            # 4. calculate average reward in CU
             r /= 3
             reward.append(r)
 
