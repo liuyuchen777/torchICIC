@@ -46,5 +46,11 @@ class MADQL:
         self.targetDQN = DQN()
 
     # train
+    def train(self):
+        print("[train] Under Construct")
+        # back prop
 
     # eval
+    def eval(self):
+        print("[eval] Under Construct")
+        # forward prop

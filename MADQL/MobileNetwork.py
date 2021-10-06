@@ -92,10 +92,30 @@ class MobileNetwork:
             self.rewardRecord.append(tsReward)
             self.averageRewardRecord.append(tsAverageReward)
             # print
-            print(f'mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}.')
+            self.logger.info(f'[Train] mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}.')
+
+    def test(self):
+        """evaluate network"""
+        for ts in range(self.config.totalTimeSlot):
+            # step
+            tsReward, tsAverageReward = self.eval()
+            # record reward
+            self.rewardRecord.append(tsReward)
+            self.averageRewardRecord.append(tsAverageReward)
+            # print
+            self.logger.info(f'[Test] mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}.')
+
+    def eval(self):
+        if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAXPOWER:
+            self.step()
+        elif self.algorithm == Algorithm.MADQL:
+            # MADQL eval
+            print("[eval] Under Construct")
+            # build state
+            # dm.eval
 
     def step(self):
-        """one step"""
+        """one step in training"""
         if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAXPOWER:
             for cu in self.CUs:
                 # take action
@@ -110,6 +130,10 @@ class MobileNetwork:
         elif self.algorithm == Algorithm.MADQL:
             # MADQL
             print("[step] Under Construct")
+            # build state
+            # add to memory pool
+            # if > x times, train
+            # eval
 
     def saveRewards(self, name="default"):
         """save rewards record to json file"""
