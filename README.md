@@ -14,9 +14,3 @@ Multi-Agent Deep Reinforcement Learning for Inter-Cell Interference Control
     https://ieeexplore.ieee.org/abstract/document/9123956
 
     https://github.com/mengxiaomao/PA_TWC
-
-## Work List
- 
-- [x] General Utils
-- [x] Wireless Communication Environment
-- [ ] DQN and RL decision maker

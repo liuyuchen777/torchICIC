@@ -1,7 +1,7 @@
 import logging
 from enum import Enum
 import numpy as np
-from config import Config
+from Config import Config
 import time
 
 
@@ -32,52 +32,52 @@ def str2index(index_str):
     return index
 
 
-def set_logger(file=True, debug=False):
+def setLogger(file=True, debug=False):
     config = Config()
     if debug:
-        log_level = logging.DEBUG
+        logLevel = logging.DEBUG
     else:
-        log_level = logging.INFO
+        logLevel = logging.INFO
     if file:
-        log_file_path = "./log/" + time.strftime("%Y-%m-%d") + ".log"
+        logFilePath = "./log/" + time.strftime("%Y-%m-%d") + ".log"
         logging.basicConfig(format='%(asctime)s, %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-                            datefmt='%H:%M:%S', level=log_level,
-                            handlers=[logging.FileHandler(log_file_path), logging.StreamHandler()])
+                            datefmt='%H:%M:%S', level=logLevel,
+                            handlers=[logging.FileHandler(logFilePath), logging.StreamHandler()])
     else:
         logging.basicConfig(format='%(asctime)s, %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-                            datefmt='%H:%M:%S', level=log_level)
+                            datefmt='%H:%M:%S', level=logLevel)
     # initial log
     logging.info("=====================================CONFIG=========================================")
     logging.info(f'START TIME: {time.strftime("%H:%M:%S", time.localtime())}')
     logging.info("-----------------------------------COMMUNICATION------------------------------------")
-    logging.info(f'Power Level: {config.power_level}, Codebook Size: {config.codebook_size}, '
-                 f'Cell Length: {config.cell_length} m, Cell Number: {config.cell_number}')
-    logging.info(f'Path Loss Exponent: {config.alpha}, Lognormal Sigma: {config.log_normal_sigma} db, '
-                 f'Lambda: {config.wave_length} m, Gaussian Sigma: {config.Gaussian_sigma} db')
+    logging.info(f'Power Level: {config.powerLevel}, Codebook Size: {config.codebookSize}, '
+                 f'Cell Length: {config.cellLength} m, Cell Number: {config.cellNumber}')
+    logging.info(f'Path Loss Exponent: {config.alpha}, Lognormal Sigma: {config.logNormalSigma} db, '
+                 f'Gaussian Sigma: {config.gaussianSigma} db')
     logging.info("-----------------------------------------DL------------------------------------------")
     # network config information
     logging.info("=========================================END=========================================")
 
 
-def decode_index(index):
+def decodeIndex(index):
     """
     compose of CU decision index: [S1 decision index, S2 decision index, S3 decision index]
     decision index = power level used * 10 + beamformer used
     """
-    power_level = index / 10
-    beamformer_index = index % 10
-    return [power_level, beamformer_index]
+    powerLevel = index / 10
+    beamformerIndex = index % 10
+    return [powerLevel, beamformerIndex]
 
 
 class Algorithm(Enum):
     RANDOM = 1
-    MAX_POWER = 2
+    MAXPOWER = 2
     FP = 3
     WMMSE = 4
     MADQL = 5
 
 
-neighbor_table = [
+neighborTable = [
     [1, 2, 3, 4, 5, 6],
     [0, 2, 6],
     [0, 1, 3],
@@ -87,16 +87,27 @@ neighbor_table = [
     [0, 1, 5]
 ]
 
+skipTable = [
+    [0, 0, 1, 1, 2, 2],
+    [],
+    [],
+    [],
+    [],
+    []
+]
 
-def judge_skip(index):
-    # print("[Judge Skip] Under Construct")
+
+def judgeSkip(index):
+    """index is sequence"""
+    # index = [cu.index, sector.index, otherCU.index, otherCUSector.index]
+
 
     return False
 
 
 if __name__ == "__main__":
     # test Logger
-    set_logger()
+    setLogger()
     logger = logging.getLogger(__name__)
     logger.debug("Hello World")
     logger.info("Hello World")

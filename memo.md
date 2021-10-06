@@ -32,6 +32,13 @@
 
 
 
+## TODO
+
+- [x] General Utils
+- [x] Wireless Communication Environment
+- [ ] DQN and RL decision maker
+- [x] Rename functions and variables
+
 ## Research Memo
 
 2021.4.13
@@ -66,5 +73,6 @@ NN出来结果非常不理想，基本跟乱猜一样
 2021.4.27
 problem fixed
 
-2021.8.15
-
+2021.10.6
+重启研究，目前无线通信环境配置部分已经完成
+开始强化学习部分的配置

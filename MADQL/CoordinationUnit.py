@@ -1,10 +1,9 @@
 import logging
 import numpy as np
-from config import Config
-from sector import Sector
-import time
+from Config import Config
+from Sector import Sector
 import random
-from user_equipment import UE
+from UserEquipment import UE
 import matplotlib.pyplot as plt
 
 
@@ -16,70 +15,70 @@ class CU:
         self.config = Config()
         self.logger = logging.getLogger(__name__)
         self.sectors = []
-        self._generate_sectors_()
+        self._generateSectors_()
         self.UEs = []
-        self._generate_UEs_()
+        self._generateUEs_()
         # decision
-        self.decision_index = []
-        self._init_decision_index()
-        self.decision_index_history = self.decision_index
+        self.decisionIndex = []
+        self._initDecisionIndex_()
+        self.decisionIndexHistory = self.decisionIndex
 
-    def _generate_sectors_(self):
-        r = self.config.cell_length
-        h = self.config.BS_height
+    def _generateSectors_(self):
+        r = self.config.cellLength
+        h = self.config.BSHeight
         self.sectors.append(Sector(0, self.index, [self.pos[0] - r / 2, self.pos[1] - r / 2 * np.sqrt(3), h]))
         self.sectors.append(Sector(1, self.index, [self.pos[0] + r, self.pos[1], h]))
         self.sectors.append(Sector(2, self.index, [self.pos[0] - r / 2, self.pos[1] + r / 2 * np.sqrt(3), h]))
 
-    def _generate_UEs_(self):
+    def _generateUEs_(self):
         # random generate UE and fix position
-        R = self.config.R_max - self.config.R_min
-        h = self.config.UT_height
+        R = self.config.Rmax - self.config.Rmin
+        h = self.config.UTHeight
         for i in range(3):
-            r = R * np.random.rand() + self.config.R_min
+            r = R * np.random.rand() + self.config.Rmin
             # print("r: ", r)
             theta = (np.random.rand() * 120 + 120 * i)
             # print("theta: ", theta)
             theta = theta / 360 * 2 * np.pi
-            pos_x = self.sectors[i].pos[0] + r * np.cos(theta)
-            pos_y = self.sectors[i].pos[1] + r * np.sin(theta)
+            posX = self.sectors[i].pos[0] + r * np.cos(theta)
+            posY = self.sectors[i].pos[1] + r * np.sin(theta)
             # append UE in UEs
-            self.UEs.append(UE(i, self.index, [pos_x, pos_y, h]))
+            self.UEs.append(UE(i, self.index, [posX, posY, h]))
 
-    def get_sectors(self):
+    def getSectors(self):
         return self.sectors
 
-    def get_UEs(self):
+    def getUEs(self):
         return self.UEs
 
-    def _init_decision_index(self):
+    def _initDecisionIndex_(self):
         for i in range(3):
-            self.decision_index.append([random.randint(0, self.config.codebook_size-1),
-                                        random.randint(0, self.config.power_level-1)])
+            self.decisionIndex.append([random.randint(0, self.config.codebookSize - 1),
+                                       random.randint(0, self.config.powerLevel - 1)])
 
-    def get_decision_index(self):
-        return self.decision_index
+    def getDecisionIndex(self):
+        return self.decisionIndex
 
-    def get_decision_index_history(self):
-        return self.decision_index_history
+    def getDecisionIndexHistory(self):
+        return self.decisionIndexHistory
 
-    def set_decision_index(self, new_decision_index):
-        self.decision_index_history = self.decision_index
-        self.decision_index = new_decision_index
+    def setDecisionIndex(self, new_decision_index):
+        self.decisionIndexHistory = self.decisionIndex
+        self.decisionIndex = new_decision_index
 
-    def plot_CU(self, plt=plt, local=False):
-        sectors_pos_x = []
-        sectors_pos_y = []
-        UEs_pos_x = []
-        UEs_pos_y = []
+    def plotCU(self, plt=plt, local=False):
+        sectorsPosX = []
+        sectorsPosY = []
+        UEsPosX = []
+        UEsPosY = []
         for i in range(3):
-            sectors_pos_x.append(self.sectors[i].pos[0])
-            sectors_pos_y.append(self.sectors[i].pos[1])
-            UEs_pos_x.append(self.UEs[i].pos[0])
-            UEs_pos_y.append(self.UEs[i].pos[1])
+            sectorsPosX.append(self.sectors[i].pos[0])
+            sectorsPosY.append(self.sectors[i].pos[1])
+            UEsPosX.append(self.UEs[i].pos[0])
+            UEsPosY.append(self.UEs[i].pos[1])
         # plot point
-        plt.scatter(sectors_pos_x, sectors_pos_y, c='r')
-        plt.scatter(UEs_pos_x, UEs_pos_y, c='b')
+        plt.scatter(sectorsPosX, sectorsPosY, c='r')
+        plt.scatter(UEsPosX, UEsPosY, c='b')
         plt.scatter([self.pos[0]], [self.pos[1]], c='y')
         # draw Hexagon
         theta = np.linspace(0, 2 * np.pi, 13)
@@ -100,7 +99,7 @@ class CU:
             plt.show()
 
 
-def plot_Hexagon():
+def plotHexagon():
     theta = np.linspace(0, 2 * np.pi, 13)
     x = np.cos(theta)
     x[1::2] *= 0.5
@@ -112,5 +111,5 @@ def plot_Hexagon():
 
 if __name__ == "__main__":
     cu = CU(0, [0., 0.])
-    cu.plot_CU(local=True)
+    cu.plotCU(local=True)
     # plot_Hexagon()
