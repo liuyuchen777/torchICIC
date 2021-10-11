@@ -10,7 +10,7 @@ class Environment:
         self.logger = logging.getLogger(__name__)
         self.config = Config()
         self.CUs = CUs
-        self.channels = dict()  # dict(channel_index) -> Channel
+        self.channels = dict()  # dict(channel_index) -> Channel, channel index is string
         self._initChannel_()
 
     def _initChannel_(self):

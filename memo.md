@@ -36,7 +36,8 @@
 
 - [x] General Utils
 - [x] Wireless Communication Environment
-- [ ] DQN and RL decision maker
+- [x] Skip Sector
+- [ ] DQN RL decision maker
 - [x] Rename functions and variables
 
 ## Research Memo

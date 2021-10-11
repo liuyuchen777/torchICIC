@@ -71,7 +71,7 @@ def decodeIndex(index):
 
 class Algorithm(Enum):
     RANDOM = 1
-    MAXPOWER = 2
+    MAX_POWER = 2
     FP = 3
     WMMSE = 4
     MADQL = 5
@@ -86,24 +86,25 @@ neighborTable = [
     [0, 4, 6],
     [0, 1, 5]
 ]
-
+# NOTE: CU中每个sector受到影响的Inter-Cell的sector id是一样的，skipTable中记录对应CU要跳过的sector id
 skipTable = [
     [-1, 0, 0, 1, 1, 2, 2],     # 0
-    [],     # 1
-    [],     # 2
-    [],     # 3
-    [],     # 4
-    [],     # 5
-    []      # 7
+    [1, -1, 1, 1, -1, -1, 2],     # 1
+    [2, 2, -1, 1, -1, -1, -1],     # 2
+    [2, -1, 0, -1, 2, -1, -1],     # 3
+    [0, -1, -1, 0, -1, 2, -1],     # 4
+    [0, -1, -1, -1, 1, -1, 0],     # 5
+    [1, 0, -1, -1, -1, 1, -1]      # 6
 ]
 
 
 def judgeSkip(index):
     """index is sequence"""
     # index = [cu.index, sector.index, otherCU.index, otherCUSector.index]
-
-
-    return False
+    if skipTable[index[0]][index[2]] == index[3]:
+        return True
+    else:
+        return False
 
 
 if __name__ == "__main__":

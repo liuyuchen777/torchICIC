@@ -46,11 +46,6 @@ class MADQL:
         self.targetDQN = DQN()
 
     # train
-    def train(self):
+    def takeAction(self, state):
+        """state is defined in MobileNetwork.buildState"""
         print("[train] Under Construct")
-        # back prop
-
-    # eval
-    def eval(self):
-        print("[eval] Under Construct")
-        # forward prop

@@ -13,7 +13,7 @@ import json
 def setDecisionMaker(algorithm):
     if algorithm == Algorithm.RANDOM:
         return Random()
-    elif algorithm == Algorithm.MAXPOWER:
+    elif algorithm == Algorithm.MAX_POWER:
         return MaxPower()
     elif algorithm == Algorithm.FP:
         return FP()
@@ -70,12 +70,30 @@ class MobileNetwork:
             cu.plotCU(plt=plt)
         plt.show()
 
-    def buildState(self, cu_index):
-        """build state for DQN input"""
+    def buildState(self, CUIndex):
+        """
+        [CORE]
+        build state for DQN input
+        two ways: intra-cell + inter-cell
+        intra-cell -> 4 * 4 (MIMO CSI) * 3 * 3 -> 12 * 12 = 144 CSI map
+        inter-cell -> center CU (12 neighbor sector), edge CU (6 neighbor sector) -> 4 * 1 * 12/6
+        p_t-1 * f_t-1 * H_t -> 4 * 1
+        """
+        # NOTE:
         print("[build_state] Under Construct")
-        # build state
-        # build record
-        # put in memory pool
+        # 1 CU, 1 record
+        state = []
+        # 1. build state
+        # 1.1. Intra-CU
+        intraState = np.zeros(shape=[self.config.BSAntenna*3, self.config.UTAntenna*3], dtype=complex)
+        for sectorIndex in range(3):
+            for UEIndex in range(3):
+                index = [CUIndex, sectorIndex, CUIndex, UEIndex]
+
+        # 1.2. intra
+
+        # 2. return
+        return state
 
     def getRewardRecord(self):
         return self.rewardRecord
@@ -106,7 +124,7 @@ class MobileNetwork:
             self.logger.info(f'[Test] mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}.')
 
     def eval(self):
-        if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAXPOWER:
+        if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAX_POWER:
             self.step()
         elif self.algorithm == Algorithm.MADQL:
             # MADQL eval
@@ -116,7 +134,7 @@ class MobileNetwork:
 
     def step(self):
         """one step in training"""
-        if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAXPOWER:
+        if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAX_POWER:
             for cu in self.CUs:
                 # take action
                 cu.setDecisionIndex(self.dm.takeAction())
@@ -130,10 +148,18 @@ class MobileNetwork:
         elif self.algorithm == Algorithm.MADQL:
             # MADQL
             print("[step] Under Construct")
-            # build state
-            # add to memory pool
-            # if > x times, train
+            for CUIndex in range(self.config.cellNumber):
+                # build state
+                state = self.buildState(CUIndex)
+                self.CUs[CUIndex].setDecisionIndex(self.dm.takeAction(state))
+                # build record
+                record = []
+                # save in memory pool
+                self.mp.push(record)
+            # if > x times, backprop DQN
+
             # eval
+            self.eval()
 
     def saveRewards(self, name="default"):
         """save rewards record to json file"""
@@ -173,7 +199,7 @@ def showReward(mn1, mn2):
 if __name__ == "__main__":
     setLogger()
     mn1 = MobileNetwork(Algorithm.RANDOM)
-    mn2 = MobileNetwork(Algorithm.MAXPOWER)
+    mn2 = MobileNetwork(Algorithm.MAX_POWER)
     """network structure"""
     # mn.plot_mobile_network()
     """print reward distribution"""
