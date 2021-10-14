@@ -52,9 +52,12 @@ def setLogger(file=True, debug=False):
     logging.info("-----------------------------------COMMUNICATION------------------------------------")
     logging.info(f'Power Level: {config.powerLevel}, Codebook Size: {config.codebookSize}, '
                  f'Cell Length: {config.cellLength} m, Cell Number: {config.cellNumber}')
-    logging.info(f'Path Loss Exponent: {config.alpha}, Lognormal Sigma: {config.logNormalSigma} db, '
+    logging.info(f'Path Loss Exponent: {config.alpha}, Log-normal Sigma: {config.logNormalSigma} db, '
                  f'Gaussian Sigma: {config.gaussianSigma} db')
     logging.info("-----------------------------------------DL------------------------------------------")
+    logging.info(f'Batch Size: {config.batchSize}, Total time slot: {config.totalTimeSlot}, '
+                 f'Learning Rate: {config.learningRate}, Reg Beta: {config.regBeta}')
+    logging.info(f'Gamma: {config.gamma}, Epsilon: {config.epsilon}, Change Probability: {config.keepAlpha}')
     # network config information
     logging.info("=========================================END=========================================")
 

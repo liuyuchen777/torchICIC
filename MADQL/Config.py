@@ -36,10 +36,17 @@ class Config:
 
         # memory pool
         self.mpMaxSize = 10000
-        self.batchSize = 1000
+        self.batchSize = 200
 
         # deep learning hyper-parameter
-        self.totalTimeSlot = 500
+        self.totalTimeSlot = 100000
+        self.learningRate = 0.01
+        self.regBeta = 0.
+        self.tStep = 50
+        self.gamma = 0.15
+        self.epsilon = 0.5
+        self.keepAlpha = 0.5
+        self.evalTimes = 10
 
     def _calPowerList_(self):
         powerGap = self.maxPower * 2 / (self.powerLevel - 1)

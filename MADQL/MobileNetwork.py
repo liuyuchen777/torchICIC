@@ -24,6 +24,11 @@ class MobileNetwork:
         self.env = Environment(self.CUs)
         self.rewardRecord = []
         self.averageRewardRecord = []
+        self.lossRecord = []
+        self.count = 0
+        self.tmpLossSum = 0.
+        self.tmpRewardSum = 0.
+        self.epoch = 0
 
     def _generateCUs_(self):
         # max support 7 cells
@@ -56,7 +61,7 @@ class MobileNetwork:
         for i in range(len(self.CUs)):
             logging.info(f'Position of {i}th CU is: {self.CUs[i].pos}')
 
-    def plot_CU_position(self):
+    def plotCUPosition(self):
         CUPosX = []
         CUPosY = []
         for CU in self.CUs:
@@ -109,7 +114,8 @@ class MobileNetwork:
                 otherSectorIndex * 2 * self.config.UTAntenna:(otherSectorIndex * 2 + 1) * self.config.UTAntenna] = real
                 # put image part in
                 intraState[sectorIndex * self.config.BSAntenna:(sectorIndex + 1) * self.config.BSAntenna,
-                (otherSectorIndex * 2 + 1) * self.config.UTAntenna:(otherSectorIndex * 2 + 2) * self.config.UTAntenna] = image
+                    (otherSectorIndex * 2 + 1) * self.config.UTAntenna:(otherSectorIndex * 2 + 2)
+                    * self.config.UTAntenna] = image
         # 1.2. intra
         interState = np.zeros(shape=[3 * 3 * self.config.cellNumber, self.config.UTAntenna * 2], dtype=float)
         for otherCUIndex in neighborTable[CUIndex]:
@@ -148,32 +154,40 @@ class MobileNetwork:
             # record reward
             self.rewardRecord.append(tsReward)
             self.averageRewardRecord.append(tsAverageReward)
-            # print
-            self.logger.info(
-                f'[Train] mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}.')
+            if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAX_POWER:
+                self.logger.info(
+                    f'[Train] mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}')
+            elif self.algorithm == Algorithm.MADQL:
+                if self.mp.getSize() > self.config.batchSize:
+                    loss = self.dm.backProp(self.mp.getBatch())
+                    self.lossRecord.append(loss)
+                    self.tmpRewardSum += tsAverageReward
+                    self.tmpLossSum += loss
+                    self.count += 1
+                    if self.count > self.config.tStep:
+                        # print train log
+                        self.logger.info(f'[train] mode: {self.algorithm}, epoch: {self.epoch + 1}, '
+                                         f'system average reward: {self.tmpRewardSum / self.config.tStep}, '
+                                         f'loss: {self.tmpLossSum / self.config.tStep}.')
+                        # eval
+                        evalReward = self.eval(self.config.evalTimes)
+                        self.logger.info(f'[eval] evaluation reward: {evalReward}.')
+                        self.count = 0
+                        self.tmpLossSum = 0.
+                        self.tmpRewardSum = 0.
+                        self.epoch += 1
 
-    def test(self):
-        """evaluate network"""
-        for ts in range(self.config.totalTimeSlot):
-            # step
-            tsReward, tsAverageReward = self.eval()
-            # record reward
-            self.rewardRecord.append(tsReward)
-            self.averageRewardRecord.append(tsAverageReward)
-            # print
-            self.logger.info(
-                f'[Test] mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}.')
-
-    def eval(self):
+    def eval(self, times):
         if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAX_POWER:
             return self.step()
         elif self.algorithm == Algorithm.MADQL:
-            # MADQL eval
-            print("[eval] Under Construct")
-            # build state
-            # dm.eval
+            totalReward = 0.
+            for i in range(times):
+                reward, averageReward = self.step(trainLabel=False)
+                totalReward += averageReward
+            return totalReward / times
 
-    def step(self):
+    def step(self, trainLabel=True):
         """
         one step in training
         record: <s, a, r, s'>
@@ -197,10 +211,15 @@ class MobileNetwork:
                 state = self.buildStateRI(CUIndex)
                 stateRecord.append(state)
                 # take action
-                self.CUs[CUIndex].setDecisionIndex(self.dm.takeAction(state))
+                if self.mp.getSize() < self.config.batchSize:
+                    self.CUs[CUIndex].setDecisionIndex(self.dm.takeActionRandom())
+                else:
+                    self.CUs[CUIndex].setDecisionIndex(self.dm.takeAction(state,
+                        self.CUs[CUIndex].getDecisionIndexHistory(), trainLabel))
                 action = 0
                 decisionIndex = self.CUs[CUIndex].getDecisionIndex()
                 decisionIndexHistory = self.CUs[CUIndex].getDecisionIndexHistory()
+                # convert action index
                 for i in range(3):
                     if decisionIndex[i][0] != decisionIndexHistory[i][0]:
                         action += 1 << (i * 2)
@@ -222,7 +241,6 @@ class MobileNetwork:
             for CUIndex in range(self.config.cellNumber):
                 record = [stateRecord[CUIndex], actionRecord[CUIndex], tsReward[CUIndex], nextStateRecord[CUIndex]]
                 self.mp.push(record)
-            # if > x times, back prop DQN
             # return
             return tsReward, tsAverageReward
 
@@ -233,6 +251,13 @@ class MobileNetwork:
         with open('./data/data.txt', 'w') as jsonFile:
             data[name + "-rewards"] = self.rewardRecord
             data[name + "-average-rewards"] = self.averageRewardRecord
+            json.dump(data, jsonFile)
+
+    def saveLoss(self, name="default"):
+        with open('./data/data.txt') as jsonFile:
+            data = json.load(jsonFile)
+        with open('./data/data.txt', 'w') as jsonFile:
+            data[name + "-loss"] = self.lossRecord
             json.dump(data, jsonFile)
 
     def loadRewards(self, name="default"):
@@ -267,11 +292,11 @@ if __name__ == "__main__":
     # mn = MobileNetwork()
     # mn.plotMobileNetwork()
     """[test] reward in random and max power"""
-    mn1 = MobileNetwork(Algorithm.RANDOM)
-    mn2 = MobileNetwork(Algorithm.MAX_POWER)
-    showReward(mn1, mn2)
-    mn1.saveRewards("default-random")
-    mn2.saveRewards("default-max-power")
+    # mn1 = MobileNetwork(Algorithm.RANDOM)
+    # mn2 = MobileNetwork(Algorithm.MAX_POWER)
+    # showReward(mn1, mn2)
+    # mn1.saveRewards("default-random")
+    # mn2.saveRewards("default-max-power")
     """[test] build state and build record"""
-    # mn = MobileNetwork(Algorithm.MADQL)
-    # mn.train()
+    mn = MobileNetwork(Algorithm.MADQL)
+    mn.train()

@@ -41,8 +41,9 @@
 - [x] Skip Sector
 - [x] Rename functions and variables
 - [x] Build State
-- [ ] DQN
-- [ ] Decision Maker
+- [x] DQN
+- [x] Decision Maker
+- [x] Check Copy Occur
 
 ## Research Memo
 
@@ -101,3 +102,7 @@ problem fixed
 buildState部分的代码仍然有问题，需要重新把复数展开成Amplitude & Phase或者Real & Image
 
 Reward Function没有加Interference Penalty
+
+代码主题部分写完了，但是有大bug。网络训练之后，出来的决策和随机的吗没有任何区别！！！
+
+网络输出的Q值太小了

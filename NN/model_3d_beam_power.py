@@ -138,7 +138,7 @@ if __name__ == "__main__":
     if mode == "initial":
         model = BSNet(x_features, y_features)
         # model.apply(weight_init)
-    elif mode == "retrain":
+    else:
         model = torch.load(retrain_path)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=reg_beta)
 
