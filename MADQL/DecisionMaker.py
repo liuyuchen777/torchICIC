@@ -44,8 +44,17 @@ class MADQL:
     def __init__(self):
         print("[MADQL] Under Construct!")
         self.targetDQN = DQN()
+        self.config = Config()
 
     # train
     def takeAction(self, state):
         """state is defined in MobileNetwork.buildState"""
-        print("[train] Under Construct")
+        # forward prop
+        # choose action base on strategy
+        """[test] fake action"""
+        action = []
+        for i in range(3):
+            codebookIndex = random.randint(0, self.config.codebookSize - 1)
+            powerIndex = self.config.powerLevel - 1  # choose the maximum power
+            action.append([codebookIndex, powerIndex])
+        return action

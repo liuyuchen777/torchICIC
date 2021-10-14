@@ -99,7 +99,10 @@ skipTable = [
 
 
 def judgeSkip(index):
-    """index is sequence"""
+    """
+    index is sequence
+    [receiver, sender]
+    """
     # index = [cu.index, sector.index, otherCU.index, otherCUSector.index]
     if skipTable[index[0]][index[2]] == index[3]:
         return True

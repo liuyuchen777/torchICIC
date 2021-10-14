@@ -1,6 +1,6 @@
 import torch
-
+from Config import Config
 
 class DQN:
     def __init__(self):
-        print("Under Construct")
+        self.config = Config()

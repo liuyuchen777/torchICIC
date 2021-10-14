@@ -55,7 +55,7 @@ class Channel:
             # complex Gaussian random variable
             h = np.random.normal(loc=0., scale=dB2num(self.config.gaussianSigma), size=(1, 2)).view(dtype=complex)
             # print("h: ", h)
-            csi += h * AoA * np.transpose(AoD)
+            csi += h.dot(AoA.dot(np.transpose(AoD)))
         csi /= np.sqrt(beta * self.config.pathNumber)
         return csi
 
@@ -81,6 +81,7 @@ def plotPDF(data):
 
 
 if __name__ == "__main__":
+    """[test] pdf of channel"""
     mSector = Sector(0, 0, [0., 0., 100.])
     mUE = UE(0, 0, [100., 0., 10.])
     channels = []

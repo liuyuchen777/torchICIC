@@ -32,13 +32,14 @@ class Config:
         self.cellNumber = 7
         self.Rmin = 40.
         self.Rmax = 100.
+        self.interferencePenaltyAlpha = 0.2
 
         # memory pool
         self.mpMaxSize = 10000
         self.batchSize = 1000
 
         # deep learning hyper-parameter
-        self.totalTimeSlot = 1000
+        self.totalTimeSlot = 500
 
     def _calPowerList_(self):
         powerGap = self.maxPower * 2 / (self.powerLevel - 1)

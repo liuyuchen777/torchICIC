@@ -35,10 +35,14 @@
 ## TODO
 
 - [x] General Utils
-- [x] Wireless Communication Environment
+- [x] Rayleigh Channel
+- [x] Reward Function Basic
+- [x] Interference Penalty in Reward Function
 - [x] Skip Sector
-- [ ] DQN RL decision maker
 - [x] Rename functions and variables
+- [x] Build State
+- [ ] DQN
+- [ ] Decision Maker
 
 ## Research Memo
 
@@ -53,27 +57,47 @@ pytorch正则化已处理
 论文:
 
 1) 不加入enhanced data
+```
 K^2*|F| = 9 * 8
+```
 2) 加入enhanced data
+```
 K^2*|F|^2 = 9 * 64
 代码中:
 17600 * 80
 why 80?
+```
 
 2021.4.23
+
 NN出来结果非常不理想，基本跟乱猜一样
 
 2021.4.24
+
 之前用的网络只有一个隐藏层，现在尝试4个隐藏层
+
 开始训练时候的cross entropy非常大
+
 蒋学长代码中的power_loss一开始是1.多，beam_loss是2.多，和我的差得有点远
+
 明明是一个公式算出来的
+
 可能原因1：网络参数初始化，蒋学长w初始化为uniform，b初始化0
+
 可能原因2：正则化，我用的是Adam优化器自带的正则化选项
 
 2021.4.27
+
 problem fixed
 
 2021.10.6
+
 重启研究，目前无线通信环境配置部分已经完成
+
 开始强化学习部分的配置
+
+2021.10.11
+
+buildState部分的代码仍然有问题，需要重新把复数展开成Amplitude & Phase或者Real & Image
+
+Reward Function没有加Interference Penalty

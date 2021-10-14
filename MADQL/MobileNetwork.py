@@ -1,28 +1,14 @@
-from Config import Config
-from utils import Algorithm, setLogger
+import json
+import logging
+
 import matplotlib.pyplot as plt
 import numpy as np
+
 from CoordinationUnit import CU
-from MemoryPool import MemoryPool
 from DecisionMaker import MaxPower, MADQL, Random, FP, WMMSE
 from Environment import Environment
-import logging
-import json
-
-
-def setDecisionMaker(algorithm):
-    if algorithm == Algorithm.RANDOM:
-        return Random()
-    elif algorithm == Algorithm.MAX_POWER:
-        return MaxPower()
-    elif algorithm == Algorithm.FP:
-        return FP()
-    elif algorithm == Algorithm.WMMSE:
-        return WMMSE()
-    elif algorithm == Algorithm.MADQL:
-        return MADQL()
-    else:
-        exit(1)
+from MemoryPool import MemoryPool
+from utils import *
 
 
 class MobileNetwork:
@@ -33,7 +19,7 @@ class MobileNetwork:
         self._generateCUs_()
         self.mp = MemoryPool()
         self.algorithm = algorithm
-        self.dm = setDecisionMaker(algorithm)
+        self.dm = self.setDecisionMaker(algorithm)
         """generate mobile network"""
         self.env = Environment(self.CUs)
         self.rewardRecord = []
@@ -46,10 +32,25 @@ class MobileNetwork:
         # the first CU
         self.CUs.append(CU(0, [0., 0.]))
         for i in range(1, CUNumber):
-            theta = np.pi/6 + (i-1)*np.pi/3
+            theta = np.pi / 6 + (i - 1) * np.pi / 3
             posX = R * np.cos(theta)
             posY = R * np.sin(theta)
             self.CUs.append(CU(i, [posX, posY]))
+
+    def setDecisionMaker(self, algorithm):
+        if algorithm == Algorithm.RANDOM:
+            return Random()
+        elif algorithm == Algorithm.MAX_POWER:
+            return MaxPower()
+        elif algorithm == Algorithm.FP:
+            return FP()
+        elif algorithm == Algorithm.WMMSE:
+            return WMMSE()
+        elif algorithm == Algorithm.MADQL:
+            return MADQL()
+        else:
+            self.logger.error("!!!Wrong Algorithm ID!!!")
+            exit(1)
 
     def printCUPosition(self):
         for i in range(len(self.CUs)):
@@ -70,29 +71,67 @@ class MobileNetwork:
             cu.plotCU(plt=plt)
         plt.show()
 
-    def buildState(self, CUIndex):
+    def buildStateAP(self, CUIndex):
         """
-        [CORE]
-        build state for DQN input
-        two ways: intra-cell + inter-cell
-        intra-cell -> 4 * 4 (MIMO CSI) * 3 * 3 -> 12 * 12 = 144 CSI map
-        inter-cell -> center CU (12 neighbor sector), edge CU (6 neighbor sector) -> 4 * 1 * 12/6
-        p_t-1 * f_t-1 * H_t -> 4 * 1
+        build state for DQN input (Amplitude & Phase)
+        two parts: intra-cell + inter-cell
+        intra-cell -> 4 * 4 (MIMO CSI) * 2 (complex -> double) * 3 * 3 -> 12 * 24 = 288 CSI map
+        single inter-cell item -> p_t-1 * f_t-1 * H_t -> 4 * 1 * 2
+        inter-cell -> center CU (12 neighbor sector), edge CU (6 neighbor sector)
+                   -> 4 * 1 * 2 (complex -> double) * 18 * 3 * 3
+                   -> 63 * 8
         """
-        # NOTE:
-        print("[build_state] Under Construct")
+
+    def buildStateRI(self, CUIndex):
+        """
+        build state for DQN input (Real & Image)
+        two parts: intra-cell + inter-cell
+        intra-cell -> 4 * 4 (MIMO CSI) * 2 (complex -> double) * 3 * 3 -> 12 * 24 = 288 CSI map
+        single inter-cell item -> p_t-1 * f_t-1 * H_t -> 4 * 1 * 2
+        inter-cell -> center CU (12 neighbor sector), edge CU (6 neighbor sector)
+                   -> 4 * 1 * 2 (complex -> double) * 18 * 3 * 3
+                   -> 63 * 8
+        """
         # 1 CU, 1 record
         state = []
         # 1. build state
         # 1.1. Intra-CU
-        intraState = np.zeros(shape=[self.config.BSAntenna*3, self.config.UTAntenna*3], dtype=complex)
+        intraState = np.zeros(shape=[self.config.BSAntenna * 3, self.config.UTAntenna * 3 * 2], dtype=float)
         for sectorIndex in range(3):
-            for UEIndex in range(3):
-                index = [CUIndex, sectorIndex, CUIndex, UEIndex]
-
+            for otherSectorIndex in range(3):
+                index = [CUIndex, sectorIndex, CUIndex, otherSectorIndex]
+                channel = self.env.getChannel(index2str(index))
+                CSI = channel.getCSI()
+                real = np.real(CSI)
+                image = np.imag(CSI)
+                # put real part in
+                intraState[sectorIndex * self.config.BSAntenna:(sectorIndex + 1) * self.config.BSAntenna,
+                otherSectorIndex * 2 * self.config.UTAntenna:(otherSectorIndex * 2 + 1) * self.config.UTAntenna] = real
+                # put image part in
+                intraState[sectorIndex * self.config.BSAntenna:(sectorIndex + 1) * self.config.BSAntenna,
+                (otherSectorIndex * 2 + 1) * self.config.UTAntenna:(otherSectorIndex * 2 + 2) * self.config.UTAntenna] = image
         # 1.2. intra
-
-        # 2. return
+        interState = np.zeros(shape=[3 * 3 * self.config.cellNumber, self.config.UTAntenna * 2], dtype=float)
+        for otherCUIndex in neighborTable[CUIndex]:
+            decisionIndexHistory = self.CUs[otherCUIndex].getDecisionIndexHistory()
+            for otherSectorIndex in range(3):
+                for sectorIndex in range(3):
+                    index = [CUIndex, sectorIndex, otherCUIndex, otherSectorIndex]
+                    if judgeSkip(index):
+                        continue
+                    else:
+                        channel = self.env.getChannel(index2str(index))
+                        CSI = channel.getCSI()  # H_t
+                        beamformer = self.config.beamformList[decisionIndexHistory[sectorIndex][0]]
+                        power = self.config.powerList[decisionIndexHistory[sectorIndex][1]]
+                        tmp = dBm2num(power) * beamformer.dot(CSI)
+                        item = np.zeros(shape=[1, self.config.UTAntenna * 2], dtype=float)
+                        item[0, 0:self.config.UTAntenna] = np.real(tmp)
+                        item[0, self.config.UTAntenna:] = np.imag(tmp)
+                        interState[sectorIndex * (3 * self.config.cellNumber) + otherCUIndex * 3 + otherSectorIndex, :] = item
+        # 2. build state & return
+        state.append(intraState)
+        state.append(interState)
         return state
 
     def getRewardRecord(self):
@@ -110,7 +149,8 @@ class MobileNetwork:
             self.rewardRecord.append(tsReward)
             self.averageRewardRecord.append(tsAverageReward)
             # print
-            self.logger.info(f'[Train] mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}.')
+            self.logger.info(
+                f'[Train] mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}.')
 
     def test(self):
         """evaluate network"""
@@ -121,11 +161,12 @@ class MobileNetwork:
             self.rewardRecord.append(tsReward)
             self.averageRewardRecord.append(tsAverageReward)
             # print
-            self.logger.info(f'[Test] mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}.')
+            self.logger.info(
+                f'[Test] mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}.')
 
     def eval(self):
         if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAX_POWER:
-            self.step()
+            return self.step()
         elif self.algorithm == Algorithm.MADQL:
             # MADQL eval
             print("[eval] Under Construct")
@@ -133,7 +174,10 @@ class MobileNetwork:
             # dm.eval
 
     def step(self):
-        """one step in training"""
+        """
+        one step in training
+        record: <s, a, r, s'>
+        """
         if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAX_POWER:
             for cu in self.CUs:
                 # take action
@@ -146,20 +190,41 @@ class MobileNetwork:
             # return
             return tsReward, tsAverageReward
         elif self.algorithm == Algorithm.MADQL:
-            # MADQL
-            print("[step] Under Construct")
+            stateRecord = []
+            actionRecord = []
             for CUIndex in range(self.config.cellNumber):
                 # build state
-                state = self.buildState(CUIndex)
+                state = self.buildStateRI(CUIndex)
+                stateRecord.append(state)
+                # take action
                 self.CUs[CUIndex].setDecisionIndex(self.dm.takeAction(state))
-                # build record
-                record = []
-                # save in memory pool
+                action = 0
+                decisionIndex = self.CUs[CUIndex].getDecisionIndex()
+                decisionIndexHistory = self.CUs[CUIndex].getDecisionIndexHistory()
+                for i in range(3):
+                    if decisionIndex[i][0] != decisionIndexHistory[i][0]:
+                        action += 1 << (i * 2)
+                    if decisionIndex[i][1] != decisionIndexHistory[i][1]:
+                        action += 1 << (i * 2 + 1)
+                actionRecord.append(action)
+            # calculate reward
+            tsReward = self.env.calReward()
+            tsAverageReward = sum(tsReward) / len(tsReward)
+            # update env
+            self.env.step()
+            # next state
+            nextStateRecord = []
+            for CUIndex in range(self.config.cellNumber):
+                # build state & take action
+                state = self.buildStateRI(CUIndex)
+                nextStateRecord.append(state)
+            # save in memory pool
+            for CUIndex in range(self.config.cellNumber):
+                record = [stateRecord[CUIndex], actionRecord[CUIndex], tsReward[CUIndex], nextStateRecord[CUIndex]]
                 self.mp.push(record)
-            # if > x times, backprop DQN
-
-            # eval
-            self.eval()
+            # if > x times, back prop DQN
+            # return
+            return tsReward, tsAverageReward
 
     def saveRewards(self, name="default"):
         """save rewards record to json file"""
@@ -198,11 +263,15 @@ def showReward(mn1, mn2):
 
 if __name__ == "__main__":
     setLogger()
+    """[test] network structure"""
+    # mn = MobileNetwork()
+    # mn.plotMobileNetwork()
+    """[test] reward in random and max power"""
     mn1 = MobileNetwork(Algorithm.RANDOM)
     mn2 = MobileNetwork(Algorithm.MAX_POWER)
-    """network structure"""
-    # mn.plot_mobile_network()
-    """print reward distribution"""
     showReward(mn1, mn2)
     mn1.saveRewards("default-random")
     mn2.saveRewards("default-max-power")
+    """[test] build state and build record"""
+    # mn = MobileNetwork(Algorithm.MADQL)
+    # mn.train()

@@ -31,8 +31,12 @@ class Environment:
                         channel = Channel(sector, ue)
                         self.channels[index2str(channel.index)] = channel
 
-    def getChannel(self):
+    def getChannels(self):
         return self.channels
+
+    def getChannel(self, index):
+        """index should be string"""
+        return self.channels[index]
 
     def printChannel(self):
         for (k, v) in self.channels.items():
@@ -65,33 +69,52 @@ class Environment:
                 # 2.2 intra-CU interference
                 for otherSector in cu.sectors:
                     if sector.index != otherSector.index:
-                        w_j_k = self.config.beamformList[actionIndex[otherSector.index][0]]
+                        beamformer = self.config.beamformList[actionIndex[otherSector.index][0]]
                         # same cu channel
                         scChannel = self.channels[index2str([cu.index, otherSector.index, cu.index, sector.index])] \
                             .getCSI()
                         bottom += dBm2num(self.config.powerList[actionIndex[otherSector.index][1]]) \
-                            * np.linalg.norm(np.matmul(np.matmul(np.matmul(np.transpose(w_j_k),
-                            np.transpose(scChannel)), scChannel), w_j_k)) ** 2
+                            * np.linalg.norm(np.matmul(np.matmul(np.matmul(np.transpose(beamformer),
+                            np.transpose(scChannel)), scChannel), beamformer)) ** 2
                 # 2.3 inter-CU interference
-                neighbor = neighborTable[cu.index]
-                for otherCUIndex in neighbor:
+                for otherCUIndex in neighborTable[cu.index]:
                     otherCU = self.CUs[otherCUIndex]
+                    otherActionIndex = otherCU.getDecisionIndex()
                     for otherCUSector in otherCU.sectors:
                         index = [cu.index, sector.index, otherCU.index, otherCUSector.index]
                         if judgeSkip(index):
                             # if inter-CU sector can't interfere current sector, skip!
                             continue
-                        w_j_l = self.config.beamformList[actionIndex[otherCUSector.index][0]]
+                        beamformer = self.config.beamformList[otherActionIndex[otherCUSector.index][0]]
                         ocsChannel = self.channels[index2str(index)].getCSI()
-                        bottom += dBm2num(self.config.powerList[actionIndex[otherCUSector.index][1]]) * \
-                                  np.linalg.norm(np.matmul(np.matmul(np.matmul(np.transpose(w_j_l),
-                            np.transpose(ocsChannel)), ocsChannel), w_j_l)) ** 2
+                        bottom += dBm2num(self.config.powerList[otherActionIndex[otherCUSector.index][1]]) * \
+                            np.linalg.norm(np.matmul(np.matmul(np.matmul(np.transpose(beamformer),
+                            np.transpose(ocsChannel)), ocsChannel), beamformer)) ** 2
                 # 3. use SINR calculate capacity
                 SINR = up / bottom
                 cap = np.log2(1 + SINR)
                 r += cap
             # 4. calculate average reward in CU
             r /= 3
+            # 5. multiply interference penalty
+            # 5.1 calculate
+            interferencePenalty = 0.
+            for sector in range(3):
+                for otherCUIndex in neighborTable[cu.index]:
+                    for otherSector in range(3):
+                        index = [otherCUIndex, otherSector, cu.index, sector]
+                        if judgeSkip(index):
+                            continue
+                        else:
+                            # 4.1 get channel from channel dict
+                            power = self.config.powerList[actionIndex[sector][1]]
+                            beamformer = self.config.beamformList[actionIndex[sector][0]]
+                            channel = self.channels[index2str(index)].getCSI()
+                            interferencePenalty += dBm2num(power) * \
+                                np.linalg.norm(np.matmul(np.matmul(np.matmul(np.transpose(beamformer),
+                                np.transpose(channel)), channel), beamformer))
+            # 5.2 multiply
+            r = r * (1 - self.config.interferencePenaltyAlpha * interferencePenalty)
             reward.append(r)
 
         return reward

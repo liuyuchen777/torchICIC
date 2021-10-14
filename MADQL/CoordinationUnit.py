@@ -9,6 +9,14 @@ import matplotlib.pyplot as plt
 
 class CU:
     def __init__(self, index, pos):
+        """
+        decisionIndex = [
+            [f_0, p_0],
+            [f_1, p_1],
+            [f_2, p_2]
+        ]
+        3 * 2
+        """
         np.random.seed(seed=None)
         self.index = index
         self.pos = pos  # [x, y]
