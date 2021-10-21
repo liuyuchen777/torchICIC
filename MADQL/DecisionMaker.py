@@ -56,7 +56,6 @@ class MADQL:
         self.optimizer = torch.optim.Adam(self.trainDQN.parameters(), lr=self.config.learningRate,
                                           weight_decay=self.config.regBeta)
         self.loss = nn.MSELoss()
-        self.bn = nn.BatchNorm2d(num_features=1, eps=0, affine=False)
         self.count = 0
 
     def takeActionRandom(self):
@@ -83,8 +82,8 @@ class MADQL:
             # greedy
             action = []
             with torch.no_grad():
-                flow1 = self.bn(torch.unsqueeze(torch.unsqueeze(torch.tensor(state[0], dtype=torch.float32), 0), 0))
-                flow2 = self.bn(torch.unsqueeze(torch.unsqueeze(torch.tensor(state[1], dtype=torch.float32), 0), 0))
+                flow1 = torch.unsqueeze(torch.unsqueeze(torch.tensor(state[0], dtype=torch.float32), 0), 0)
+                flow2 = torch.unsqueeze(torch.unsqueeze(torch.tensor(state[1], dtype=torch.float32), 0), 0)
                 predict = self.targetDQN.forward(flow1, flow2)
             index = torch.argmax(predict).item()
             for i in range(3):
@@ -98,20 +97,20 @@ class MADQL:
                     else:
                         powerIndex = previous[i][1] - 1
                     if powerIndex < 0:
-                        powerIndex = 0
+                        powerIndex = 1
                     if powerIndex >= self.config.powerLevel:
-                        powerIndex = self.config.powerLevel - 1
+                        powerIndex = self.config.powerLevel - 2
                 else:
                     powerIndex = previous[i][1]
                 if beamformer:
-                    if np.random.rand() < self.config.keepAlpha:
+                    if np.random.rand() > self.config.keepAlpha:
                         beamformerIndex = previous[i][0] + 1
                     else:
                         beamformerIndex = previous[i][0] - 1
                     if beamformerIndex < 0:
-                        beamformerIndex = 0
+                        beamformerIndex = 1
                     if beamformerIndex >= self.config.codebookSize:
-                        beamformerIndex = self.config.codebookSize - 1
+                        beamformerIndex = self.config.codebookSize - 2
                 else:
                     beamformerIndex = previous[i][0]
                 action.append([beamformerIndex, powerIndex])
@@ -123,13 +122,13 @@ class MADQL:
         """
         self.count += 1
         # train network
-        flow1 = self.bn(torch.unsqueeze(torch.tensor([item[0][0] for item in recordBatch], dtype=torch.float32), 1))
-        flow2 = self.bn(torch.unsqueeze(torch.tensor([item[0][1] for item in recordBatch], dtype=torch.float32), 1))
+        flow1 = torch.unsqueeze(torch.tensor([item[0][0] for item in recordBatch], dtype=torch.float32), 1)
+        flow2 = torch.unsqueeze(torch.tensor([item[0][1] for item in recordBatch], dtype=torch.float32), 1)
         predictTrain = self.trainDQN.forward(flow1, flow2)
         with torch.no_grad():
             # target network
-            flowNext1 = self.bn(torch.unsqueeze(torch.tensor([item[3][0] for item in recordBatch], dtype=torch.float32), 1))
-            flowNext2 = self.bn(torch.unsqueeze(torch.tensor([item[3][1] for item in recordBatch], dtype=torch.float32), 1))
+            flowNext1 = torch.unsqueeze(torch.tensor([item[3][0] for item in recordBatch], dtype=torch.float32), 1)
+            flowNext2 = torch.unsqueeze(torch.tensor([item[3][1] for item in recordBatch], dtype=torch.float32), 1)
             predictTarget = self.targetDQN.forward(flowNext1, flowNext2)
             # revise reward
             rewardMax = torch.amax(predictTarget, dim=1)
@@ -139,7 +138,7 @@ class MADQL:
             for i in range(self.config.batchSize):
                 predictTarget[i][action[i]] = rewardRevise[i]
         # calculate loss
-        myLoss = self.loss(predictTrain, predictTarget)
+        myLoss = self.loss(predictTarget, predictTrain)
         myLoss.backward()
         self.optimizer.step()
         self.optimizer.zero_grad()
@@ -147,5 +146,6 @@ class MADQL:
         if self.count > self.config.tStep:
             self.count = 0
             self.targetDQN = copy.deepcopy(self.trainDQN)
+            self.logger.info("DQN Parameter Updates!")
         # return loss to time slot
         return myLoss

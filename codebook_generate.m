@@ -1,7 +1,7 @@
 close all; clear;
 set(0,'defaultfigurecolor','w');
 %--------------------------Codebook Design--------------------------------%
-M = 3; % number of antennas 
+M = 4; % number of antennas 
 K = 4; % codebook size
 N = 16; % number of phases
 W = zeros(M, K);

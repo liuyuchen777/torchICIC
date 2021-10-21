@@ -107,7 +107,7 @@ def judgeSkip(index):
     [receiver, sender]
     """
     # index = [cu.index, sector.index, otherCU.index, otherCUSector.index]
-    if skipTable[index[0]][index[2]] == index[3]:
+    if skipTable[index[2]][index[0]] == index[1]:
         return True
     else:
         return False

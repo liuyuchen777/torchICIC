@@ -17,7 +17,7 @@ class Config:
 
         # beamforming vector list
         self.codebookSize = 4
-        self.beamformList = np.zeros(shape=[self.BSAntenna, self.codebookSize], dtype=np.cdouble)
+        self.beamformList = np.zeros(shape=[self.codebookSize, self.BSAntenna], dtype=np.cdouble)
         self._calCodeList_()
 
         # wireless channel
@@ -39,13 +39,13 @@ class Config:
         self.batchSize = 200
 
         # deep learning hyper-parameter
-        self.totalTimeSlot = 100000
+        self.totalTimeSlot = 500
         self.learningRate = 0.01
         self.regBeta = 0.
-        self.tStep = 50
+        self.tStep = 100
         self.gamma = 0.15
-        self.epsilon = 0.5
-        self.keepAlpha = 0.5
+        self.epsilon = 0.3
+        self.keepAlpha = 0.3
         self.evalTimes = 10
 
     def _calPowerList_(self):
@@ -57,12 +57,12 @@ class Config:
 
     def _calCodeList_(self):
         # need to generate three sector of code matrix
-        S = 16
-        N = self.BSAntenna
-        Q = self.codebookSize
-        for n in range(N):
-            for q in range(Q):
-                self.beamformList[q][n] = np.exp(1j * 2 * np.pi / S * (n * ((q + Q / 2) % Q) / (Q / S))) / np.sqrt(N)
+        N = 16  # number of phases
+        M = self.BSAntenna      # number of Antenna
+        K = self.codebookSize   # codebook size
+        for m in range(1, M+1):
+            for k in range(1, K+1):
+                self.beamformList[k-1][m-1] = np.exp(2j * np.pi / N * int(m * (k + K / 2) % K / (K/N))) / np.sqrt(M)
 
 
 if __name__ == "__main__":

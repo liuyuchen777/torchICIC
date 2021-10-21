@@ -106,3 +106,7 @@ Reward Function没有加Interference Penalty
 代码主题部分写完了，但是有大bug。网络训练之后，出来的决策和随机的吗没有任何区别！！！
 
 网络输出的Q值太小了
+
+现在发现了channel有bug，明天调试
+
+明天计划重新复习强化学习

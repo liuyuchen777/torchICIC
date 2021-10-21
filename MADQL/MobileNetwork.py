@@ -134,7 +134,8 @@ class MobileNetwork:
                         item = np.zeros(shape=[1, self.config.UTAntenna * 2], dtype=float)
                         item[0, 0:self.config.UTAntenna] = np.real(tmp)
                         item[0, self.config.UTAntenna:] = np.imag(tmp)
-                        interState[sectorIndex * (3 * self.config.cellNumber) + otherCUIndex * 3 + otherSectorIndex, :] = item
+                        interState[sectorIndex * (3 * self.config.cellNumber)
+                                   + otherCUIndex * 3 + otherSectorIndex, :] = item
         # 2. build state & return
         state.append(intraState)
         state.append(interState)
@@ -292,11 +293,11 @@ if __name__ == "__main__":
     # mn = MobileNetwork()
     # mn.plotMobileNetwork()
     """[test] reward in random and max power"""
-    # mn1 = MobileNetwork(Algorithm.RANDOM)
-    # mn2 = MobileNetwork(Algorithm.MAX_POWER)
-    # showReward(mn1, mn2)
-    # mn1.saveRewards("default-random")
-    # mn2.saveRewards("default-max-power")
+    mn1 = MobileNetwork(Algorithm.RANDOM)
+    mn2 = MobileNetwork(Algorithm.MAX_POWER)
+    showReward(mn1, mn2)
+    mn1.saveRewards("default-random")
+    mn2.saveRewards("default-max-power")
     """[test] build state and build record"""
-    mn = MobileNetwork(Algorithm.MADQL)
-    mn.train()
+    # mn = MobileNetwork(Algorithm.MADQL)
+    # mn.train()
