@@ -74,6 +74,9 @@ class MobileNetwork:
     def plotMobileNetwork(self):
         for cu in self.CUs:
             cu.plotCU(plt=plt)
+        plt.xlabel(r'$d_x$/m')
+        plt.ylabel(r'$d_y$/m')
+        plt.title("System Model of MIMO Cellular Network")
         plt.show()
 
     def buildStateAP(self, CUIndex):
@@ -290,14 +293,14 @@ def showReward(mn1, mn2):
 if __name__ == "__main__":
     setLogger()
     """[test] network structure"""
-    # mn = MobileNetwork()
-    # mn.plotMobileNetwork()
-    """[test] reward in random and max power"""
-    mn1 = MobileNetwork(Algorithm.RANDOM)
-    mn2 = MobileNetwork(Algorithm.MAX_POWER)
-    showReward(mn1, mn2)
-    mn1.saveRewards("default-random")
-    mn2.saveRewards("default-max-power")
+    mn = MobileNetwork()
+    mn.plotMobileNetwork()
+    # """[test] reward in random and max power"""
+    # mn1 = MobileNetwork(Algorithm.RANDOM)
+    # mn2 = MobileNetwork(Algorithm.MAX_POWER)
+    # showReward(mn1, mn2)
+    # mn1.saveRewards("default-random")
+    # mn2.saveRewards("default-max-power")
     """[test] build state and build record"""
     # mn = MobileNetwork(Algorithm.MADQL)
     # mn.train()
