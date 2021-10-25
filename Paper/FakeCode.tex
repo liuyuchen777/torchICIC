@@ -1,0 +1,39 @@
+\documentclass{article}
+
+\usepackage[top=2cm, bottom=2cm, left=3cm, right=3cm]{geometry}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{amsmath}
+
+\begin{document}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}  % Use Input in the format of Algorithm
+\renewcommand{\algorithmicensure}{\textbf{Output:}} % Use Output in the format of Algorithm
+\begin{algorithm}[h]
+	\caption{Pseudeocode of the Proposed Method} 
+	% title of algorithm
+	\label{alg}
+	\begin{algorithmic}[1]
+		\State Establish a pair of DQNs (a trained DQN with weights 
+		$\theta$ and a target DQN with weights $\bm{\theta}^-$) and an empty
+		experience pool $M$ for all CUs;
+		\State Initialize the trained DQN wih random weights; set $\bm{\theta}^-=\bm{\theta}$;
+		\State In time slot $t(M \leq M_b)$, CU takes action randomly and stores 
+		the corresponding experience $\langle s, a, r, s' \rangle$ in its experience pool.
+		\Repeat
+		\State CU $k$ observe its state $s_k$ in time slot $t$, $\forall k \in K$;
+		\State In time slot $t(t>M_b)$ CU $k$ chooses an action $a_k$ according to $\epsilon$-greedy 
+		policy; agnet $k$ chooses an action $a_k=\arg\max_{a \in A}q(s_k, a; \bm{\theta}_k)$ with probability
+		$(1-\epsilon)$, or randomly chooses an action $a_k \in A$ with probability $\epsilon$, $\forall k \in K$;
+		\State CU $k$ executes the chosen action $a_k$, then gets an immediate reward $r_k=R(s_k, a_k)$, $\forall k \in K$;
+		\State CU $k$ observes a new state $s'_k$ in time slot $t+1$, $\forall k \in K$;
+		\State CU $k$ saves its new experience $\langle s_k, a_k, r_k, s_k' \rangle$ into experience pool;
+		\State Samples a mini-batch consisting of $M_b$ experiences from experience pool $M$;
+		\State Updates the weights $\bm{\theta}$ of trained DQN according to BP base on difference between reward 
+		in experience pool and output Q-value of target DQN;
+		\State Updates $\bm{\theta}^-$ with $\bm{\theta}$ every $T_{step}$ time slots;
+		\Until{$R(t)-R(t-1)<\gamma$}
+	\end{algorithmic}
+\end{algorithm}
+\end{document}
