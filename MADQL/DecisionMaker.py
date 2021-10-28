@@ -47,6 +47,11 @@ class MaxPower:
         return action
 
 
+class CellES:
+    def __init__(self):
+        self.logger = logging.getLogger()
+
+
 class MADQL:
     def __init__(self):
         self.logger = logging.getLogger()

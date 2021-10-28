@@ -33,7 +33,7 @@ class MobileNetwork:
     def _generateCUs_(self):
         # max support 7 cells
         CUNumber = self.config.cellNumber
-        R = self.config.cellLength * np.sqrt(3)
+        R = self.config.cellSize * np.sqrt(3)
         # the first CU
         self.CUs.append(CU(0, [0., 0.]))
         for i in range(1, CUNumber):

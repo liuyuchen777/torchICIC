@@ -1,6 +1,6 @@
 import logging
 from Config import Config
-from utils import dB2num, setLogger
+from utils import dB2num, setLogger, num2dB
 import numpy as np
 from Sector import Sector
 from UserEquipment import UE
@@ -26,16 +26,19 @@ class Channel:
         self.CSIHistory = self.CSI     # csi in last time slot
 
     def _calDistance_(self):
-        dis = (self.sector.pos[0] - self.ue.pos[0]) ** 2 \
-              + (self.sector.pos[1] - self.ue.pos[1]) ** 2 \
-              + (self.sector.pos[2] - self.ue.pos[2]) ** 2
+        dis = np.power(self.sector.pos[0] - self.ue.pos[0], 2) \
+              + np.power(self.sector.pos[1] - self.ue.pos[1], 2) \
+              + np.power(self.sector.pos[2] - self.ue.pos[2], 2)
 
         return np.sqrt(dis)
 
     def _calCSI_(self):
-        index = self.index[1]
+        index = self.index[1]   # sector index decide AoD
+        distance = self.distance
         # large-scale fading
-        beta = dB2num(120.9 + 37.6 * np.log10(self.distance / 1000) + np.random.normal(0, self.config.logNormalSigma))
+        largeScale = np.power(1000. / distance, self.config.alpha)
+        shadowing = np.random.lognormal(mean=0., sigma=self.config.logNormalSigma)
+        beta = largeScale * shadowing
         # empty csi
         csi = np.zeros(shape=[self.config.UTAntenna, self.config.BSAntenna], dtype=complex)
         for _ in range(self.config.pathNumber):
@@ -49,14 +52,16 @@ class Channel:
             index 1 -> [120, 240)
             index 2 -> [240, 360)
             """
-            theta_s = (np.random.rand() * 120 + 120 * index) / 360 * 2 * np.pi
+            thetaSend = (np.random.rand() * 120 + 120 * index) / 360 * 2 * np.pi
             for n in range(self.config.BSAntenna):
-                AoD[n][0] = np.exp(-np.pi*self.distance*np.sin(theta_s)*1j*n)
-            theta_r = np.random.rand() * 2 * np.pi      # receive angle could be [0, 2pi)
+                AoD[n][0] = np.exp(-np.pi*self.distance*np.sin(thetaSend)*1j*n)
+            thetaReceive = np.random.rand() * 2 * np.pi      # receive angle could be [0, 2pi)
             for m in range(self.config.UTAntenna):
-                AoA[m][0] = np.exp(-np.pi*self.distance*np.sin(theta_r)*1j*m)
+                AoA[m][0] = np.exp(-np.pi*self.distance*np.sin(thetaReceive)*1j*m)
             # complex Gaussian random variable
-            h = np.random.normal(loc=0., scale=dB2num(self.config.gaussianSigma), size=(1, 2)).view(dtype=complex)
+            hReal = dB2num(np.random.normal(0., self.config.gaussianSigma))
+            hImage = dB2num(np.random.normal(0., self.config.gaussianSigma))
+            h = hReal + 1j * hImage
             # print("h: \n", h)
             # print("AoD: \n", AoD)
             # print("AoA: \n", AoA)
@@ -80,7 +85,7 @@ def plotPDF(data):
     # this create the kernel, given an array it will estimate the probability over that values
     kde = gaussian_kde(data)
     # these are the values over which your kernel will be evaluated
-    distSpace = linspace(min(data), max(data), 1000)
+    distSpace = linspace(min(data), max(data), 10000)
     # plot the results
     plt.plot(distSpace, kde(distSpace))
     plt.show()
@@ -95,7 +100,7 @@ if __name__ == "__main__":
     # print(channel.getCSI())
     """[test] pdf of channel"""
     mSector = Sector(0, 0, [0., 0., 10.])
-    mUE = UE(0, 0, [50., 50., 1.5])
+    mUE = UE(0, 0, [30., 30., 1.5])
     channel = Channel(sector=mSector, ue=mUE)
     channels = []
     for i in range(10000):

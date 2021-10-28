@@ -32,7 +32,7 @@ class CU:
         self.decisionIndexHistory = self.decisionIndex
 
     def _generateSectors_(self):
-        r = self.config.cellLength
+        r = self.config.cellSize
         h = self.config.BSHeight
         self.sectors.append(Sector(0, self.index, [self.pos[0] - r / 2, self.pos[1] - r / 2 * np.sqrt(3), h]))
         self.sectors.append(Sector(1, self.index, [self.pos[0] + r, self.pos[1], h]))
@@ -79,6 +79,7 @@ class CU:
         sectorsPosY = []
         UEsPosX = []
         UEsPosY = []
+        cellSize = self.config.cellSize
         for i in range(3):
             sectorsPosX.append(self.sectors[i].pos[0])
             sectorsPosY.append(self.sectors[i].pos[1])
@@ -94,13 +95,13 @@ class CU:
         x[1::2] *= 0.5
         y = np.sin(theta)
         y[1::2] *= 0.5
-        plt.plot(x[::2] * 200. + self.pos[0], y[::2] * 200. + self.pos[1], color='r')
+        plt.plot(x[::2] * cellSize + self.pos[0], y[::2] * cellSize + self.pos[1], color='r')
         # print sector line
-        point = np.linspace([-200, 0], [0, 0], 10) + self.pos
+        point = np.linspace([-cellSize, 0], [0, 0], 10) + self.pos
         plt.plot(point[:, 0], point[:, 1], color='k')
-        point = np.linspace([0, 0], [100, 100*np.sqrt(3)], 10) + self.pos
+        point = np.linspace([0, 0], [cellSize / 2, cellSize / 2 * np.sqrt(3)], 10) + self.pos
         plt.plot(point[:, 0], point[:, 1], color='k')
-        point = np.linspace([0, 0], [100, -100 * np.sqrt(3)], 10) + self.pos
+        point = np.linspace([0, 0], [cellSize / 2, - cellSize / 2 * np.sqrt(3)], 10) + self.pos
         plt.plot(point[:, 0], point[:, 1], color='k')
         # show figure
         if local:

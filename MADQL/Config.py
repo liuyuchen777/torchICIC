@@ -10,7 +10,7 @@ class Config:
         self.UTHeight = 1.5
 
         # power level list
-        self.maxPower = 10.
+        self.maxPower = 10.  # dBm
         self.powerLevel = 5
         self.powerList = []
         self._calPowerList_()
@@ -21,17 +21,17 @@ class Config:
         self._calCodeList_()
 
         # wireless channel
-        self.alpha = 4  # path loss exponent
+        self.alpha = 3  # path loss exponent
         self.logNormalSigma = 8   # db
         self.gaussianSigma = 10    # db
         self.noisePower = -100    # Gaussian white noise, dBm
         self.pathNumber = 6    # LOS path number
 
         # cellular network
-        self.cellLength = 200. # m
+        self.cellSize = 100.  # m
         self.cellNumber = 7
-        self.Rmin = 40.
-        self.Rmax = 100.
+        self.Rmin = 15.
+        self.Rmax = 60.
         self.interferencePenaltyAlpha = 0.2
 
         # memory pool

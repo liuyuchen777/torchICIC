@@ -6,17 +6,17 @@ import time
 
 
 def dBm2num(dB):
-    num = 10 ** (dB / 10) / 1000
+    num = np.power(10., dB / 10.) / 1000.
     return num
 
 
 def dB2num(dB):
-    num = 10 ** (dB / 10)
+    num = np.power(10., dB / 10.)
     return num
 
 
 def num2dB(num):
-    dB = 10 * np.log10(num)
+    dB = 10. * np.log10(num)
     return dB
 
 
@@ -51,7 +51,7 @@ def setLogger(file=True, debug=False):
     logging.info(f'START TIME: {time.strftime("%H:%M:%S", time.localtime())}')
     logging.info("-----------------------------------COMMUNICATION------------------------------------")
     logging.info(f'Power Level: {config.powerLevel}, Codebook Size: {config.codebookSize}, '
-                 f'Cell Length: {config.cellLength} m, Cell Number: {config.cellNumber}')
+                 f'Cell Length: {config.cellSize} m, Cell Number: {config.cellNumber}')
     logging.info(f'Path Loss Exponent: {config.alpha}, Log-normal Sigma: {config.logNormalSigma} db, '
                  f'Gaussian Sigma: {config.gaussianSigma} db')
     logging.info("-----------------------------------------DL------------------------------------------")
@@ -78,6 +78,7 @@ class Algorithm(Enum):
     FP = 3
     WMMSE = 4
     MADQL = 5
+    CELL_ES = 6
 
 
 neighborTable = [

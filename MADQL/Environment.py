@@ -103,13 +103,13 @@ class Environment:
             reward.append(r)
         # 5. consider others
         rewardRevised = []
-        for otherCUIndex in range(len(reward)):
+        for CUIndex in range(len(reward)):
             extraReward = 0.
             alpha = self.config.interferencePenaltyAlpha
-            for neighborCU in neighborTable[otherCUIndex]:
+            for neighborCU in neighborTable[CUIndex]:
                 extraReward += reward[neighborCU]
-            extraReward /= len(neighborTable[otherCUIndex])
-            tmpReward = (1 - alpha) * reward[otherCUIndex] + alpha * extraReward
+            extraReward /= len(neighborTable[CUIndex])
+            tmpReward = (1 - alpha) * reward[CUIndex] + alpha * extraReward
             rewardRevised.append(tmpReward)
 
         return rewardRevised
