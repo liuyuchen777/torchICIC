@@ -47,6 +47,12 @@ class Environment:
         for v in self.channels.values():
             v.step()
 
+    def calLocalReward(self):
+        """
+        this reward only consider consider Intra-CU interference
+        """
+        print("----------Under Construct----------")
+
     def calReward(self):
         """
         use action and CSI calculate each CU's reward
@@ -65,10 +71,10 @@ class Environment:
                 index = [cu.index, sector.index, cu.index, sector.index]
                 # direct channel
                 directChannel = self.channels[index2str(index)].getCSI()
-                signalPower = dBm2num(power) * np.linalg.norm(beamformer * directChannel) ** 4
+                signalPower = dBm2num(power) * np.power(np.linalg.norm(beamformer * directChannel), 4)
                 # 2. bottom
                 # 2.1 Gaussian noise
-                noisePower = dBm2num(self.config.noisePower) * np.linalg.norm(beamformer * directChannel) ** 2
+                noisePower = dBm2num(self.config.noisePower) * np.power(np.linalg.norm(beamformer * directChannel), 2)
                 intraCellInterference = 0.
                 # 2.2 intra-CU interference
                 for otherSector in cu.sectors:
@@ -78,8 +84,8 @@ class Environment:
                         index = [cu.index, otherSector.index, cu.index, sector.index]
                         # same cu channel
                         intraChannel = self.channels[index2str(index)].getCSI()
-                        intraCellInterference += dBm2num(power) * np.linalg.norm(np.transpose(beamformer)
-                                            * np.transpose(intraChannel) * intraChannel * beamformer) ** 2
+                        intraCellInterference += dBm2num(power) * np.power(np.linalg.norm(np.transpose(beamformer)
+                                            * np.transpose(intraChannel) * intraChannel * beamformer), 2)
                 # 2.3 inter-CU interference
                 interCellInterference = 0.
                 for otherCUIndex in neighborTable[cu.index]:
@@ -92,8 +98,8 @@ class Environment:
                         beamformer = self.config.beamformList[otherActionIndex[otherCUSector.index][0]]
                         power = self.config.powerList[otherActionIndex[otherCUSector.index][1]]
                         ocsChannel = self.channels[index2str(index)].getCSI()
-                        interCellInterference += dBm2num(power) * np.linalg.norm(np.transpose(beamformer)
-                                            * np.transpose(ocsChannel) * ocsChannel * beamformer) ** 2
+                        interCellInterference += dBm2num(power) * np.power(np.linalg.norm(np.transpose(beamformer)
+                                            * np.transpose(ocsChannel) * ocsChannel * beamformer), 2)
                 # 3. use SINR calculate capacity
                 SINR = signalPower / (noisePower + interCellInterference + intraCellInterference)
                 cap = np.log2(1 + SINR)
@@ -103,9 +109,9 @@ class Environment:
             reward.append(r)
         # 5. consider others
         rewardRevised = []
+        alpha = self.config.interferencePenaltyAlpha
         for CUIndex in range(len(reward)):
             extraReward = 0.
-            alpha = self.config.interferencePenaltyAlpha
             for neighborCU in neighborTable[CUIndex]:
                 extraReward += reward[neighborCU]
             extraReward /= len(neighborTable[CUIndex])

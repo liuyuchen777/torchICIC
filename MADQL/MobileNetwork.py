@@ -93,12 +93,7 @@ class MobileNetwork:
     def buildStateRI(self, CUIndex):
         """
         build state for DQN input (Real & Image)
-        two parts: intra-cell + inter-cell
-        intra-cell -> 4 * 4 (MIMO CSI) * 2 (complex -> double) * 3 * 3 -> 12 * 24 = 288 CSI map
-        single inter-cell item -> p_t-1 * f_t-1 * H_t -> 4 * 1 * 2
-        inter-cell -> center CU (12 neighbor sector), edge CU (6 neighbor sector)
-                   -> 4 * 1 * 2 (complex -> double) * 18 * 3 * 3
-                   -> 63 * 8
+
         """
         # 1 CU, 1 record
         state = []
@@ -150,6 +145,12 @@ class MobileNetwork:
     def getAverageRewardRecord(self):
         return self.averageRewardRecord
 
+    def cleanRewardRecord(self):
+        self.rewardRecord = []
+
+    def cleanAverageRewardRecord(self):
+        self.averageRewardRecord = []
+
     def train(self):
         """train network"""
         for ts in range(self.config.totalTimeSlot):
@@ -187,7 +188,7 @@ class MobileNetwork:
         elif self.algorithm == Algorithm.MADQL:
             totalReward = 0.
             for i in range(times):
-                reward, averageReward = self.step(trainLabel=False)
+                _, averageReward = self.step(trainLabel=False)
                 totalReward += averageReward
             return totalReward / times
 
@@ -277,13 +278,19 @@ def cdf(x, plot=True, *args, **kwargs):
     plt.plot(x, y, *args, **kwargs) if plot else (x, y)
 
 
-def showReward(mn1, mn2):
-    mn1.train()
-    averageRewards1 = mn1.getAverageRewardRecord()
+def showReward(mn):
+    mn.setDecisionMaker(Algorithm.RANDOM)
+    mn.train()
+    averageRewards1 = mn.getAverageRewardRecord()
     cdf(averageRewards1, label="Random")
 
-    mn2.train()
-    averageRewards2 = mn2.getAverageRewardRecord()
+    mn.cleanRewardRecord()
+    mn.cleanAverageRewardRecord()
+
+    mn.algorithm = Algorithm.MAX_POWER
+    mn.dm = mn.setDecisionMaker(mn.algorithm)
+    mn.train()
+    averageRewards2 = mn.getAverageRewardRecord()
     cdf(averageRewards2, label="Max Power")
 
     plt.legend(loc='upper left')
@@ -293,14 +300,11 @@ def showReward(mn1, mn2):
 if __name__ == "__main__":
     setLogger()
     """[test] network structure"""
-    mn = MobileNetwork()
-    mn.plotMobileNetwork()
-    # """[test] reward in random and max power"""
-    # mn1 = MobileNetwork(Algorithm.RANDOM)
-    # mn2 = MobileNetwork(Algorithm.MAX_POWER)
-    # showReward(mn1, mn2)
-    # mn1.saveRewards("default-random")
-    # mn2.saveRewards("default-max-power")
+    # mn = MobileNetwork()
+    # mn.plotMobileNetwork()
+    """[test] reward in random and max power"""
+    # mn = MobileNetwork()
+    # showReward(mn)
     """[test] build state and build record"""
-    # mn = MobileNetwork(Algorithm.MADQL)
-    # mn.train()
+    mn = MobileNetwork(Algorithm.MADQL)
+    mn.train()

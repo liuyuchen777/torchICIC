@@ -6,15 +6,6 @@ from Config import Config
 
 
 class DQN(nn.Module):
-    """
-    input:
-        two-flow
-        flow1 -> 12 * 24
-        flow2 -> 63 * 8
-    output:
-        [2 (keep current power || change to another power) * 2 (keep current beamformer || change to another beamformer)] ^ 3
-        64 * 1
-    """
     def __init__(self):
         super(DQN, self).__init__()
         self.config = Config()

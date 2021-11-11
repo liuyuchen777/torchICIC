@@ -14,6 +14,8 @@ ue_antenna = M
 CSI is M * N matrix
 """
 
+# Rayleigh Channel
+
 
 class Channel:
     def __init__(self, sector, ue):
@@ -22,6 +24,9 @@ class Channel:
         self.ue = ue
         self.index = [sector.CUIndex, sector.index, ue.CUIndex, ue.index]  # (CU of sector, sector, CU of ue, ue)
         self.distance = self._calDistance_()
+        self.shadowing = np.random.normal(0., self.config.ShadowingSigma)
+        self.largeScale = np.power(self.distance / 1000., self.config.alpha)
+        self.beta = dB2num(self.largeScale + self.shadowing)
         self.CSI = self._calCSI_()
         self.CSIHistory = self.CSI     # csi in last time slot
 
@@ -34,11 +39,7 @@ class Channel:
 
     def _calCSI_(self):
         index = self.index[1]   # sector index decide AoD
-        distance = self.distance
         # large-scale fading
-        largeScale = np.power(1000. / distance, self.config.alpha)
-        shadowing = np.random.lognormal(mean=0., sigma=self.config.logNormalSigma)
-        beta = largeScale * shadowing
         # empty csi
         csi = np.zeros(shape=[self.config.UTAntenna, self.config.BSAntenna], dtype=complex)
         for _ in range(self.config.pathNumber):
@@ -54,20 +55,20 @@ class Channel:
             """
             thetaSend = (np.random.rand() * 120 + 120 * index) / 360 * 2 * np.pi
             for n in range(self.config.BSAntenna):
-                AoD[n][0] = np.exp(-np.pi*self.distance*np.sin(thetaSend)*1j*n)
+                AoD[n][0] = np.exp(-np.pi*np.sin(thetaSend)*1j*n)
             thetaReceive = np.random.rand() * 2 * np.pi      # receive angle could be [0, 2pi)
             for m in range(self.config.UTAntenna):
-                AoA[m][0] = np.exp(-np.pi*self.distance*np.sin(thetaReceive)*1j*m)
+                AoA[m][0] = np.exp(-np.pi*np.sin(thetaReceive)*1j*m)
             # complex Gaussian random variable
-            hReal = dB2num(np.random.normal(0., self.config.gaussianSigma))
-            hImage = dB2num(np.random.normal(0., self.config.gaussianSigma))
+            hReal = np.random.normal(0., self.config.gaussianSigma)
+            hImage = np.random.normal(0., self.config.gaussianSigma)
             h = hReal + 1j * hImage
             # print("h: \n", h)
             # print("AoD: \n", AoD)
             # print("AoA: \n", AoA)
             # print("AoA * AoD: \n", AoA * np.transpose(AoD))
             csi += h * AoA * np.transpose(AoD)
-        csi /= np.sqrt(beta)
+        csi /= np.sqrt(self.beta)
         return csi
 
     def step(self):
@@ -85,9 +86,14 @@ def plotPDF(data):
     # this create the kernel, given an array it will estimate the probability over that values
     kde = gaussian_kde(data)
     # these are the values over which your kernel will be evaluated
-    distSpace = linspace(min(data), max(data), 10000)
+    distSpace = linspace(min(data), max(data), 2000)
     # plot the results
     plt.plot(distSpace, kde(distSpace))
+    plt.show()
+
+
+def plotPDF2(data):
+    plt.hist(data, color='blue', edgecolor='black', bins=100)
     plt.show()
 
 
@@ -107,4 +113,9 @@ if __name__ == "__main__":
         norm = np.linalg.norm(channel.getCSI())
         channels.append(norm)
         channel.step()
-    plotPDF(channels)
+    plotPDF2(channels)
+    """[test] pdf function work or not"""
+    # gaussianData = np.random.normal(loc=0., scale=1., size=10000)
+    # plotPDF(gaussianData)
+    # plt.hist(gaussianData, color='blue', edgecolor='black', bins=100)
+    # plt.show()

@@ -22,8 +22,9 @@ class Config:
 
         # wireless channel
         self.alpha = 3  # path loss exponent
-        self.logNormalSigma = 8   # db
-        self.gaussianSigma = 10    # db
+        self.ShadowingSigma = 8   # db
+        self.gaussianSigma = 1
+        # loss, non-loss
         self.noisePower = -100    # Gaussian white noise, dBm
         self.pathNumber = 6    # LOS path number
 
@@ -35,11 +36,11 @@ class Config:
         self.interferencePenaltyAlpha = 0.2
 
         # memory pool
-        self.mpMaxSize = 10000
-        self.batchSize = 200
+        self.mpMaxSize = 1000000
+        self.batchSize = 256
 
         # deep learning hyper-parameter
-        self.totalTimeSlot = 500
+        self.totalTimeSlot = 1000000
         self.learningRate = 0.01
         self.regBeta = 0.
         self.tStep = 100

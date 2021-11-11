@@ -110,3 +110,10 @@ Reward Function没有加Interference Penalty
 现在发现了channel有bug，明天调试
 
 明天计划重新复习强化学习
+
+2021.11.10
+
+时隔一个月重新开始搞研究...
+
+这次终于把信道的东西弄清楚了，现在改用Rayleigh信道，然后shadowing只随机生成一次，之后不发生变动。
+

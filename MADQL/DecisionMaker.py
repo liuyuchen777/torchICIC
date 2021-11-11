@@ -51,6 +51,9 @@ class CellES:
     def __init__(self):
         self.logger = logging.getLogger()
 
+    def takeAction(self):
+        print("----------Under Construct----------")
+
 
 class MADQL:
     def __init__(self):
@@ -62,6 +65,7 @@ class MADQL:
                                           weight_decay=self.config.regBeta)
         self.loss = nn.MSELoss()
         self.count = 0
+        print("PyTorch Version: \n", torch.__version__)
 
     def takeActionRandom(self):
         # random
