@@ -97,7 +97,7 @@ class MobileNetwork:
         """
         # 1 CU, 1 record
         state = []
-        # 1. build state
+        # 1. build st  ate
         # 1.1. Intra-CU
         intraState = np.zeros(shape=[self.config.BSAntenna * 3, self.config.UTAntenna * 3 * 2], dtype=float)
         for sectorIndex in range(3):
