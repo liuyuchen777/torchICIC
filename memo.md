@@ -117,3 +117,11 @@ Reward Function没有加Interference Penalty
 
 这次终于把信道的东西弄清楚了，现在改用Rayleigh信道，然后shadowing只随机生成一次，之后不发生变动。
 
+2021.12.13
+
+有隔了一个月，迫于毕业的压力以及中期发表，不得不重新开始搞研究。今天把two-flow CNN的网络架构换成了
+两个隐藏层的全连接。state也重新修正了，还顺手修好的几个bug。但train的结果还是不work，loss非常小，
+随着训练也有所下降，可是reward根本不上升。现在还没想出来这个是什么原因所导致的bug。
+
+之后的计划是姑且看看将学长和Jiang Ge的代码，找出自己代码不work的原因。中间应该是有一些还没找出来的
+bug。

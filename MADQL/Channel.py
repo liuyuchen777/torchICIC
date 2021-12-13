@@ -14,8 +14,6 @@ ue_antenna = M
 CSI is M * N matrix
 """
 
-# Rayleigh Channel
-
 
 class Channel:
     def __init__(self, sector, ue):
@@ -39,7 +37,6 @@ class Channel:
 
     def _calCSI_(self):
         index = self.index[1]   # sector index decide AoD
-        # large-scale fading
         # empty csi
         csi = np.zeros(shape=[self.config.UTAntenna, self.config.BSAntenna], dtype=complex)
         for _ in range(self.config.pathNumber):

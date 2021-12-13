@@ -108,6 +108,7 @@ class Environment:
             r /= 3
             reward.append(r)
         # 5. consider others
+        # TODO: check reward function
         rewardRevised = []
         alpha = self.config.interferencePenaltyAlpha
         for CUIndex in range(len(reward)):

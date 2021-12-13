@@ -6,6 +6,7 @@ class MemoryPool:
     def __init__(self, maxSize=Config().mpMaxSize):
         self.maxSize = maxSize
         self.pool = []
+        self.size = 0
 
     def push(self, record):
         if self.getSize() >= self.maxSize:
@@ -13,9 +14,10 @@ class MemoryPool:
             self.pool.append(record)
         else:
             self.pool.append(record)
+            self.size += 1
 
     def getSize(self):
-        return len(self.pool)
+        return self.size
 
     def getBatch(self, size=Config().batchSize):
         random.shuffle(self.pool)

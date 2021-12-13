@@ -1,5 +1,3 @@
-import torch
-import torch.nn.functional as F
 import torch.nn as nn
 
 from Config import Config
@@ -10,35 +8,15 @@ class DQN(nn.Module):
         super(DQN, self).__init__()
         self.config = Config()
         # layers
-        # flow1
-        self.F1Conv1 = nn.Conv2d(1, 3, 3)
-        self.F1Pool1 = nn.MaxPool2d(2, 2)
-        self.F1Conv2 = nn.Conv2d(3, 5, 3)
-        self.F1FC1 = nn.Linear(5 * 3 * 9, 80)
-        # flow2
-        self.F2Conv1 = nn.Conv2d(1, 3, 3)
-        self.F2Pool1 = nn.MaxPool2d(2, 2)
-        self.F2Conv2 = nn.Conv2d(3, 5, 3)
-        self.F2FC1 = nn.Linear(5 * 28 * 1, 120)
-        # compose flow1 and flow2
-        self.ComFC1 = nn.Linear(200, 120)
-        self.ComFC2 = nn.Linear(120, 64)
+        self.inputLayer = nn.Linear(self.config.inputLayer, self.config.hiddenLayers[0])
+        self.hiddenLayer1 = nn.Linear(self.config.hiddenLayers[0], self.config.hiddenLayers[1])
+        self.hiddenLayer2 = nn.Linear(self.config.hiddenLayers[1], self.config.hiddenLayers[2])
+        self.outputLayer = nn.Linear(self.config.hiddenLayers[2], self.config.outputLayer)
 
-    def forward(self, flow1, flow2):
+    def forward(self, input):
         # flow1
-        flow1 = F.relu(self.F1Conv1(flow1))
-        flow1 = self.F1Pool1(flow1)
-        flow1 = F.relu(self.F1Conv2(flow1))
-        flow1 = torch.flatten(flow1, 1)
-        flow1 = F.relu(self.F1FC1(flow1))
-        # flow2
-        flow2 = F.relu(self.F2Conv1(flow2))
-        flow2 = self.F2Pool1(flow2)
-        flow2 = F.relu(self.F2Conv2(flow2))
-        flow2 = torch.flatten(flow2, 1)
-        flow2 = F.relu(self.F2FC1(flow2))
-        # compose
-        out = torch.cat((flow1, flow2), 1)
-        out = self.ComFC1(out)
-        out = self.ComFC2(out)
+        out = self.inputLayer(input)
+        out = self.hiddenLayer1(out)
+        out = self.hiddenLayer2(out)
+        out = self.outputLayer(out)
         return out
