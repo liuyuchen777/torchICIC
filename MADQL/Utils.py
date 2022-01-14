@@ -20,12 +20,6 @@ def num2dB(num):
     return dB
 
 
-"""
-Index Composition
-[CU of sector, sector, CU of ue, ue]
-"""
-
-
 def index2str(index):
     return f'{index[0]},{index[1]},{index[2]},{index[3]}'
 

@@ -1,4 +1,4 @@
-from utils import Algorithm, setLogger
+from Utils import Algorithm, setLogger
 from MobileNetwork import MobileNetwork
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 import logging
 from Config import Config
-from utils import dB2num, setLogger, num2dB
+from Utils import dB2num, setLogger, num2dB
 import numpy as np
 from Sector import Sector
 from UserEquipment import UE

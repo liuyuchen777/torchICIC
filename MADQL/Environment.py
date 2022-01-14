@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 from Config import Config
-from utils import index2str, neighborTable, judgeSkip, dBm2num
+from Utils import index2str, neighborTable, judgeSkip, dBm2num
 from Channel import Channel
 
 

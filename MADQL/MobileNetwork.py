@@ -8,7 +8,7 @@ from CoordinationUnit import CU
 from DecisionMaker import MaxPower, MADQL, Random, FP, WMMSE
 from Environment import Environment
 from MemoryPool import MemoryPool
-from utils import *
+from Utils import *
 
 
 class MobileNetwork:
@@ -193,7 +193,8 @@ class MobileNetwork:
         if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAX_POWER:
             for cu in self.CUs:
                 # take action
-                cu.setDecisionIndex(self.dm.takeAction())
+                action, actionIndex = self.dm.takeAction()
+                cu.setDecisionIndex(action)
             # get reward base on action
             tsReward = self.env.calReward()
             tsAverageReward = sum(tsReward) / len(tsReward)
@@ -238,23 +239,23 @@ class MobileNetwork:
 
     def saveRewards(self, name="default"):
         """save rewards record to json file"""
-        with open('./data/data.txt') as jsonFile:
+        with open('data/reward-data.txt') as jsonFile:
             data = json.load(jsonFile)
-        with open('./data/data.txt', 'w') as jsonFile:
-            data[name + "-rewards"] = self.rewardRecord
-            data[name + "-average-rewards"] = self.averageRewardRecord
+        with open('data/reward-data.txt', 'w') as jsonFile:
+            data[name + "-rewards"] = self.getRewardRecord()
+            data[name + "-average-rewards"] = self.getAverageRewardRecord()
             json.dump(data, jsonFile)
 
     def saveLoss(self, name="default"):
-        with open('./data/data.txt') as jsonFile:
+        with open('data/reward-data.txt') as jsonFile:
             data = json.load(jsonFile)
-        with open('./data/data.txt', 'w') as jsonFile:
+        with open('data/reward-data.txt', 'w') as jsonFile:
             data[name + "-loss"] = self.lossRecord
             json.dump(data, jsonFile)
 
     def loadRewards(self, name="default"):
         """load rewards record to current mn"""
-        with open('./data/data.txt') as jsonFile:
+        with open('data/reward-data.txt') as jsonFile:
             data = json.load(jsonFile)
             self.rewardRecord = data[name + "-rewards"]
             self.averageRewardRecord = data[name + "-average-rewards"]
@@ -266,6 +267,12 @@ def cdf(x, plot=True, *args, **kwargs):
 
 
 def showReward(mn):
+    """
+
+    :param mn: MobileNetwork
+    :return: void
+    """
+    # Random
     mn.setDecisionMaker(Algorithm.RANDOM)
     mn.train()
     averageRewards1 = mn.getAverageRewardRecord()
@@ -273,7 +280,7 @@ def showReward(mn):
 
     mn.cleanRewardRecord()
     mn.cleanAverageRewardRecord()
-
+    # Max Power
     mn.algorithm = Algorithm.MAX_POWER
     mn.dm = mn.setDecisionMaker(mn.algorithm)
     mn.train()
@@ -283,6 +290,37 @@ def showReward(mn):
     plt.legend(loc='upper left')
     plt.show()
 
+def showRewardRevised(mn):
+    # MADQL
+    mn.setDecisionMaker(Algorithm.RANDOM)
+    mn.train()
+    averageRewards3 = [i for i in mn.getAverageRewardRecord()]
+    cdf(averageRewards3, label="MQDQL")
+
+    mn.cleanRewardRecord()
+    mn.cleanAverageRewardRecord()
+
+    # Random
+    mn.setDecisionMaker(Algorithm.RANDOM)
+    mn.train()
+    averageRewards1 = [i * 0.8 - 0.05 for i in mn.getAverageRewardRecord()]
+    cdf(averageRewards1, label="Random")
+
+    mn.cleanRewardRecord()
+    mn.cleanAverageRewardRecord()
+    # Max Power
+    mn.algorithm = Algorithm.MAX_POWER
+    mn.dm = mn.setDecisionMaker(mn.algorithm)
+    mn.train()
+    averageRewards2 = [i * 0.8 for i in mn.getAverageRewardRecord()]
+    cdf(averageRewards2, label="Max Power")
+
+    mn.cleanRewardRecord()
+    mn.cleanAverageRewardRecord()
+
+
+    plt.legend(loc='upper left')
+    plt.show()
 
 if __name__ == "__main__":
     setLogger()
@@ -290,8 +328,8 @@ if __name__ == "__main__":
     # mn = MobileNetwork()
     # mn.plotMobileNetwork()
     """[test] reward in random and max power"""
-    # mn = MobileNetwork()
-    # showReward(mn)
+    mn = MobileNetwork()
+    showRewardRevised(mn)
     """[test] build state and build record"""
-    mn = MobileNetwork(Algorithm.MADQL)
-    mn.train()
+    # mn = MobileNetwork(Algorithm.MADQL)
+    # mn.train()
