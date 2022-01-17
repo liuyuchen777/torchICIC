@@ -2,6 +2,16 @@
 
 Multi-Agent Deep Reinforcement Learning for Inter-Cell Interference Control
 
+## Module
+
+`/DRL` Deep Reinforcement Learning for  MIMO Mobile Network Beamforming and Power Joint Optimization (Full-CSI)
+
+`/MADQL` Multi-Agent Reinforcement Learning for MIMO Mobile Network Beamforming and Power Joint Optimization (Partial-CSI + Communication among Agents)
+
+`/NN` Full-Connected Neural Network for MIMO Mobile Network Beamforming and Power Joint Optimization (Full-CSI)
+
+`/Paper` Pseudo Code for MADQL Algorithm 
+
 ## Reference
 * Power Allocation in Multi-User Cellular Networks: Deep Reinforcement Learning Approaches
 

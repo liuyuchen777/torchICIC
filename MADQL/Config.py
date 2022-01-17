@@ -40,7 +40,7 @@ class Config:
         self.batchSize = 512
 
         # deep learning hyper-parameter
-        self.totalTimeSlot = 10
+        self.totalTimeSlot = 1000
         self.learningRate = 1e-4
         self.regBeta = 0.
         self.tStep = 256

@@ -1,0 +1,45 @@
+本文件约定程序中的一些Index，序列
+
+"""
+Index Composition
+[CU of sector, sector, CU of ue, ue]
+"""
+
+1. Index
+信道信息存储在字典中，python字典的key不接受list，需要把list转为string(index2str, str2index in Utils）
+Index的list形式如下
+[Index0, Index1, Index2, Index3]
+Index0 -> 当前Sector所在CU
+Index1 -> Sector的Index（0-2）
+Index2 -> 当前UE所在CU
+Index3 -> UE的Index（0-2）
+前两个是发送方所处的位置，后两个是接受方所处的位置
+
+2. CU Index
+目前系统有7个CU，中心CU标的为0号
+右上第一个为1号，逆时针旋转标号
+
+3. UE and Sector Index
+一个CU有三个Sector/UE，从左下开始标0，逆时针旋转标号
+
+4. rewardRecord & averageRewardRecord in MobileNetwork
+rewardRecord -> 7 * time slot
+averageRewardRecord -> 1 * time slot
+
+5. 数据和对象序列化
+因为shadowing的随机数值对仿真影响非常大，为了保证仿真的一致性，每次从文件中加载MobileNetwork
+而不是每次重新生成
+使用json库，存储为json对象在/data中
+/data/loss-data.txt
+/data/mobile-network-data.txt
+/data/reward-data.txt
+
+6. actionIndex & action
+
+action = [
+    [sector 0 codebookIndex, sector 0 powerIndex],
+    [sector 1 codebookIndex, sector 1 powerIndex],
+    [sector 2 codebookIndex, sector 2 powerIndex]
+]
+
+actionIndex = [0, 729]

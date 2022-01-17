@@ -1,11 +1,10 @@
 import json
-import logging
 
 import matplotlib.pyplot as plt
-import numpy as np
+import pickle
 
 from CoordinationUnit import CU
-from DecisionMaker import MaxPower, MADQL, Random, FP, WMMSE
+from DecisionMaker import MaxPower, MADQL, Random, FP, WMMSE, CellES
 from Environment import Environment
 from MemoryPool import MemoryPool
 from Utils import *
@@ -15,17 +14,18 @@ class MobileNetwork:
     def __init__(self, algorithm=Algorithm.RANDOM):
         self.logger = logging.getLogger(__name__)
         self.config = Config()
-        self.CUs = []
-        self._generateCUs_()
         self.mp = MemoryPool()
         self.algorithm = algorithm
-        self.dm = self.setDecisionMaker(algorithm)
-        """generate mobile network"""
+        self.dm = Random()
+        self.setDecisionMaker(algorithm)
+        """start generate mobile network"""
+        self.CUs = []
+        self._generateCUs_()
         self.env = Environment(self.CUs)
-        self.rewardRecord = []
-        self.averageRewardRecord = []
+        """end generate mobile network"""
+        self.rewardRecord = []                      # 7 * time slot
+        self.averageRewardRecord = []               # 1 * time slot
         self.lossRecord = []
-        self.count = 0
         self.tmpLossSum = 0.
         self.tmpRewardSum = 0.
         self.epoch = 0
@@ -43,19 +43,26 @@ class MobileNetwork:
             self.CUs.append(CU(i, [posX, posY]))
 
     def setDecisionMaker(self, algorithm):
+        self.algorithm = algorithm
         if algorithm == Algorithm.RANDOM:
-            return Random()
+            self.dm = Random()
         elif algorithm == Algorithm.MAX_POWER:
-            return MaxPower()
+            self.dm = MaxPower()
         elif algorithm == Algorithm.FP:
-            return FP()
+            self.dm = FP()
         elif algorithm == Algorithm.WMMSE:
-            return WMMSE()
+            self.dm = WMMSE()
         elif algorithm == Algorithm.MADQL:
-            return MADQL()
+            self.dm = MADQL()
+        elif algorithm == Algorithm.CELL_ES:
+            self.dm = CellES()
         else:
             self.logger.error("!!!Wrong Algorithm ID!!!")
             exit(1)
+
+    """
+    network structure visualization
+    """
 
     def printCUPosition(self):
         for i in range(len(self.CUs)):
@@ -84,7 +91,6 @@ class MobileNetwork:
         build state for DQN input (Amplitude & Phase)
 
         ver 1.0
-        ...
         ver 2.0
         """
         # TODO: implement amplitude & phase state input
@@ -132,18 +138,6 @@ class MobileNetwork:
                               72+otherCUIndex*72+otherSectorIndex*24+sectorIndex*8+8] = np.imag(tmp)
         return state
 
-    def getRewardRecord(self):
-        return self.rewardRecord
-
-    def getAverageRewardRecord(self):
-        return self.averageRewardRecord
-
-    def cleanRewardRecord(self):
-        self.rewardRecord = []
-
-    def cleanAverageRewardRecord(self):
-        self.averageRewardRecord = []
-
     def train(self):
         """train network"""
         for ts in range(self.config.totalTimeSlot):
@@ -152,22 +146,23 @@ class MobileNetwork:
             # record reward
             self.rewardRecord.append(tsReward)
             self.averageRewardRecord.append(tsAverageReward)
-            if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAX_POWER:
-                self.logger.info(
-                    f'[Train] mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}')
+            if self.algorithm == Algorithm.RANDOM \
+                    or self.algorithm == Algorithm.MAX_POWER \
+                    or self.algorithm == Algorithm.CELL_ES:
+                if ts % 1 == 0:
+                    self.logger.info(f'[Train] mode: {self.algorithm},time slot: {ts + 1}, '
+                                     f'system average reward: {tsAverageReward}')
             elif self.algorithm == Algorithm.MADQL:
                 if self.mp.getSize() > self.config.batchSize:
                     loss = self.dm.backProp(self.mp.getBatch())
                     self.lossRecord.append(loss)
                     self.tmpRewardSum += tsAverageReward
                     self.tmpLossSum += loss
-                    self.count += 1
-                    if self.count > self.config.tStep:
+                    if ts % self.config.tStep == 0:
                         # copy DQN parameters
                         self.logger.info(f'[train] mode: {self.algorithm}, epoch: {self.epoch + 1}, '
                                          f'system average reward: {self.tmpRewardSum / self.config.tStep}, '
                                          f'loss: {self.tmpLossSum / self.config.tStep}.')
-                        self.count = 0
                         self.tmpLossSum = 0.
                         self.tmpRewardSum = 0.
                         self.epoch += 1
@@ -194,6 +189,18 @@ class MobileNetwork:
             for cu in self.CUs:
                 # take action
                 action, actionIndex = self.dm.takeAction()
+                cu.setDecisionIndex(action)
+            # get reward base on action
+            tsReward = self.env.calReward()
+            tsAverageReward = sum(tsReward) / len(tsReward)
+            # update environment
+            self.env.step()
+            # return
+            return tsReward, tsAverageReward
+        elif self.algorithm == Algorithm.CELL_ES:
+            # test every action and set cell ES action
+            for cu in self.CUs:
+                action, actionIndex = self.dm.takeAction(self.env, cu)
                 cu.setDecisionIndex(action)
             # get reward base on action
             tsReward = self.env.calReward()
@@ -237,6 +244,32 @@ class MobileNetwork:
             # return
             return tsReward, tsAverageReward
 
+    """
+    getter & setter
+    """
+
+    def getRewardRecord(self):
+        return self.rewardRecord
+
+    def getAverageRewardRecord(self):
+        return self.averageRewardRecord
+
+    def setRewardRecord(self, reward):
+        self.rewardRecord = reward
+
+    def setAverageRewardRecord(self, averageReward):
+        self.averageRewardRecord = averageReward
+
+    def cleanRewardRecord(self):
+        self.rewardRecord = []
+
+    def cleanAverageRewardRecord(self):
+        self.averageRewardRecord = []
+
+    """
+    save data as json
+    """
+
     def saveRewards(self, name="default"):
         """save rewards record to json file"""
         with open('data/reward-data.txt') as jsonFile:
@@ -254,82 +287,24 @@ class MobileNetwork:
             json.dump(data, jsonFile)
 
     def loadRewards(self, name="default"):
-        """load rewards record to current mn"""
         with open('data/reward-data.txt') as jsonFile:
             data = json.load(jsonFile)
             self.rewardRecord = data[name + "-rewards"]
             self.averageRewardRecord = data[name + "-average-rewards"]
 
 
+# save and load mobile network
+def saveMobileNetwork(mn):
+    with open('data/mobile-network-data.txt', 'wb') as file:
+        pickle.dump(mn, file)
+
+
+def loadMobileNetwork():
+    with open('data/mobile-network-data.txt', 'rb') as file:
+        mn = pickle.load(file)
+        return mn
+
+
 def cdf(x, plot=True, *args, **kwargs):
     x, y = sorted(x), np.arange(len(x)) / len(x)
     plt.plot(x, y, *args, **kwargs) if plot else (x, y)
-
-
-def showReward(mn):
-    """
-
-    :param mn: MobileNetwork
-    :return: void
-    """
-    # Random
-    mn.setDecisionMaker(Algorithm.RANDOM)
-    mn.train()
-    averageRewards1 = mn.getAverageRewardRecord()
-    cdf(averageRewards1, label="Random")
-
-    mn.cleanRewardRecord()
-    mn.cleanAverageRewardRecord()
-    # Max Power
-    mn.algorithm = Algorithm.MAX_POWER
-    mn.dm = mn.setDecisionMaker(mn.algorithm)
-    mn.train()
-    averageRewards2 = mn.getAverageRewardRecord()
-    cdf(averageRewards2, label="Max Power")
-
-    plt.legend(loc='upper left')
-    plt.show()
-
-def showRewardRevised(mn):
-    # MADQL
-    mn.setDecisionMaker(Algorithm.RANDOM)
-    mn.train()
-    averageRewards3 = [i for i in mn.getAverageRewardRecord()]
-    cdf(averageRewards3, label="MQDQL")
-
-    mn.cleanRewardRecord()
-    mn.cleanAverageRewardRecord()
-
-    # Random
-    mn.setDecisionMaker(Algorithm.RANDOM)
-    mn.train()
-    averageRewards1 = [i * 0.8 - 0.05 for i in mn.getAverageRewardRecord()]
-    cdf(averageRewards1, label="Random")
-
-    mn.cleanRewardRecord()
-    mn.cleanAverageRewardRecord()
-    # Max Power
-    mn.algorithm = Algorithm.MAX_POWER
-    mn.dm = mn.setDecisionMaker(mn.algorithm)
-    mn.train()
-    averageRewards2 = [i * 0.8 for i in mn.getAverageRewardRecord()]
-    cdf(averageRewards2, label="Max Power")
-
-    mn.cleanRewardRecord()
-    mn.cleanAverageRewardRecord()
-
-
-    plt.legend(loc='upper left')
-    plt.show()
-
-if __name__ == "__main__":
-    setLogger()
-    """[test] network structure"""
-    # mn = MobileNetwork()
-    # mn.plotMobileNetwork()
-    """[test] reward in random and max power"""
-    mn = MobileNetwork()
-    showRewardRevised(mn)
-    """[test] build state and build record"""
-    # mn = MobileNetwork(Algorithm.MADQL)
-    # mn.train()

@@ -51,9 +51,30 @@ class MaxPower:
 class CellES:
     def __init__(self):
         self.logger = logging.getLogger()
+        self.config = Config()
 
-    def takeAction(self):
-        print("----------Under Construct----------")
+    def takeAction(self, env, cu):
+        actionIndex = random.randint(0, self.config.outputLayer - 1)
+        bestReward = 0.
+        action = []
+        # main loop for ES
+        for powerIndex0 in range(self.config.powerLevel):
+            for beamIndex0 in range(self.config.codebookSize):
+                for powerIndex1 in range(self.config.powerLevel):
+                    for beamIndex1 in range(self.config.codebookSize):
+                        for powerIndex2 in range(self.config.powerLevel):
+                            for beamIndex2 in range(self.config.codebookSize):
+                                actionTmp = [
+                                    [beamIndex0, powerIndex0],
+                                    [beamIndex1, powerIndex1],
+                                    [beamIndex2, powerIndex2]
+                                ]
+                                rewardTmp = env.calLocalReward(cu.index, actionTmp)
+                                if rewardTmp > bestReward:
+                                    bestReward = rewardTmp
+                                    action = actionTmp
+
+        return action, actionIndex
 
 
 class MADQL:
