@@ -57,19 +57,9 @@ def setLogger(file=True, debug=False):
     logging.info("-----------------------------------------DL------------------------------------------")
     logging.info(f'Batch Size: {config.batchSize}, Total time slot: {config.totalTimeSlot}, '
                  f'Learning Rate: {config.learningRate}, Reg Beta: {config.regBeta}')
-    logging.info(f'Gamma: {config.gamma}, Epsilon: {config.epsilon}, Change Probability: {config.keepAlpha}')
+    logging.info(f'Gamma: {config.gamma}, Epsilon: {config.epsilon}')
     # network config information
     logging.info("=========================================END=========================================")
-
-
-def decodeIndex(index):
-    """
-    compose of CU decision index: [S1 decision index, S2 decision index, S3 decision index]
-    decision index = power level used * 10 + beamformer used
-    """
-    powerLevel = index / 10
-    beamformerIndex = index % 10
-    return [powerLevel, beamformerIndex]
 
 
 class Algorithm(Enum):
@@ -90,6 +80,7 @@ neighborTable = [
     [0, 4, 6],
     [0, 1, 5]
 ]
+
 # NOTE: CU中每个sector受到影响的Inter-Cell的sector id是一样的，skipTable中记录对应CU要跳过的sector id
 skipTable = [
     [-1, 0, 0, 1, 1, 2, 2],     # 0

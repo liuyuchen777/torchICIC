@@ -1,6 +1,6 @@
 import logging
 from Config import Config
-from utils import dB2num, setLogger, num2dB
+from Utils import dB2num, setLogger, num2dB
 import numpy as np
 from Sector import Sector
 from UserEquipment import UE
@@ -13,8 +13,6 @@ bs_antenna = N
 ue_antenna = M
 CSI is M * N matrix
 """
-
-# Rayleigh Channel
 
 
 class Channel:
@@ -39,7 +37,6 @@ class Channel:
 
     def _calCSI_(self):
         index = self.index[1]   # sector index decide AoD
-        # large-scale fading
         # empty csi
         csi = np.zeros(shape=[self.config.UTAntenna, self.config.BSAntenna], dtype=complex)
         for _ in range(self.config.pathNumber):

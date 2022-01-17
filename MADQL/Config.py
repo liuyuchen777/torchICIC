@@ -36,18 +36,20 @@ class Config:
         self.interferencePenaltyAlpha = 0.2
 
         # memory pool
-        self.mpMaxSize = 1000000
-        self.batchSize = 256
+        self.mpMaxSize = 10000
+        self.batchSize = 512
 
         # deep learning hyper-parameter
-        self.totalTimeSlot = 1000000
-        self.learningRate = 0.01
+        self.totalTimeSlot = 1000
+        self.learningRate = 1e-4
         self.regBeta = 0.
-        self.tStep = 100
-        self.gamma = 0.15
+        self.tStep = 256
+        self.gamma = 0.3
         self.epsilon = 0.3
-        self.keepAlpha = 0.3
         self.evalTimes = 10
+        self.hiddenLayers = [1024, 1024, 1024]
+        self.inputLayer = 576
+        self.outputLayer = 729
 
     def _calPowerList_(self):
         powerGap = self.maxPower * 2 / (self.powerLevel - 1)

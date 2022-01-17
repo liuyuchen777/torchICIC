@@ -70,9 +70,9 @@ class CU:
     def getDecisionIndexHistory(self):
         return self.decisionIndexHistory
 
-    def setDecisionIndex(self, new_decision_index):
+    def setDecisionIndex(self, newDecisionIndex):
         self.decisionIndexHistory = self.decisionIndex
-        self.decisionIndex = new_decision_index
+        self.decisionIndex = newDecisionIndex
 
     def plotCU(self, plt=plt, local=False):
         sectorsPosX = []

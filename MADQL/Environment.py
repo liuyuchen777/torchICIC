@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 from Config import Config
-from utils import index2str, neighborTable, judgeSkip, dBm2num
+from Utils import index2str, neighborTable, judgeSkip, dBm2num
 from Channel import Channel
 
 
@@ -47,11 +47,43 @@ class Environment:
         for v in self.channels.values():
             v.step()
 
-    def calLocalReward(self):
+    def calLocalReward(self, CUIndex, actionIndex):
         """
-        this reward only consider consider Intra-CU interference
+        this reward only consider Intra-CU interference
+        for single CU in specific action Index
         """
-        print("----------Under Construct----------")
+        cu = self.CUs[CUIndex]
+        r = 0.
+        for sector in cu.sectors:
+            # 1. direct channel (up)
+            beamformer = self.config.beamformList[actionIndex[sector.index][0]]
+            power = self.config.powerList[actionIndex[sector.index][1]]
+            index = [cu.index, sector.index, cu.index, sector.index]
+            # direct channel
+            directChannel = self.channels[index2str(index)].getCSI()
+            signalPower = dBm2num(power) * np.power(np.linalg.norm(beamformer * directChannel), 4)
+            # 2. bottom
+            # 2.1 Gaussian noise
+            noisePower = dBm2num(self.config.noisePower) * np.power(np.linalg.norm(beamformer * directChannel), 2)
+            intraCellInterference = 0.
+            # 2.2 intra-CU interference
+            for otherSector in cu.sectors:
+                if sector.index != otherSector.index:
+                    beamformer = self.config.beamformList[actionIndex[otherSector.index][0]]
+                    power = self.config.powerList[actionIndex[otherSector.index][1]]
+                    index = [cu.index, otherSector.index, cu.index, sector.index]
+                    # same cu channel
+                    intraChannel = self.channels[index2str(index)].getCSI()
+                    intraCellInterference += dBm2num(power) * np.power(np.linalg.norm(np.transpose(beamformer)
+                                        * np.transpose(intraChannel) * intraChannel * beamformer), 2)
+            # summation
+            SINR = signalPower / (noisePower + intraCellInterference)
+            cap = np.log2(1 + SINR)
+            r += cap
+        # 4. calculate average reward in CU
+        r /= 3
+
+        return r
 
     def calReward(self):
         """
@@ -108,6 +140,7 @@ class Environment:
             r /= 3
             reward.append(r)
         # 5. consider others
+        # TODO: check reward function
         rewardRevised = []
         alpha = self.config.interferencePenaltyAlpha
         for CUIndex in range(len(reward)):

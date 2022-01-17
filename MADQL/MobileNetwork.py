@@ -1,31 +1,31 @@
 import json
-import logging
 
 import matplotlib.pyplot as plt
-import numpy as np
+import pickle
 
 from CoordinationUnit import CU
-from DecisionMaker import MaxPower, MADQL, Random, FP, WMMSE
+from DecisionMaker import MaxPower, MADQL, Random, FP, WMMSE, CellES
 from Environment import Environment
 from MemoryPool import MemoryPool
-from utils import *
+from Utils import *
 
 
 class MobileNetwork:
     def __init__(self, algorithm=Algorithm.RANDOM):
         self.logger = logging.getLogger(__name__)
         self.config = Config()
-        self.CUs = []
-        self._generateCUs_()
         self.mp = MemoryPool()
         self.algorithm = algorithm
-        self.dm = self.setDecisionMaker(algorithm)
-        """generate mobile network"""
+        self.dm = Random()
+        self.setDecisionMaker(algorithm)
+        """start generate mobile network"""
+        self.CUs = []
+        self._generateCUs_()
         self.env = Environment(self.CUs)
-        self.rewardRecord = []
-        self.averageRewardRecord = []
+        """end generate mobile network"""
+        self.rewardRecord = []                      # 7 * time slot
+        self.averageRewardRecord = []               # 1 * time slot
         self.lossRecord = []
-        self.count = 0
         self.tmpLossSum = 0.
         self.tmpRewardSum = 0.
         self.epoch = 0
@@ -43,19 +43,26 @@ class MobileNetwork:
             self.CUs.append(CU(i, [posX, posY]))
 
     def setDecisionMaker(self, algorithm):
+        self.algorithm = algorithm
         if algorithm == Algorithm.RANDOM:
-            return Random()
+            self.dm = Random()
         elif algorithm == Algorithm.MAX_POWER:
-            return MaxPower()
+            self.dm = MaxPower()
         elif algorithm == Algorithm.FP:
-            return FP()
+            self.dm = FP()
         elif algorithm == Algorithm.WMMSE:
-            return WMMSE()
+            self.dm = WMMSE()
         elif algorithm == Algorithm.MADQL:
-            return MADQL()
+            self.dm = MADQL()
+        elif algorithm == Algorithm.CELL_ES:
+            self.dm = CellES()
         else:
             self.logger.error("!!!Wrong Algorithm ID!!!")
             exit(1)
+
+    """
+    network structure visualization
+    """
 
     def printCUPosition(self):
         for i in range(len(self.CUs)):
@@ -82,74 +89,54 @@ class MobileNetwork:
     def buildStateAP(self, CUIndex):
         """
         build state for DQN input (Amplitude & Phase)
-        two parts: intra-cell + inter-cell
-        intra-cell -> 4 * 4 (MIMO CSI) * 2 (complex -> double) * 3 * 3 -> 12 * 24 = 288 CSI map
-        single inter-cell item -> p_t-1 * f_t-1 * H_t -> 4 * 1 * 2
-        inter-cell -> center CU (12 neighbor sector), edge CU (6 neighbor sector)
-                   -> 4 * 1 * 2 (complex -> double) * 18 * 3 * 3
-                   -> 63 * 8
+
+        ver 1.0
+        ver 2.0
         """
+        # TODO: implement amplitude & phase state input
 
     def buildStateRI(self, CUIndex):
         """
         build state for DQN input (Real & Image)
 
+        ver 1.0
+        1st flow -> 12 * 24 (288)
+        2nd flow -> 54 * 8 (432)
+        ver 2.0
+        total one hot -> (72 + 432) * 1
         """
-        # 1 CU, 1 record
-        state = []
-        # 1. build st  ate
-        # 1.1. Intra-CU
-        intraState = np.zeros(shape=[self.config.BSAntenna * 3, self.config.UTAntenna * 3 * 2], dtype=float)
+        state = np.zeros(shape=self.config.inputLayer, dtype=float)
+        # Intra-CU
+        action = self.CUs[CUIndex].getDecisionIndex()
         for sectorIndex in range(3):
             for otherSectorIndex in range(3):
                 index = [CUIndex, sectorIndex, CUIndex, otherSectorIndex]
                 channel = self.env.getChannel(index2str(index))
                 CSI = channel.getCSI()
-                real = np.real(CSI)
-                image = np.imag(CSI)
-                # put real part in
-                intraState[sectorIndex * self.config.BSAntenna:(sectorIndex + 1) * self.config.BSAntenna,
-                otherSectorIndex * 2 * self.config.UTAntenna:(otherSectorIndex * 2 + 1) * self.config.UTAntenna] = real
-                # put image part in
-                intraState[sectorIndex * self.config.BSAntenna:(sectorIndex + 1) * self.config.BSAntenna,
-                    (otherSectorIndex * 2 + 1) * self.config.UTAntenna:(otherSectorIndex * 2 + 2)
-                    * self.config.UTAntenna] = image
-        # 1.2. intra
-        interState = np.zeros(shape=[3 * 3 * self.config.cellNumber, self.config.UTAntenna * 2], dtype=float)
+                beamformer = self.config.beamformList[action[sectorIndex][0]]
+                power = self.config.powerList[action[sectorIndex][1]]
+                tmp = dBm2num(power) * beamformer.dot(CSI)
+                state[sectorIndex*24+otherSectorIndex*8: sectorIndex*24+otherSectorIndex*8+4] = np.real(tmp)
+                state[sectorIndex*24+otherSectorIndex*8+4: sectorIndex*24+otherSectorIndex*8+8] = np.imag(tmp)
+        # Inter-CU
         for otherCUIndex in neighborTable[CUIndex]:
-            decisionIndexHistory = self.CUs[otherCUIndex].getDecisionIndexHistory()
+            actionHistory = self.CUs[otherCUIndex].getDecisionIndexHistory()
             for otherSectorIndex in range(3):
                 for sectorIndex in range(3):
-                    index = [CUIndex, sectorIndex, otherCUIndex, otherSectorIndex]
+                    index = [otherCUIndex, otherSectorIndex, CUIndex, sectorIndex]
                     if judgeSkip(index):
                         continue
                     else:
                         channel = self.env.getChannel(index2str(index))
                         CSI = channel.getCSI()  # H_t
-                        beamformer = self.config.beamformList[decisionIndexHistory[sectorIndex][0]]
-                        power = self.config.powerList[decisionIndexHistory[sectorIndex][1]]
+                        beamformer = self.config.beamformList[actionHistory[otherSectorIndex][0]]
+                        power = self.config.powerList[actionHistory[otherSectorIndex][1]]
                         tmp = dBm2num(power) * beamformer.dot(CSI)
-                        item = np.zeros(shape=[1, self.config.UTAntenna * 2], dtype=float)
-                        item[0, 0:self.config.UTAntenna] = np.real(tmp)
-                        item[0, self.config.UTAntenna:] = np.imag(tmp)
-                        interState[sectorIndex * (3 * self.config.cellNumber)
-                                   + otherCUIndex * 3 + otherSectorIndex, :] = item
-        # 2. build state & return
-        state.append(intraState)
-        state.append(interState)
+                        state[72+otherCUIndex*72+otherSectorIndex*24+sectorIndex*8:
+                              72+otherCUIndex*72+otherSectorIndex*24+sectorIndex*8+4] = np.real(tmp)
+                        state[72+otherCUIndex*72+otherSectorIndex*24+sectorIndex*8+4:
+                              72+otherCUIndex*72+otherSectorIndex*24+sectorIndex*8+8] = np.imag(tmp)
         return state
-
-    def getRewardRecord(self):
-        return self.rewardRecord
-
-    def getAverageRewardRecord(self):
-        return self.averageRewardRecord
-
-    def cleanRewardRecord(self):
-        self.rewardRecord = []
-
-    def cleanAverageRewardRecord(self):
-        self.averageRewardRecord = []
 
     def train(self):
         """train network"""
@@ -159,28 +146,29 @@ class MobileNetwork:
             # record reward
             self.rewardRecord.append(tsReward)
             self.averageRewardRecord.append(tsAverageReward)
-            if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAX_POWER:
-                self.logger.info(
-                    f'[Train] mode: {self.algorithm},time slot: {ts + 1}, system average reward: {tsAverageReward}')
+            if self.algorithm == Algorithm.RANDOM \
+                    or self.algorithm == Algorithm.MAX_POWER \
+                    or self.algorithm == Algorithm.CELL_ES:
+                if ts % 1 == 0:
+                    self.logger.info(f'[Train] mode: {self.algorithm},time slot: {ts + 1}, '
+                                     f'system average reward: {tsAverageReward}')
             elif self.algorithm == Algorithm.MADQL:
                 if self.mp.getSize() > self.config.batchSize:
                     loss = self.dm.backProp(self.mp.getBatch())
                     self.lossRecord.append(loss)
                     self.tmpRewardSum += tsAverageReward
                     self.tmpLossSum += loss
-                    self.count += 1
-                    if self.count > self.config.tStep:
-                        # print train log
+                    if ts % self.config.tStep == 0:
+                        # copy DQN parameters
                         self.logger.info(f'[train] mode: {self.algorithm}, epoch: {self.epoch + 1}, '
                                          f'system average reward: {self.tmpRewardSum / self.config.tStep}, '
                                          f'loss: {self.tmpLossSum / self.config.tStep}.')
-                        # eval
-                        evalReward = self.eval(self.config.evalTimes)
-                        self.logger.info(f'[eval] evaluation reward: {evalReward}.')
-                        self.count = 0
                         self.tmpLossSum = 0.
                         self.tmpRewardSum = 0.
                         self.epoch += 1
+                        self.dm.updateModelParamter()
+                else:
+                    continue
 
     def eval(self, times):
         if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAX_POWER:
@@ -200,7 +188,20 @@ class MobileNetwork:
         if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAX_POWER:
             for cu in self.CUs:
                 # take action
-                cu.setDecisionIndex(self.dm.takeAction())
+                action, actionIndex = self.dm.takeAction()
+                cu.setDecisionIndex(action)
+            # get reward base on action
+            tsReward = self.env.calReward()
+            tsAverageReward = sum(tsReward) / len(tsReward)
+            # update environment
+            self.env.step()
+            # return
+            return tsReward, tsAverageReward
+        elif self.algorithm == Algorithm.CELL_ES:
+            # test every action and set cell ES action
+            for cu in self.CUs:
+                action, actionIndex = self.dm.takeAction(self.env, cu)
+                cu.setDecisionIndex(action)
             # get reward base on action
             tsReward = self.env.calReward()
             tsAverageReward = sum(tsReward) / len(tsReward)
@@ -216,21 +217,15 @@ class MobileNetwork:
                 state = self.buildStateRI(CUIndex)
                 stateRecord.append(state)
                 # take action
+                action = []
+                actionIndex = 0
                 if self.mp.getSize() < self.config.batchSize:
-                    self.CUs[CUIndex].setDecisionIndex(self.dm.takeActionRandom())
+                    action, actionIndex = self.dm.takeActionRandom(self.CUs[CUIndex].getDecisionIndexHistory())
+                    self.CUs[CUIndex].setDecisionIndex(action)
                 else:
-                    self.CUs[CUIndex].setDecisionIndex(self.dm.takeAction(state,
-                        self.CUs[CUIndex].getDecisionIndexHistory(), trainLabel))
-                action = 0
-                decisionIndex = self.CUs[CUIndex].getDecisionIndex()
-                decisionIndexHistory = self.CUs[CUIndex].getDecisionIndexHistory()
-                # convert action index
-                for i in range(3):
-                    if decisionIndex[i][0] != decisionIndexHistory[i][0]:
-                        action += 1 << (i * 2)
-                    if decisionIndex[i][1] != decisionIndexHistory[i][1]:
-                        action += 1 << (i * 2 + 1)
-                actionRecord.append(action)
+                    action, actionIndex = self.dm.takeAction(state, self.CUs[CUIndex].getDecisionIndexHistory(), trainLabel)
+                    self.CUs[CUIndex].setDecisionIndex(action)
+                actionRecord.append(actionIndex)
             # calculate reward
             tsReward = self.env.calReward()
             tsAverageReward = sum(tsReward) / len(tsReward)
@@ -249,62 +244,67 @@ class MobileNetwork:
             # return
             return tsReward, tsAverageReward
 
+    """
+    getter & setter
+    """
+
+    def getRewardRecord(self):
+        return self.rewardRecord
+
+    def getAverageRewardRecord(self):
+        return self.averageRewardRecord
+
+    def setRewardRecord(self, reward):
+        self.rewardRecord = reward
+
+    def setAverageRewardRecord(self, averageReward):
+        self.averageRewardRecord = averageReward
+
+    def cleanRewardRecord(self):
+        self.rewardRecord = []
+
+    def cleanAverageRewardRecord(self):
+        self.averageRewardRecord = []
+
+    """
+    save data as json
+    """
+
     def saveRewards(self, name="default"):
         """save rewards record to json file"""
-        with open('./data/data.txt') as jsonFile:
+        with open('data/reward-data.txt') as jsonFile:
             data = json.load(jsonFile)
-        with open('./data/data.txt', 'w') as jsonFile:
-            data[name + "-rewards"] = self.rewardRecord
-            data[name + "-average-rewards"] = self.averageRewardRecord
+        with open('data/reward-data.txt', 'w') as jsonFile:
+            data[name + "-rewards"] = self.getRewardRecord()
+            data[name + "-average-rewards"] = self.getAverageRewardRecord()
             json.dump(data, jsonFile)
 
     def saveLoss(self, name="default"):
-        with open('./data/data.txt') as jsonFile:
+        with open('data/reward-data.txt') as jsonFile:
             data = json.load(jsonFile)
-        with open('./data/data.txt', 'w') as jsonFile:
+        with open('data/reward-data.txt', 'w') as jsonFile:
             data[name + "-loss"] = self.lossRecord
             json.dump(data, jsonFile)
 
     def loadRewards(self, name="default"):
-        """load rewards record to current mn"""
-        with open('./data/data.txt') as jsonFile:
+        with open('data/reward-data.txt') as jsonFile:
             data = json.load(jsonFile)
             self.rewardRecord = data[name + "-rewards"]
             self.averageRewardRecord = data[name + "-average-rewards"]
 
 
+# save and load mobile network
+def saveMobileNetwork(mn):
+    with open('data/mobile-network-data.txt', 'wb') as file:
+        pickle.dump(mn, file)
+
+
+def loadMobileNetwork():
+    with open('data/mobile-network-data.txt', 'rb') as file:
+        mn = pickle.load(file)
+        return mn
+
+
 def cdf(x, plot=True, *args, **kwargs):
     x, y = sorted(x), np.arange(len(x)) / len(x)
     plt.plot(x, y, *args, **kwargs) if plot else (x, y)
-
-
-def showReward(mn):
-    mn.setDecisionMaker(Algorithm.RANDOM)
-    mn.train()
-    averageRewards1 = mn.getAverageRewardRecord()
-    cdf(averageRewards1, label="Random")
-
-    mn.cleanRewardRecord()
-    mn.cleanAverageRewardRecord()
-
-    mn.algorithm = Algorithm.MAX_POWER
-    mn.dm = mn.setDecisionMaker(mn.algorithm)
-    mn.train()
-    averageRewards2 = mn.getAverageRewardRecord()
-    cdf(averageRewards2, label="Max Power")
-
-    plt.legend(loc='upper left')
-    plt.show()
-
-
-if __name__ == "__main__":
-    setLogger()
-    """[test] network structure"""
-    # mn = MobileNetwork()
-    # mn.plotMobileNetwork()
-    """[test] reward in random and max power"""
-    # mn = MobileNetwork()
-    # showReward(mn)
-    """[test] build state and build record"""
-    mn = MobileNetwork(Algorithm.MADQL)
-    mn.train()
