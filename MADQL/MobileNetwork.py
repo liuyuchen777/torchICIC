@@ -26,9 +26,6 @@ class MobileNetwork:
         self.rewardRecord = []                      # 7 * time slot
         self.averageRewardRecord = []               # 1 * time slot
         self.lossRecord = []
-        self.tmpLossSum = 0.
-        self.tmpRewardSum = 0.
-        self.epoch = 0
 
     def _generateCUs_(self):
         # max support 7 cells
@@ -156,17 +153,13 @@ class MobileNetwork:
                 if self.mp.getSize() > self.config.batchSize:
                     loss = self.dm.backProp(self.mp.getBatch())
                     self.lossRecord.append(loss)
-                    self.tmpRewardSum += tsAverageReward
-                    self.tmpLossSum += loss
-                    if ts % self.config.tStep == 0:
+                    if ts % 1 == 0:
                         # copy DQN parameters
-                        self.logger.info(f'[train] mode: {self.algorithm}, epoch: {self.epoch + 1}, '
-                                         f'system average reward: {self.tmpRewardSum / self.config.tStep}, '
-                                         f'loss: {self.tmpLossSum / self.config.tStep}.')
-                        self.tmpLossSum = 0.
-                        self.tmpRewardSum = 0.
-                        self.epoch += 1
-                        self.dm.updateModelParamter()
+                        self.logger.info(f'[train] mode: {self.algorithm}, time slot: {ts}, '
+                                         f'system average reward: {tsAverageReward}, '
+                                         f'loss: {loss}.')
+                    if ts % self.config.tStep == 0:
+                        self.dm.updateModelParameter()
                 else:
                     continue
 
@@ -259,6 +252,13 @@ class MobileNetwork:
 
     def setAverageRewardRecord(self, averageReward):
         self.averageRewardRecord = averageReward
+
+    def setConfig(self, config):
+        self.config = config
+
+    def cleanReward(self):
+        self.cleanRewardRecord()
+        self.cleanAverageRewardRecord()
 
     def cleanRewardRecord(self):
         self.rewardRecord = []

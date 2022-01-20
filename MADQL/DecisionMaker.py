@@ -77,6 +77,11 @@ class CellES:
         return action, actionIndex
 
 
+"""
+MADQL Algorithm Agent
+"""
+
+
 class MADQL:
     def __init__(self):
         self.logger = logging.getLogger()
@@ -87,7 +92,11 @@ class MADQL:
         self.optimizer = torch.optim.Adam(self.trainDQN.parameters(), lr=self.config.learningRate,
                                           weight_decay=self.config.regBeta)
         self.loss = nn.MSELoss()
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.trainDQN.to(self.device)
+        self.targetDQN.to(self.device)
         print("PyTorch Version: \n", torch.__version__)
+        print("GPU Device: \n", self.device)
 
     def takeActionBaseIndex(self, index, previous):
         action = []
@@ -124,8 +133,8 @@ class MADQL:
             return self.takeActionRandom(previous)
         else:
             with torch.no_grad():
-                input = torch.unsqueeze(torch.unsqueeze(torch.tensor(state, dtype=torch.float32), 0), 0)
-                predict = self.targetDQN.forward(input)
+                state = torch.unsqueeze(torch.unsqueeze(torch.tensor(state, dtype=torch.float32), 0), 0).to(self.device)
+                predict = self.targetDQN.forward(state)
             actionIndex = torch.argmax(predict).item()
             action = self.takeActionBaseIndex(actionIndex, previous)
             return action, actionIndex
@@ -135,17 +144,19 @@ class MADQL:
         record = (s, a, r, s')
         """
         # train network
-        input = torch.tensor([item[0] for item in recordBatch], dtype=torch.float32)
-        predictTrain = self.trainDQN.forward(input)
+        state = torch.tensor([item[0] for item in recordBatch], dtype=torch.float32)
+        state = state.to(self.device)
+        predictTrain = self.trainDQN.forward(state)
         with torch.no_grad():
             # target network
-            inputNext = torch.tensor([item[3] for item in recordBatch], dtype=torch.float32)
-            predictTarget = self.targetDQN.forward(inputNext)
+            stateNext = torch.tensor([item[3] for item in recordBatch], dtype=torch.float32)
+            stateNext = stateNext.to(self.device)
+            predictTarget = self.targetDQN.forward(stateNext)
             # revise reward
             rewardMax = torch.amax(predictTarget, dim=1)
             action = [item[1] for item in recordBatch]
             reward = [item[2] for item in recordBatch]
-            rewardRevise = torch.tensor(reward) + self.config.gamma * rewardMax
+            rewardRevise = torch.tensor(reward).to(self.device) + self.config.gamma * rewardMax
             for i in range(self.config.batchSize):
                 predictTarget[i][action[i]] = rewardRevise[i]
         # calculate loss
@@ -156,6 +167,6 @@ class MADQL:
         # return loss to time slot
         return myLoss
 
-    def updateModelParamter(self):
-        self.logger.info("DQN Parameter Updates!")
+    def updateModelParameter(self):
+        self.logger.info("----------------Target DQN Parameter Updates!------------------")
         self.targetDQN.load_state_dict(self.trainDQN.state_dict())

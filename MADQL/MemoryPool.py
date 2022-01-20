@@ -1,6 +1,7 @@
 import random
-from Config import Config
 
+from Config import Config
+import numpy as np
 
 class MemoryPool:
     def __init__(self, maxSize=Config().mpMaxSize):

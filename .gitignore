@@ -1,7 +1,5 @@
 .idea
 __pycache__
-log
 checkpoints
-data
 .vscode
 model

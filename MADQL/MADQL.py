@@ -96,11 +96,15 @@ if __name__ == "__main__":
     # mn = MobileNetwork()
     # showReward(mn)
     """[test] build state and build record"""
-    # mn = MobileNetwork(Algorithm.MADQL)
-    # mn.train()
+    mn = loadMobileNetwork()
+    mn.setConfig(Config())
+    mn.setDecisionMaker(Algorithm.MADQL)
+    mn.cleanReward()
+    mn.train()
+    mn.saveRewards("MADQL_Train")
     """[test] save and load mobile network"""
     # testSaveLoadMobileNetwork()
     """[test] cell ES"""
     # testCellES()
     """[test] mid term"""
-    drawMidTerm()
+    # drawMidTerm()
