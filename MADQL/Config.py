@@ -40,7 +40,7 @@ class Config:
         self.batchSize = 512
 
         # deep learning hyper-parameter
-        self.totalTimeSlot = 10000
+        self.totalTimeSlot = 300
         self.learningRate = 1e-4
         self.regBeta = 0.
         self.tStep = 256
@@ -50,6 +50,8 @@ class Config:
         self.hiddenLayers = [1024, 1024, 1024]
         self.inputLayer = 576
         self.outputLayer = 729
+        self.printSlot = 1
+        self.MODEL_PATH = "./model/MADQL.pth"
 
     def _calPowerList_(self):
         powerGap = self.maxPower * 2 / (self.powerLevel - 1)

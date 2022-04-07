@@ -15,6 +15,7 @@ class MobileNetwork:
         self.logger = logging.getLogger(__name__)
         self.config = Config()
         self.mp = MemoryPool()
+        """set decision maker"""
         self.algorithm = algorithm
         self.dm = Random()
         self.setDecisionMaker(algorithm)
@@ -83,6 +84,10 @@ class MobileNetwork:
         plt.title("System Model of MIMO Cellular Network")
         plt.show()
 
+    """
+    state builder
+    """
+
     def buildStateAP(self, CUIndex):
         """
         build state for DQN input (Amplitude & Phase)
@@ -101,10 +106,13 @@ class MobileNetwork:
         2nd flow -> 54 * 8 (432)
         ver 2.0
         total one hot -> (72 + 432) * 1
+        72 -> 4 * 9 * 2
+        432 -> 6 * (4 * 9 * 2)
+        2 = Real + Image
         """
         state = np.zeros(shape=self.config.inputLayer, dtype=float)
         # Intra-CU
-        action = self.CUs[CUIndex].getDecisionIndex()
+        action = self.CUs[CUIndex].getAction()
         for sectorIndex in range(3):
             for otherSectorIndex in range(3):
                 index = [CUIndex, sectorIndex, CUIndex, otherSectorIndex]
@@ -117,7 +125,7 @@ class MobileNetwork:
                 state[sectorIndex*24+otherSectorIndex*8+4: sectorIndex*24+otherSectorIndex*8+8] = np.imag(tmp)
         # Inter-CU
         for otherCUIndex in neighborTable[CUIndex]:
-            actionHistory = self.CUs[otherCUIndex].getDecisionIndexHistory()
+            actionHistory = self.CUs[otherCUIndex].getActionHistory()
             for otherSectorIndex in range(3):
                 for sectorIndex in range(3):
                     index = [otherCUIndex, otherSectorIndex, CUIndex, sectorIndex]
@@ -135,44 +143,6 @@ class MobileNetwork:
                               72+otherCUIndex*72+otherSectorIndex*24+sectorIndex*8+8] = np.imag(tmp)
         return state
 
-    def train(self):
-        """train network"""
-        for ts in range(self.config.totalTimeSlot):
-            # step
-            tsReward, tsAverageReward = self.step()
-            # record reward
-            self.rewardRecord.append(tsReward)
-            self.averageRewardRecord.append(tsAverageReward)
-            if self.algorithm == Algorithm.RANDOM \
-                    or self.algorithm == Algorithm.MAX_POWER \
-                    or self.algorithm == Algorithm.CELL_ES:
-                if ts % 1 == 0:
-                    self.logger.info(f'[Train] mode: {self.algorithm},time slot: {ts + 1}, '
-                                     f'system average reward: {tsAverageReward}')
-            elif self.algorithm == Algorithm.MADQL:
-                if self.mp.getSize() > self.config.batchSize:
-                    loss = self.dm.backProp(self.mp.getBatch())
-                    self.lossRecord.append(loss)
-                    if ts % 1 == 0:
-                        # copy DQN parameters
-                        self.logger.info(f'[train] mode: {self.algorithm}, time slot: {ts}, '
-                                         f'system average reward: {tsAverageReward}, '
-                                         f'loss: {loss}.')
-                    if ts % self.config.tStep == 0:
-                        self.dm.updateModelParameter()
-                else:
-                    continue
-
-    def eval(self, times):
-        if self.algorithm == Algorithm.RANDOM or self.algorithm == Algorithm.MAX_POWER:
-            return self.step()
-        elif self.algorithm == Algorithm.MADQL:
-            totalReward = 0.
-            for i in range(times):
-                _, averageReward = self.step(trainLabel=False)
-                totalReward += averageReward
-            return totalReward / times
-
     def step(self, trainLabel=True):
         """
         one step in training
@@ -182,7 +152,7 @@ class MobileNetwork:
             for cu in self.CUs:
                 # take action
                 action, actionIndex = self.dm.takeAction()
-                cu.setDecisionIndex(action)
+                cu.setAction(action)
             # get reward base on action
             tsReward = self.env.calReward()
             tsAverageReward = sum(tsReward) / len(tsReward)
@@ -194,7 +164,7 @@ class MobileNetwork:
             # test every action and set cell ES action
             for cu in self.CUs:
                 action, actionIndex = self.dm.takeAction(self.env, cu)
-                cu.setDecisionIndex(action)
+                cu.setAction(action)
             # get reward base on action
             tsReward = self.env.calReward()
             tsAverageReward = sum(tsReward) / len(tsReward)
@@ -210,14 +180,13 @@ class MobileNetwork:
                 state = self.buildStateRI(CUIndex)
                 stateRecord.append(state)
                 # take action
-                action = []
-                actionIndex = 0
                 if self.mp.getSize() < self.config.batchSize:
-                    action, actionIndex = self.dm.takeActionRandom(self.CUs[CUIndex].getDecisionIndexHistory())
-                    self.CUs[CUIndex].setDecisionIndex(action)
+                    action, actionIndex = self.dm.takeActionRandom(self.CUs[CUIndex].getActionHistory())
+                    self.CUs[CUIndex].setAction(action)
                 else:
-                    action, actionIndex = self.dm.takeAction(state, self.CUs[CUIndex].getDecisionIndexHistory(), trainLabel)
-                    self.CUs[CUIndex].setDecisionIndex(action)
+                    action, actionIndex = self.dm.takeAction(state, self.CUs[CUIndex].getActionHistory(),
+                                                             trainLabel)
+                    self.CUs[CUIndex].setAction(action)
                 actionRecord.append(actionIndex)
             # calculate reward
             tsReward = self.env.calReward()
@@ -236,6 +205,38 @@ class MobileNetwork:
                 self.mp.push(record)
             # return
             return tsReward, tsAverageReward
+
+    def train(self):
+        """train network"""
+        for ts in range(self.config.totalTimeSlot):
+            # step
+            tsReward, tsAverageReward = self.step()
+            # record reward
+            self.rewardRecord.append(tsReward)
+            self.averageRewardRecord.append(tsAverageReward)
+            if self.algorithm == Algorithm.RANDOM \
+                    or self.algorithm == Algorithm.MAX_POWER \
+                    or self.algorithm == Algorithm.CELL_ES:
+                if ts % self.config.printSlot == 0:
+                    self.logger.info(f'[Train] mode: {self.algorithm},time slot: {ts + 1}, '
+                                     f'system average reward: {tsAverageReward}')
+            elif self.algorithm == Algorithm.MADQL:
+                if self.mp.getSize() > self.config.batchSize:
+                    loss = self.dm.backProp(self.mp.getBatch())
+                    self.lossRecord.append(loss)
+                    if ts % self.config.printSlot == 0:
+                        # copy DQN parameters
+                        self.logger.info(f'[train] mode: {self.algorithm}, time slot: {ts}, '
+                                         f'system average reward: {tsAverageReward}, '
+                                         f'loss: {loss}.')
+                    if ts % self.config.tStep == 0:
+                        self.dm.updateModelParameter()
+                else:
+                    continue
+        # finish train
+        self.logger.info("training finished")
+        self.dm.saveModel()
+        self.logger.info("model saved")
 
     """
     getter & setter

@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 class CU:
     def __init__(self, index, pos):
         """
-        decisionIndex = [
+        action = [
             [f_0, p_0],
             [f_1, p_1],
             [f_2, p_2]
@@ -27,9 +27,9 @@ class CU:
         self.UEs = []
         self._generateUEs_()
         # decision
-        self.decisionIndex = []
-        self._initDecisionIndex_()
-        self.decisionIndexHistory = self.decisionIndex
+        self.action = []
+        self._initAction_()
+        self.actionHistory = self.action
 
     def _generateSectors_(self):
         r = self.config.cellSize
@@ -59,20 +59,20 @@ class CU:
     def getUEs(self):
         return self.UEs
 
-    def _initDecisionIndex_(self):
+    def _initAction_(self):
         for i in range(3):
-            self.decisionIndex.append([random.randint(0, self.config.codebookSize - 1),
-                                       random.randint(0, self.config.powerLevel - 1)])
+            self.action.append([random.randint(0, self.config.codebookSize - 1),
+                                random.randint(0, self.config.powerLevel - 1)])
 
-    def getDecisionIndex(self):
-        return self.decisionIndex
+    def getAction(self):
+        return self.action
 
-    def getDecisionIndexHistory(self):
-        return self.decisionIndexHistory
+    def getActionHistory(self):
+        return self.actionHistory
 
-    def setDecisionIndex(self, newDecisionIndex):
-        self.decisionIndexHistory = self.decisionIndex
-        self.decisionIndex = newDecisionIndex
+    def setAction(self, newAction):
+        self.actionHistory = self.action
+        self.action = newAction
 
     def plotCU(self, plt=plt, local=False):
         sectorsPosX = []

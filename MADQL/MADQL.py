@@ -1,5 +1,7 @@
 from MobileNetwork import *
 
+import matplotlib.pyplot as plt
+
 
 def showReward(mn):
     # Random
@@ -96,10 +98,7 @@ if __name__ == "__main__":
     # mn = MobileNetwork()
     # showReward(mn)
     """[test] build state and build record"""
-    mn = loadMobileNetwork()
-    mn.setConfig(Config())
-    mn.setDecisionMaker(Algorithm.MADQL)
-    mn.cleanReward()
+    mn = MobileNetwork(Algorithm.MADQL)
     mn.train()
     mn.saveRewards("MADQL_Train")
     """[test] save and load mobile network"""

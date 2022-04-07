@@ -19,7 +19,7 @@ class Environment:
         """
         for cu in self.CUs:
             for sector in cu.sectors:
-                # intra CU
+                # intra CU + direct channel
                 for ue in cu.UEs:
                     channel = Channel(sector, ue)
                     self.channels[index2str(channel.index)] = channel
@@ -94,14 +94,13 @@ class Environment:
         reward = []
         for cu in self.CUs:
             # main loop calculate reward in each CU
-            actionIndex = cu.getDecisionIndex()
+            actionIndex = cu.getAction()
             r = 0.
             for sector in cu.sectors:
-                # 1. direct channel (up)
+                # 1. direct channel
                 beamformer = self.config.beamformList[actionIndex[sector.index][0]]
                 power = self.config.powerList[actionIndex[sector.index][1]]
                 index = [cu.index, sector.index, cu.index, sector.index]
-                # direct channel
                 directChannel = self.channels[index2str(index)].getCSI()
                 signalPower = dBm2num(power) * np.power(np.linalg.norm(beamformer * directChannel), 4)
                 # 2. bottom
@@ -122,7 +121,7 @@ class Environment:
                 interCellInterference = 0.
                 for otherCUIndex in neighborTable[cu.index]:
                     otherCU = self.CUs[otherCUIndex]
-                    otherActionIndex = otherCU.getDecisionIndexHistory()
+                    otherActionIndex = otherCU.getActionHistory()
                     for otherCUSector in otherCU.sectors:
                         index = [otherCU.index, otherCUSector.index, cu.index, sector.index]
                         if judgeSkip(index):
@@ -140,7 +139,6 @@ class Environment:
             r /= 3
             reward.append(r)
         # 5. consider others
-        # TODO: check reward function
         rewardRevised = []
         alpha = self.config.interferencePenaltyAlpha
         for CUIndex in range(len(reward)):

@@ -83,12 +83,16 @@ MADQL Algorithm Agent
 
 
 class MADQL:
-    def __init__(self):
+    def __init__(self, name="new"):
+        # general tool
         self.logger = logging.getLogger()
+        self.config = Config()
+        # define network
         self.trainDQN = DQN()
         self.targetDQN = DQN()
+        if name != "new":
+            self.trainDQN.state_dict(torch.load(self.config.MODEL_PATH))
         self.targetDQN.load_state_dict(self.trainDQN.state_dict())
-        self.config = Config()
         self.optimizer = torch.optim.Adam(self.trainDQN.parameters(), lr=self.config.learningRate,
                                           weight_decay=self.config.regBeta)
         self.loss = nn.MSELoss()
@@ -133,8 +137,8 @@ class MADQL:
             return self.takeActionRandom(previous)
         else:
             with torch.no_grad():
-                state = torch.unsqueeze(torch.unsqueeze(torch.tensor(state, dtype=torch.float32), 0), 0).to(self.device)
-                predict = self.targetDQN.forward(state)
+                input = torch.unsqueeze(torch.unsqueeze(torch.tensor(state, dtype=torch.float32), 0), 0).to(self.device)
+                predict = self.targetDQN.forward(input)
             actionIndex = torch.argmax(predict).item()
             action = self.takeActionBaseIndex(actionIndex, previous)
             return action, actionIndex
@@ -170,3 +174,6 @@ class MADQL:
     def updateModelParameter(self):
         self.logger.info("----------------Target DQN Parameter Updates!------------------")
         self.targetDQN.load_state_dict(self.trainDQN.state_dict())
+
+    def saveModel(self):
+        torch.save(self.trainDQN.state_dict(), self.config.MODEL_PATH)
