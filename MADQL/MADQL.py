@@ -3,27 +3,8 @@ from MobileNetwork import *
 import matplotlib.pyplot as plt
 
 
-def showReward(mn):
-    # Random
-    mn.setDecisionMaker(Algorithm.RANDOM)
-    mn.train()
-    averageRewards1 = mn.getAverageRewardRecord()
-    cdf(averageRewards1, label="Random")
-
-    mn.cleanRewardRecord()
-    mn.cleanAverageRewardRecord()
-    # Max Power
-    mn.algorithm = Algorithm.MAX_POWER
-    mn.dm = mn.setDecisionMaker(mn.algorithm)
-    mn.train()
-    averageRewards2 = mn.getAverageRewardRecord()
-    cdf(averageRewards2, label="Max Power")
-
-    plt.legend(loc='upper left')
-    plt.show()
-
-
 def testSaveLoadMobileNetwork():
+    """load mobile network parameter (position of UE, channel random variable) from local file"""
     mn = MobileNetwork()
     mn.plotMobileNetwork()
     saveMobileNetwork(mn)
@@ -32,6 +13,7 @@ def testSaveLoadMobileNetwork():
 
 
 def testCellES():
+    """compare ES, random and plot reward"""
     # load model
     mn = loadMobileNetwork()
     mn.config = Config()
@@ -58,52 +40,49 @@ def testCellES():
     plt.show()
 
 
-def drawMidTerm():
-    # load model
-    mn = loadMobileNetwork()
-
-    # CELL ES
-    mn.loadRewards("CELL_ES")
-    averageRewards = mn.getAverageRewardRecord()
-    cdf(averageRewards, label="Cell ES")
-
-    # Max Power
-    mn.loadRewards("MaxPower")
-    averageRewards3 = mn.getAverageRewardRecord()
-    cdf(averageRewards3, label="Max Power")
-
+def showReward(mn):
+    """"""
     # Random
-    mn.loadRewards("Random")
+    mn.setDecisionMaker(Algorithm.RANDOM)
+    mn.train()
+    averageRewards1 = mn.getAverageRewardRecord()
+    cdf(averageRewards1, label="Random")
+
+    mn.cleanRewardRecord()
+    mn.cleanAverageRewardRecord()
+    # Max Power
+    mn.algorithm = Algorithm.MAX_POWER
+    mn.dm = mn.setDecisionMaker(mn.algorithm)
+    mn.train()
     averageRewards2 = mn.getAverageRewardRecord()
-    cdf(averageRewards2, label="Random")
+    cdf(averageRewards2, label="Max Power")
 
-    # MADQL
-    mn.loadRewards("MADQL")
-    averageRewards4 = mn.getAverageRewardRecord()
-    cdf(averageRewards4, label="MADQL")
-
-    plt.ylabel("Empirical Cumulative Probability")
-    plt.xlabel("Average Spectral Efficiency (bps/Hz) per Link")
-    plt.title("Empirical CDF")
     plt.legend(loc='upper left')
     plt.show()
 
 
 if __name__ == "__main__":
     setLogger()
-    """[test] network structure"""
-    # mn = MobileNetwork()
-    # mn.plotMobileNetwork()
-    """[test] reward in random and max power"""
-    # mn = MobileNetwork()
-    # showReward(mn)
-    """[test] build state and build record"""
-    mn = MobileNetwork(Algorithm.MADQL)
-    mn.train()
-    mn.saveRewards("MADQL_Train")
-    """[test] save and load mobile network"""
-    # testSaveLoadMobileNetwork()
-    """[test] cell ES"""
-    # testCellES()
-    """[test] mid term"""
-    # drawMidTerm()
+    EXECUTION_MODE = "NETWORK_STRUCTURE"
+    if EXECUTION_MODE == "NETWORK_STRUCTURE":
+        """[test] network structure"""
+        mn = MobileNetwork()
+        mn.plotMobileNetwork()
+    elif EXECUTION_MODE == "RAND_AND_MAX_POWER":
+        """[test] reward in random and max power"""
+        mn = MobileNetwork()
+        showReward(mn)
+    elif EXECUTION_MODE == "BUILD_STATE_AND_RECORD":
+        """[test] build state and build record"""
+        mn = loadMobileNetwork()
+        mn.setConfig(Config())
+        mn.setDecisionMaker(Algorithm.MADQL)
+        mn.cleanReward()
+        mn.train()
+        mn.saveRewards("MADQL_Train")
+    elif EXECUTION_MODE == "SAVE_AND_LOAD_MODEL":
+        """[test] save and load mobile network"""
+        testSaveLoadMobileNetwork()
+    elif EXECUTION_MODE == "CELL_ES":
+        """[test] cell ES"""
+        testCellES()
