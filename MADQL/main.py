@@ -1,12 +1,12 @@
-from MobileNetwork import *
-
+from mobile_network import *
+from utils import *
 import matplotlib.pyplot as plt
 
 
 def testSaveLoadMobileNetwork():
     """load mobile network parameter (position of UE, channel random variable) from local file"""
     mn = MobileNetwork()
-    mn.plotMobileNetwork()
+    plotMobileNetwork(mn)
     saveMobileNetwork(mn)
     mnNew = loadMobileNetwork()
     mnNew.plotMobileNetwork()
@@ -41,18 +41,18 @@ def testCellES():
 
 
 def showReward(mn):
-    """"""
     # Random
-    mn.setDecisionMaker(Algorithm.RANDOM)
+    mn.dm = setDecisionMaker(Algorithm.RANDOM)
     mn.train()
     averageRewards1 = mn.getAverageRewardRecord()
     cdf(averageRewards1, label="Random")
 
     mn.cleanRewardRecord()
     mn.cleanAverageRewardRecord()
+
     # Max Power
     mn.algorithm = Algorithm.MAX_POWER
-    mn.dm = mn.setDecisionMaker(mn.algorithm)
+    mn.dm = setDecisionMaker(mn.algorithm)
     mn.train()
     averageRewards2 = mn.getAverageRewardRecord()
     cdf(averageRewards2, label="Max Power")
@@ -63,11 +63,11 @@ def showReward(mn):
 
 if __name__ == "__main__":
     setLogger()
-    EXECUTION_MODE = "NETWORK_STRUCTURE"
+    EXECUTION_MODE = "SAVE_AND_LOAD_MODEL"
     if EXECUTION_MODE == "NETWORK_STRUCTURE":
         """[test] network structure"""
         mn = MobileNetwork()
-        mn.plotMobileNetwork()
+        plotMobileNetwork(mn)
     elif EXECUTION_MODE == "RAND_AND_MAX_POWER":
         """[test] reward in random and max power"""
         mn = MobileNetwork()

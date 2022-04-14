@@ -1,7 +1,24 @@
 import numpy as np
 
+"""
+Use decorator mode to make Config singleton, save repeat compute codebook, improve performance
+"""
 
-class Config:
+
+def Singleton(cls):
+    _instance = {}
+
+    def _singleton():
+        if cls not in _instance:
+            _instance[cls] = cls()
+        return _instance[cls]
+
+    return _singleton
+
+
+@Singleton
+class Config(object):
+
     def __init__(self):
         # base station and user terminal
         self.BSAntenna = 4
@@ -71,6 +88,14 @@ class Config:
 
 
 if __name__ == "__main__":
+    # test generate action list
     config = Config()
     print(config.powerList)
     print(config.beamformList)
+    # test singleton
+    config1 = Config()
+    config2 = Config()
+    if config1 == config2:
+        print("It's singleton!")
+    else:
+        print("Not same instance!")

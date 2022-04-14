@@ -1,4 +1,4 @@
-from Config import Config
+from config import Config
 
 
 class Sector:

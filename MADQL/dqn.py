@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from Config import Config
+from config import Config
 
 
 class DQN(nn.Module):

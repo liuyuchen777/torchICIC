@@ -1,12 +1,13 @@
 import logging
-from Config import Config
-from Utils import dB2num, setLogger, num2dB
+from config import Config
+from utils import dB2num, setLogger, num2dB
 import numpy as np
-from Sector import Sector
-from UserEquipment import UE
+from sector import Sector
+from user_equipment import UE
 import matplotlib.pyplot as plt
 from scipy.stats.kde import gaussian_kde
 from numpy import linspace
+
 
 """
 bs_antenna = N
@@ -95,24 +96,28 @@ def plotPDF2(data):
 
 
 if __name__ == "__main__":
-    """[test] single channel value"""
-    # mSector = Sector(0, 0, [0., 0., 10.])
-    # mUE = UE(0, 0, [50., 50., 1.5])
-    # channel = Channel(sector=mSector, ue=mUE)
-    # print("CSI: ")
-    # print(channel.getCSI())
-    """[test] pdf of channel"""
-    mSector = Sector(0, 0, [0., 0., 10.])
-    mUE = UE(0, 0, [30., 30., 1.5])
-    channel = Channel(sector=mSector, ue=mUE)
-    channels = []
-    for i in range(10000):
-        norm = np.linalg.norm(channel.getCSI())
-        channels.append(norm)
-        channel.step()
-    plotPDF2(channels)
-    """[test] pdf function work or not"""
-    # gaussianData = np.random.normal(loc=0., scale=1., size=10000)
-    # plotPDF(gaussianData)
-    # plt.hist(gaussianData, color='blue', edgecolor='black', bins=100)
-    # plt.show()
+    EXECUTION_MODE = "CHANNEL_PDF"
+    if EXECUTION_MODE == "SINGLE_CHANNEL":
+        """[test] single channel value"""
+        # mSector = Sector(0, 0, [0., 0., 10.])
+        # mUE = UE(0, 0, [50., 50., 1.5])
+        # channel = Channel(sector=mSector, ue=mUE)
+        # print("CSI: ")
+        # print(channel.getCSI())
+    elif EXECUTION_MODE == "CHANNEL_PDF":
+        """[test] pdf of channel"""
+        mSector = Sector(0, 0, [0., 0., 10.])
+        mUE = UE(0, 0, [30., 30., 1.5])
+        channel = Channel(sector=mSector, ue=mUE)
+        channels = []
+        for i in range(10000):
+            norm = np.linalg.norm(channel.getCSI())
+            channels.append(norm)
+            channel.step()
+        plotPDF2(channels)
+    elif EXECUTION_MODE == "TEST_PLOT_PDF":
+        """[test] pdf function work or not"""
+        # gaussianData = np.random.normal(loc=0., scale=1., size=10000)
+        # plotPDF(gaussianData)
+        # plt.hist(gaussianData, color='blue', edgecolor='black', bins=100)
+        # plt.show()

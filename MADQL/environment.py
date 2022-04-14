@@ -1,8 +1,8 @@
 import logging
 import numpy as np
-from Config import Config
-from Utils import index2str, neighborTable, judgeSkip, dBm2num
-from Channel import Channel
+from config import Config
+from utils import index2str, neighborTable, judgeSkip, dBm2num
+from channel import Channel
 
 
 class Environment:

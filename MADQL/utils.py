@@ -1,8 +1,14 @@
 import logging
 from enum import Enum
 import numpy as np
-from Config import Config
+from config import Config
 import time
+from decision_maker import Random, MADQL, MaxPower, WMMSE, FP, CellES
+import matplotlib.pyplot as plt
+
+"""
+Functions to convert number to dBm/dB (power)
+"""
 
 
 def dBm2num(dB):
@@ -18,6 +24,13 @@ def dB2num(dB):
 def num2dB(num):
     dB = 10. * np.log10(num)
     return dB
+
+
+"""
+Channel index convertor
+Downlink transmission
+index = [transmitCU.index, transmitSector.index, receiverCU.index, receiverSector.index]
+"""
 
 
 def index2str(index):
@@ -62,6 +75,11 @@ def setLogger(file=True, debug=False):
     logging.info("=========================================END=========================================")
 
 
+"""
+Enum class of current available method
+"""
+
+
 class Algorithm(Enum):
     RANDOM = 1
     MAX_POWER = 2
@@ -69,6 +87,38 @@ class Algorithm(Enum):
     WMMSE = 4
     MADQL = 5
     CELL_ES = 6
+
+
+def setDecisionMaker(algorithm):
+    """
+    Return instance of decision maker base on algorithm
+    Args:
+        algorithm:
+
+    Returns:
+        decision maker
+    """
+    if algorithm == Algorithm.RANDOM:
+        return Random()
+    elif algorithm == Algorithm.MAX_POWER:
+        return MaxPower()
+    elif algorithm == Algorithm.FP:
+        return FP()
+    elif algorithm == Algorithm.WMMSE:
+        return WMMSE()
+    elif algorithm == Algorithm.MADQL:
+        return MADQL()
+    elif algorithm == Algorithm.CELL_ES:
+        return CellES()
+    else:
+        raise Exception("Incorrect algorithm setting: " + algorithm)
+
+
+"""
+Inter-Sector of a base station will isolate with each other
+CU index start from 0, anti-clockwise from -30 degree
+Sector index start from 0, anti-clockwise from -120 degree
+"""
 
 
 neighborTable = [
@@ -81,7 +131,7 @@ neighborTable = [
     [0, 1, 5]
 ]
 
-# NOTE: CU中每个sector受到影响的Inter-Cell的sector id是一样的，skipTable中记录对应CU要跳过的sector id
+
 skipTable = [
     [-1, 0, 0, 1, 1, 2, 2],     # 0
     [1, -1, 1, 1, -1, -1, 2],     # 1
@@ -98,11 +148,15 @@ def judgeSkip(index):
     index is sequence
     [receiver, sender]
     """
-    # index = [cu.index, sector.index, otherCU.index, otherCUSector.index]
     if skipTable[index[2]][index[0]] == index[1]:
         return True
     else:
         return False
+
+
+def cdf(x, plot=True, *args, **kwargs):
+    x, y = sorted(x), np.arange(len(x)) / len(x)
+    plt.plot(x, y, *args, **kwargs) if plot else (x, y)
 
 
 if __name__ == "__main__":
