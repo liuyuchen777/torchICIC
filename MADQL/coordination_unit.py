@@ -1,4 +1,3 @@
-import logging
 import numpy as np
 from config import Config
 import random
@@ -19,8 +18,6 @@ class CU:
         """
         self.index = index
         self.pos = pos  # [x, y]
-        self.config = Config()
-        self.logger = logging.getLogger(__name__)
         self.sectors = generateSector(self.index, self.pos)
         self.UEs = generateUE(self.index, self.sectors)
         # decision
@@ -36,8 +33,8 @@ class CU:
 
     def _initAction_(self):
         for i in range(3):
-            self.action.append([random.randint(0, self.config.codebookSize - 1),
-                                random.randint(0, self.config.powerLevel - 1)])
+            self.action.append([random.randint(0, Config().codebookSize - 1),
+                                random.randint(0, Config().powerLevel - 1)])
 
     def getAction(self):
         return self.action
@@ -60,7 +57,7 @@ def plotCU(CU, plt=plt, local=False):
     sectorsPosY = []
     UEsPosX = []
     UEsPosY = []
-    cellSize = CU.config.cellSize
+    cellSize = Config().cellSize
     for i in range(3):
         sectorsPosX.append(CU.sectors[i].pos[0])
         sectorsPosY.append(CU.sectors[i].pos[1])

@@ -1,4 +1,3 @@
-import logging
 from config import Config
 from utils import dB2num, setLogger, num2dB
 import numpy as np
@@ -18,13 +17,12 @@ CSI is M * N matrix
 
 class Channel:
     def __init__(self, sector, ue):
-        self.config = Config()
         self.sector = sector
         self.ue = ue
         self.index = [sector.CUIndex, sector.index, ue.CUIndex, ue.index]  # (CU of sector, sector, CU of ue, ue)
         self.distance = self._calDistance_()
-        self.shadowing = np.random.normal(0., self.config.ShadowingSigma)
-        self.largeScale = np.power(self.distance / 1000., self.config.alpha)
+        self.shadowing = np.random.normal(0., Config().ShadowingSigma)
+        self.largeScale = np.power(self.distance / 1000., Config().alpha)
         self.beta = dB2num(self.largeScale + self.shadowing)
         self.CSI = self._calCSI_()
         self.CSIHistory = self.CSI     # csi in last time slot
@@ -39,12 +37,12 @@ class Channel:
     def _calCSI_(self):
         index = self.index[1]   # sector index decide AoD
         # empty csi
-        csi = np.zeros(shape=[self.config.UTAntenna, self.config.BSAntenna], dtype=complex)
-        for _ in range(self.config.pathNumber):
+        csi = np.zeros(shape=[Config().UTAntenna, Config().BSAntenna], dtype=complex)
+        for _ in range(Config().pathNumber):
             # Angle of Arrival
-            AoA = np.zeros(shape=[self.config.UTAntenna, 1], dtype=complex)
+            AoA = np.zeros(shape=[Config().UTAntenna, 1], dtype=complex)
             # Angle of Departure
-            AoD = np.zeros(shape=[self.config.BSAntenna, 1], dtype=complex)
+            AoD = np.zeros(shape=[Config().BSAntenna, 1], dtype=complex)
             """
             sender angle:
             index 0 -> [0, 120)
@@ -52,14 +50,14 @@ class Channel:
             index 2 -> [240, 360)
             """
             thetaSend = (np.random.rand() * 120 + 120 * index) / 360 * 2 * np.pi
-            for n in range(self.config.BSAntenna):
+            for n in range(Config().BSAntenna):
                 AoD[n][0] = np.exp(-np.pi*np.sin(thetaSend)*1j*n)
             thetaReceive = np.random.rand() * 2 * np.pi      # receive angle could be [0, 2pi)
-            for m in range(self.config.UTAntenna):
+            for m in range(Config().UTAntenna):
                 AoA[m][0] = np.exp(-np.pi*np.sin(thetaReceive)*1j*m)
             # complex Gaussian random variable
-            hReal = np.random.normal(0., self.config.gaussianSigma)
-            hImage = np.random.normal(0., self.config.gaussianSigma)
+            hReal = np.random.normal(0., Config().gaussianSigma)
+            hImage = np.random.normal(0., Config().gaussianSigma)
             h = hReal + 1j * hImage
             # print("h: \n", h)
             # print("AoD: \n", AoD)
@@ -96,14 +94,15 @@ def plotPDF2(data):
 
 
 if __name__ == "__main__":
-    EXECUTION_MODE = "CHANNEL_PDF"
+    EXECUTION_MODE = "TEST_PLOT_PDF"
+
     if EXECUTION_MODE == "SINGLE_CHANNEL":
         """[test] single channel value"""
-        # mSector = Sector(0, 0, [0., 0., 10.])
-        # mUE = UE(0, 0, [50., 50., 1.5])
-        # channel = Channel(sector=mSector, ue=mUE)
-        # print("CSI: ")
-        # print(channel.getCSI())
+        mSector = Sector(0, 0, [0., 0., 10.])
+        mUE = UE(0, 0, [50., 50., 1.5])
+        channel = Channel(sector=mSector, ue=mUE)
+        print("CSI: ")
+        print(channel.getCSI())
     elif EXECUTION_MODE == "CHANNEL_PDF":
         """[test] pdf of channel"""
         mSector = Sector(0, 0, [0., 0., 10.])
@@ -117,7 +116,7 @@ if __name__ == "__main__":
         plotPDF2(channels)
     elif EXECUTION_MODE == "TEST_PLOT_PDF":
         """[test] pdf function work or not"""
-        # gaussianData = np.random.normal(loc=0., scale=1., size=10000)
-        # plotPDF(gaussianData)
-        # plt.hist(gaussianData, color='blue', edgecolor='black', bins=100)
-        # plt.show()
+        gaussianData = np.random.normal(loc=0., scale=1., size=10000)
+        plotPDF(gaussianData)
+        plt.hist(gaussianData, color='blue', edgecolor='black', bins=100)
+        plt.show()

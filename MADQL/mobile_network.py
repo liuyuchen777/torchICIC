@@ -177,28 +177,13 @@ class MobileNetwork:
                     continue
         # finish train
         self.logger.info("training finished")
-        self.dm.saveModel()
-        self.logger.info("model saved")
+        if self.algorithm == Algorithm.MADQL:
+            self.dm.saveModel()
+            self.logger.info("model saved")
 
     """
-    getter & setter
+    cleaner
     """
-
-    def getRewardRecord(self):
-        return self.rewardRecord
-
-    def getAverageRewardRecord(self):
-        return self.averageRewardRecord
-
-    def setRewardRecord(self, reward):
-        self.rewardRecord = reward
-
-    def setAverageRewardRecord(self, averageReward):
-        self.averageRewardRecord = averageReward
-
-    def setConfig(self, config):
-        self.config = config
-
     def cleanReward(self):
         self.cleanRewardRecord()
         self.cleanAverageRewardRecord()
@@ -218,14 +203,14 @@ class MobileNetwork:
         with open('data/reward-data.txt') as jsonFile:
             data = json.load(jsonFile)
         with open('data/reward-data.txt', 'w') as jsonFile:
-            data[name + "-rewards"] = self.getRewardRecord()
-            data[name + "-average-rewards"] = self.getAverageRewardRecord()
+            data[name + "-rewards"] = self.rewardRecord
+            data[name + "-average-rewards"] = self.averageRewardRecord
             json.dump(data, jsonFile)
 
     def saveLoss(self, name="default"):
-        with open('data/reward-data.txt') as jsonFile:
+        with open('data/loss-data.txt') as jsonFile:
             data = json.load(jsonFile)
-        with open('data/reward-data.txt', 'w') as jsonFile:
+        with open('data/loss-data.txt', 'w') as jsonFile:
             data[name + "-loss"] = self.lossRecord
             json.dump(data, jsonFile)
 
@@ -243,12 +228,16 @@ Save and load model structure from json file
 
 def saveMobileNetwork(mn):
     with open('data/mobile-network-data.txt', 'wb') as file:
-        pickle.dump(mn, file)
+        pos_and_channel_data = {'pos': mn.CUs, 'channel': mn.env}
+        pickle.dump(pos_and_channel_data, file)
 
 
 def loadMobileNetwork():
     with open('data/mobile-network-data.txt', 'rb') as file:
-        mn = pickle.load(file)
+        pos_and_channel_data = pickle.load(file)
+        mn = MobileNetwork()
+        mn.CUs = pos_and_channel_data['pos']
+        mn.env = pos_and_channel_data['channel']
         return mn
 
 

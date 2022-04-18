@@ -1,4 +1,3 @@
-import logging
 import numpy as np
 from config import Config
 from utils import index2str, neighborTable, judgeSkip, dBm2num
@@ -7,8 +6,6 @@ from channel import Channel
 
 class Environment:
     def __init__(self, CUs):
-        self.logger = logging.getLogger(__name__)
-        self.config = Config()
         self.CUs = CUs
         self.channels = dict()  # dict(channel_index) -> Channel, channel index is string
         self._initChannel_()
@@ -56,21 +53,21 @@ class Environment:
         r = 0.
         for sector in cu.sectors:
             # 1. direct channel (up)
-            beamformer = self.config.beamformList[actionIndex[sector.index][0]]
-            power = self.config.powerList[actionIndex[sector.index][1]]
+            beamformer = Config().beamformList[actionIndex[sector.index][0]]
+            power = Config().powerList[actionIndex[sector.index][1]]
             index = [cu.index, sector.index, cu.index, sector.index]
             # direct channel
             directChannel = self.channels[index2str(index)].getCSI()
             signalPower = dBm2num(power) * np.power(np.linalg.norm(beamformer * directChannel), 4)
             # 2. bottom
             # 2.1 Gaussian noise
-            noisePower = dBm2num(self.config.noisePower) * np.power(np.linalg.norm(beamformer * directChannel), 2)
+            noisePower = dBm2num(Config().noisePower) * np.power(np.linalg.norm(beamformer * directChannel), 2)
             intraCellInterference = 0.
             # 2.2 intra-CU interference
             for otherSector in cu.sectors:
                 if sector.index != otherSector.index:
-                    beamformer = self.config.beamformList[actionIndex[otherSector.index][0]]
-                    power = self.config.powerList[actionIndex[otherSector.index][1]]
+                    beamformer = Config().beamformList[actionIndex[otherSector.index][0]]
+                    power = Config().powerList[actionIndex[otherSector.index][1]]
                     index = [cu.index, otherSector.index, cu.index, sector.index]
                     # same cu channel
                     intraChannel = self.channels[index2str(index)].getCSI()
@@ -98,20 +95,20 @@ class Environment:
             r = 0.
             for sector in cu.sectors:
                 # 1. direct channel
-                beamformer = self.config.beamformList[actionIndex[sector.index][0]]
-                power = self.config.powerList[actionIndex[sector.index][1]]
+                beamformer = Config().beamformList[actionIndex[sector.index][0]]
+                power = Config().powerList[actionIndex[sector.index][1]]
                 index = [cu.index, sector.index, cu.index, sector.index]
                 directChannel = self.channels[index2str(index)].getCSI()
                 signalPower = dBm2num(power) * np.power(np.linalg.norm(beamformer * directChannel), 4)
                 # 2. bottom
                 # 2.1 Gaussian noise
-                noisePower = dBm2num(self.config.noisePower) * np.power(np.linalg.norm(beamformer * directChannel), 2)
+                noisePower = dBm2num(Config().noisePower) * np.power(np.linalg.norm(beamformer * directChannel), 2)
                 intraCellInterference = 0.
                 # 2.2 intra-CU interference
                 for otherSector in cu.sectors:
                     if sector.index != otherSector.index:
-                        beamformer = self.config.beamformList[actionIndex[otherSector.index][0]]
-                        power = self.config.powerList[actionIndex[otherSector.index][1]]
+                        beamformer = Config().beamformList[actionIndex[otherSector.index][0]]
+                        power = Config().powerList[actionIndex[otherSector.index][1]]
                         index = [cu.index, otherSector.index, cu.index, sector.index]
                         # same cu channel
                         intraChannel = self.channels[index2str(index)].getCSI()
@@ -126,8 +123,8 @@ class Environment:
                         index = [otherCU.index, otherCUSector.index, cu.index, sector.index]
                         if judgeSkip(index):
                             continue
-                        beamformer = self.config.beamformList[otherActionIndex[otherCUSector.index][0]]
-                        power = self.config.powerList[otherActionIndex[otherCUSector.index][1]]
+                        beamformer = Config().beamformList[otherActionIndex[otherCUSector.index][0]]
+                        power = Config().powerList[otherActionIndex[otherCUSector.index][1]]
                         ocsChannel = self.channels[index2str(index)].getCSI()
                         interCellInterference += dBm2num(power) * np.power(np.linalg.norm(np.transpose(beamformer)
                                             * np.transpose(ocsChannel) * ocsChannel * beamformer), 2)
@@ -140,7 +137,7 @@ class Environment:
             reward.append(r)
         # 5. consider others
         rewardRevised = []
-        alpha = self.config.interferencePenaltyAlpha
+        alpha = Config().interferencePenaltyAlpha
         for CUIndex in range(len(reward)):
             extraReward = 0.
             for neighborCU in neighborTable[CUIndex]:
@@ -150,3 +147,7 @@ class Environment:
             rewardRevised.append(tmpReward)
 
         return rewardRevised
+
+
+if __name__ == "__main__":
+    print("----------------Test ENV----------------")

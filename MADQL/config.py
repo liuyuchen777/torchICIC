@@ -16,7 +16,7 @@ def Singleton(cls):
     return _singleton
 
 
-@Singleton
+# @Singleton
 class Config(object):
 
     def __init__(self):
@@ -90,8 +90,9 @@ class Config(object):
 if __name__ == "__main__":
     # test generate action list
     config = Config()
-    print(config.powerList)
-    print(config.beamformList)
+    # print(config.powerList)
+    # print(config.beamformList)
+
     # test singleton
     config1 = Config()
     config2 = Config()
