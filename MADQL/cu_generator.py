@@ -1,6 +1,6 @@
 import numpy as np
 from coordination_unit import CU
-from config import Config
+from config import *
 
 
 def generateCU():
@@ -10,13 +10,12 @@ def generateCU():
     Returns:
         CUs: list of CU
     """
-    config = Config()
     CUs = []
-    if config.cellNumber < 1 or config.cellNumber > 7:
-        raise Exception("Incorrect setting of cell number: " + config.cellNumber)
+    if CELL_NUMBER < 1 or CELL_NUMBER > 7:
+        raise Exception("Incorrect setting of cell number: " + CELL_NUMBER)
     # max support 7 cells
-    CUNumber = config.cellNumber
-    cellRadius = config.cellSize * np.sqrt(3)
+    CUNumber = CELL_NUMBER
+    cellRadius = CELL_SIZE * np.sqrt(3)
     # CU Index 0
     CUs.append(CU(0, [0., 0.]))
     for i in range(1, CUNumber):

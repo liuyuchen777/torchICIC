@@ -1,4 +1,3 @@
-from config import Config
 
 
 class UE:
@@ -6,4 +5,3 @@ class UE:
         self.index = index
         self.CUIndex = CUIndex
         self.pos = pos  # [x, y, z]
-        self.config = Config()

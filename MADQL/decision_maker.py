@@ -5,65 +5,55 @@ import torch.optim
 import torch.nn as nn
 import numpy as np
 
-from config import Config
+from config import *
 from dqn import DQN
 
 
 class WMMSE:
     def __init__(self):
-        self.config = Config()
+        print("---------Under Construct--------")
 
 
 class FP:
     def __init__(self):
-        self.config = Config()
+        print("---------Under Construct--------")
 
 
 class Random:
-    def __init__(self):
-        self.config = Config()
-
     def takeAction(self):
         action = []
-        actionIndex = random.randint(0, self.config.outputLayer - 1)
+        actionIndex = random.randint(0, OUTPUT_LAYER - 1)
         for i in range(3):
             """random beamformer and power"""
-            codebookIndex = random.randint(0, self.config.codebookSize - 1)
-            powerIndex = random.randint(0, self.config.powerLevel - 1)
+            codebookIndex = random.randint(0, CODEBOOK_SIZE - 1)
+            powerIndex = random.randint(0, POWER_LEVEL - 1)
             action.append([codebookIndex, powerIndex])
         return action, actionIndex
 
 
 class MaxPower:
-    def __init__(self):
-        self.config = Config()
-
     def takeAction(self):
         action = []
-        actionIndex = random.randint(0, self.config.outputLayer - 1)
+        actionIndex = random.randint(0, OUTPUT_LAYER - 1)
         for i in range(3):
-            codebookIndex = random.randint(0, self.config.codebookSize - 1)
-            powerIndex = self.config.powerLevel - 1     # choose the maximum power
+            codebookIndex = random.randint(0, CODEBOOK_SIZE - 1)
+            powerIndex = POWER_LEVEL - 1     # choose the maximum power
             action.append([codebookIndex, powerIndex])
         return action, actionIndex
 
 
 class CellES:
-    def __init__(self):
-        self.logger = logging.getLogger()
-        self.config = Config()
-
     def takeAction(self, env, cu):
-        actionIndex = random.randint(0, self.config.outputLayer - 1)
+        actionIndex = random.randint(0, OUTPUT_LAYER - 1)
         bestReward = 0.
         action = []
         # main loop for ES
-        for powerIndex0 in range(self.config.powerLevel):
-            for beamIndex0 in range(self.config.codebookSize):
-                for powerIndex1 in range(self.config.powerLevel):
-                    for beamIndex1 in range(self.config.codebookSize):
-                        for powerIndex2 in range(self.config.powerLevel):
-                            for beamIndex2 in range(self.config.codebookSize):
+        for powerIndex0 in range(POWER_LEVEL):
+            for beamIndex0 in range(CODEBOOK_SIZE):
+                for powerIndex1 in range(POWER_LEVEL):
+                    for beamIndex1 in range(CODEBOOK_SIZE):
+                        for powerIndex2 in range(POWER_LEVEL):
+                            for beamIndex2 in range(CODEBOOK_SIZE):
                                 actionTmp = [
                                     [beamIndex0, powerIndex0],
                                     [beamIndex1, powerIndex1],
@@ -86,19 +76,21 @@ class MADQL:
     def __init__(self, name="new"):
         # general tool
         self.logger = logging.getLogger()
-        self.config = Config()
         # define network
         self.trainDQN = DQN()
         self.targetDQN = DQN()
         if name != "new":
-            self.trainDQN.state_dict(torch.load(self.config.MODEL_PATH))
+            self.trainDQN.state_dict(torch.load(MODEL_PATH))
+        # copy parameter of train DQN to target DQN
         self.targetDQN.load_state_dict(self.trainDQN.state_dict())
-        self.optimizer = torch.optim.Adam(self.trainDQN.parameters(), lr=self.config.learningRate,
-                                          weight_decay=self.config.regBeta)
+        self.optimizer = torch.optim.Adam(self.trainDQN.parameters(), lr=LEARNING_RATE,
+                                          weight_decay=REG_BETA)
         self.loss = nn.MSELoss()
+        # set tensor on GPU
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.trainDQN.to(self.device)
         self.targetDQN.to(self.device)
+        # check version
         print("PyTorch Version: \n", torch.__version__)
         print("GPU Device: \n", self.device)
 
@@ -114,26 +106,26 @@ class MADQL:
             # beamformer
             if beamformer == 0 and beamformerIndex != 0:
                 beamformerIndex -= 1
-            elif beamformer == 2 and beamformerIndex != self.config.codebookSize - 1:
+            elif beamformer == 2 and beamformerIndex != CODEBOOK_SIZE - 1:
                 beamformerIndex += 1
             # power
             if power == 0 and powerIndex != 0:
                 powerIndex -= 1
-            elif power == 2 and powerIndex != self.config.powerLevel - 1:
+            elif power == 2 and powerIndex != POWER_LEVEL - 1:
                 powerIndex += 1
             action.append([beamformerIndex, powerIndex])
         return action
 
     def takeActionRandom(self, previous):
         # random
-        actionIndex = random.randint(0, self.config.outputLayer - 1)
+        actionIndex = random.randint(0, OUTPUT_LAYER - 1)
         action = self.takeActionBaseIndex(actionIndex, previous)
         return action, actionIndex
 
     def takeAction(self, state, previous, trainLabel=True):
         """state is defined in MobileNetwork.buildState"""
         # epsilon-greedy policy
-        if np.random.rand() < self.config.epsilon and trainLabel:
+        if np.random.rand() < EPSILON and trainLabel:
             return self.takeActionRandom(previous)
         else:
             with torch.no_grad():
@@ -160,8 +152,8 @@ class MADQL:
             rewardMax = torch.amax(predictTarget, dim=1)
             action = [item[1] for item in recordBatch]
             reward = [item[2] for item in recordBatch]
-            rewardRevise = torch.tensor(reward).to(self.device) + self.config.gamma * rewardMax
-            for i in range(self.config.batchSize):
+            rewardRevise = torch.tensor(reward).to(self.device) + GAMMA * rewardMax
+            for i in range(BATCH_SIZE):
                 predictTarget[i][action[i]] = rewardRevise[i]
         # calculate loss
         myLoss = self.loss(predictTarget, predictTrain)
@@ -176,4 +168,4 @@ class MADQL:
         self.targetDQN.load_state_dict(self.trainDQN.state_dict())
 
     def saveModel(self):
-        torch.save(self.trainDQN.state_dict(), self.config.MODEL_PATH)
+        torch.save(self.trainDQN.state_dict(), MODEL_PATH)

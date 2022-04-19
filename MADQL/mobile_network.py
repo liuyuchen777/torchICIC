@@ -8,12 +8,13 @@ from memory_pool import MemoryPool
 from coordination_unit import plotCU
 from utils import *
 
+from config import *
+
 
 class MobileNetwork:
 
     def __init__(self, algorithm=Algorithm.RANDOM):
         self.logger = logging.getLogger(__name__)
-        self.config = Config()
         self.mp = MemoryPool()
         """set decision maker"""
         self.algorithm = algorithm
@@ -52,7 +53,7 @@ class MobileNetwork:
         432 -> 6 * (4 * 9 * 2)
         2 = Real + Image
         """
-        state = np.zeros(shape=self.config.inputLayer, dtype=float)
+        state = np.zeros(shape=INPUT_LAYER, dtype=float)
         # Intra-CU
         action = self.CUs[CUIndex].getAction()
         for sectorIndex in range(3):
@@ -60,8 +61,8 @@ class MobileNetwork:
                 index = [CUIndex, sectorIndex, CUIndex, otherSectorIndex]
                 channel = self.env.getChannel(index2str(index))
                 CSI = channel.getCSI()
-                beamformer = self.config.beamformList[action[sectorIndex][0]]
-                power = self.config.powerList[action[sectorIndex][1]]
+                beamformer = BEAMFORMER_LIST[action[sectorIndex][0]]
+                power = POWER_LIST[action[sectorIndex][1]]
                 tmp = dBm2num(power) * beamformer.dot(CSI)
                 state[sectorIndex*24+otherSectorIndex*8: sectorIndex*24+otherSectorIndex*8+4] = np.real(tmp)
                 state[sectorIndex*24+otherSectorIndex*8+4: sectorIndex*24+otherSectorIndex*8+8] = np.imag(tmp)
@@ -76,8 +77,8 @@ class MobileNetwork:
                     else:
                         channel = self.env.getChannel(index2str(index))
                         CSI = channel.getCSI()  # H_t
-                        beamformer = self.config.beamformList[actionHistory[otherSectorIndex][0]]
-                        power = self.config.powerList[actionHistory[otherSectorIndex][1]]
+                        beamformer = BEAMFORMER_LIST[actionHistory[otherSectorIndex][0]]
+                        power = POWER_LIST[actionHistory[otherSectorIndex][1]]
                         tmp = dBm2num(power) * beamformer.dot(CSI)
                         state[72+otherCUIndex*72+otherSectorIndex*24+sectorIndex*8:
                               72+otherCUIndex*72+otherSectorIndex*24+sectorIndex*8+4] = np.real(tmp)
@@ -117,12 +118,12 @@ class MobileNetwork:
         elif self.algorithm == Algorithm.MADQL:
             stateRecord = []
             actionRecord = []
-            for CUIndex in range(self.config.cellNumber):
+            for CUIndex in range(CELL_NUMBER):
                 # build state
                 state = self.buildStateRI(CUIndex)
                 stateRecord.append(state)
                 # take action
-                if self.mp.getSize() < self.config.batchSize:
+                if self.mp.getSize() < BATCH_SIZE:
                     action, actionIndex = self.dm.takeActionRandom(self.CUs[CUIndex].getActionHistory())
                     self.CUs[CUIndex].setAction(action)
                 else:
@@ -137,12 +138,12 @@ class MobileNetwork:
             self.env.step()
             # next state
             nextStateRecord = []
-            for CUIndex in range(self.config.cellNumber):
+            for CUIndex in range(CELL_NUMBER):
                 # build state & take action
                 state = self.buildStateRI(CUIndex)
                 nextStateRecord.append(state)
             # save in memory pool
-            for CUIndex in range(self.config.cellNumber):
+            for CUIndex in range(CELL_NUMBER):
                 record = [stateRecord[CUIndex], actionRecord[CUIndex], tsReward[CUIndex], nextStateRecord[CUIndex]]
                 self.mp.push(record)
             # return
@@ -150,7 +151,7 @@ class MobileNetwork:
 
     def train(self):
         """train network"""
-        for ts in range(self.config.totalTimeSlot):
+        for ts in range(TOTAL_TIME_SLOT):
             # step
             tsReward, tsAverageReward = self.step()
             # record reward
@@ -159,21 +160,24 @@ class MobileNetwork:
             if self.algorithm == Algorithm.RANDOM \
                     or self.algorithm == Algorithm.MAX_POWER \
                     or self.algorithm == Algorithm.CELL_ES:
-                if ts % self.config.printSlot == 0:
+                if ts % PRINT_SLOT == 0:
                     self.logger.info(f'[Train] mode: {self.algorithm},time slot: {ts + 1}, '
                                      f'system average reward: {tsAverageReward}')
             elif self.algorithm == Algorithm.MADQL:
-                if self.mp.getSize() > self.config.batchSize:
+                if self.mp.getSize() > BATCH_SIZE:
                     loss = self.dm.backProp(self.mp.getBatch())
                     self.lossRecord.append(loss)
-                    if ts % self.config.printSlot == 0:
-                        # copy DQN parameters
-                        self.logger.info(f'[train] mode: {self.algorithm}, time slot: {ts}, '
+                    if ts % PRINT_SLOT == 0:
+                        self.logger.info(f'[Train] mode: {self.algorithm}, time slot: {ts}, '
                                          f'system average reward: {tsAverageReward}, '
                                          f'loss: {loss}.')
-                    if ts % self.config.tStep == 0:
+                    if ts % T_STEP == 0:
+                        # update target DQN parameters
                         self.dm.updateModelParameter()
                 else:
+                    if ts % PRINT_SLOT == 0:
+                        self.logger.info(f'[Train] mode: {self.algorithm}, time slot: {ts}, '
+                                         f'system average reward: {tsAverageReward}, ')
                     continue
         # finish train
         self.logger.info("training finished")

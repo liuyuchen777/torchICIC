@@ -1,17 +1,16 @@
 import torch.nn as nn
 
-from config import Config
+from config import *
 
 
 class DQN(nn.Module):
     def __init__(self):
         super(DQN, self).__init__()
-        self.config = Config()
         # layers
-        self.inputLayer = nn.Linear(self.config.inputLayer, self.config.hiddenLayers[0])
-        self.hiddenLayer1 = nn.Linear(self.config.hiddenLayers[0], self.config.hiddenLayers[1])
-        self.hiddenLayer2 = nn.Linear(self.config.hiddenLayers[1], self.config.hiddenLayers[2])
-        self.outputLayer = nn.Linear(self.config.hiddenLayers[2], self.config.outputLayer)
+        self.inputLayer = nn.Linear(INPUT_LAYER, HIDDEN_LAYERS[0])
+        self.hiddenLayer1 = nn.Linear(HIDDEN_LAYERS[0], HIDDEN_LAYERS[1])
+        self.hiddenLayer2 = nn.Linear(HIDDEN_LAYERS[1], HIDDEN_LAYERS[2])
+        self.outputLayer = nn.Linear(HIDDEN_LAYERS[2], OUTPUT_LAYER)
 
     def forward(self, input):
         # flow1

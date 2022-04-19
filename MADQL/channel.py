@@ -1,5 +1,5 @@
-from config import Config
-from utils import dB2num, setLogger, num2dB
+from config import *
+from utils import dB2num
 import numpy as np
 from sector import Sector
 from user_equipment import UE
@@ -21,8 +21,8 @@ class Channel:
         self.ue = ue
         self.index = [sector.CUIndex, sector.index, ue.CUIndex, ue.index]  # (CU of sector, sector, CU of ue, ue)
         self.distance = self._calDistance_()
-        self.shadowing = np.random.normal(0., Config().ShadowingSigma)
-        self.largeScale = np.power(self.distance / 1000., Config().alpha)
+        self.shadowing = np.random.normal(0., SHADOWING_SIGMA)
+        self.largeScale = np.power(self.distance / 1000., ALPHA)
         self.beta = dB2num(self.largeScale + self.shadowing)
         self.CSI = self._calCSI_()
         self.CSIHistory = self.CSI     # csi in last time slot
@@ -37,12 +37,12 @@ class Channel:
     def _calCSI_(self):
         index = self.index[1]   # sector index decide AoD
         # empty csi
-        csi = np.zeros(shape=[Config().UTAntenna, Config().BSAntenna], dtype=complex)
-        for _ in range(Config().pathNumber):
+        csi = np.zeros(shape=[UT_ANTENNA, BS_ANTENNA], dtype=complex)
+        for _ in range(PATH_NUMBER):
             # Angle of Arrival
-            AoA = np.zeros(shape=[Config().UTAntenna, 1], dtype=complex)
+            AoA = np.zeros(shape=[UT_ANTENNA, 1], dtype=complex)
             # Angle of Departure
-            AoD = np.zeros(shape=[Config().BSAntenna, 1], dtype=complex)
+            AoD = np.zeros(shape=[BS_ANTENNA, 1], dtype=complex)
             """
             sender angle:
             index 0 -> [0, 120)
@@ -50,14 +50,14 @@ class Channel:
             index 2 -> [240, 360)
             """
             thetaSend = (np.random.rand() * 120 + 120 * index) / 360 * 2 * np.pi
-            for n in range(Config().BSAntenna):
+            for n in range(BS_ANTENNA):
                 AoD[n][0] = np.exp(-np.pi*np.sin(thetaSend)*1j*n)
             thetaReceive = np.random.rand() * 2 * np.pi      # receive angle could be [0, 2pi)
-            for m in range(Config().UTAntenna):
+            for m in range(UT_ANTENNA):
                 AoA[m][0] = np.exp(-np.pi*np.sin(thetaReceive)*1j*m)
             # complex Gaussian random variable
-            hReal = np.random.normal(0., Config().gaussianSigma)
-            hImage = np.random.normal(0., Config().gaussianSigma)
+            hReal = np.random.normal(0., GAUSSIAN_SIGMA)
+            hImage = np.random.normal(0., GAUSSIAN_SIGMA)
             h = hReal + 1j * hImage
             # print("h: \n", h)
             # print("AoD: \n", AoD)

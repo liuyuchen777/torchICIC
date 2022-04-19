@@ -33,7 +33,7 @@ class RLSimulator(object):
                 agent.memory_pool.reset()
                 # decay epsilon (optional)
                 # agent.decay_epsilon()
-                agent.epsilon = max(1 - ((i + 1) / 30.), 0.1)
+                agent.EPSILON = max(1 - ((i + 1) / 30.), 0.1)
             # cross validation
             rewards = self.test(agents)
             time_elapsed = time.time() - start

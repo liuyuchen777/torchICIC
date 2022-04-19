@@ -1,10 +1,10 @@
 import random
 
-from config import Config
-import numpy as np
+from config import *
+
 
 class MemoryPool:
-    def __init__(self, maxSize=Config().mpMaxSize):
+    def __init__(self, maxSize=MP_MAX_SIZE):
         self.maxSize = maxSize
         self.pool = []
         self.size = 0
@@ -20,6 +20,6 @@ class MemoryPool:
     def getSize(self):
         return self.size
 
-    def getBatch(self, size=Config().batchSize):
+    def getBatch(self, size=BATCH_SIZE):
         random.shuffle(self.pool)
         return self.pool[:size]

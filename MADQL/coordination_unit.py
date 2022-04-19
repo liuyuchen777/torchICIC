@@ -1,5 +1,5 @@
 import numpy as np
-from config import Config
+from config import *
 import random
 import matplotlib.pyplot as plt
 from bs_ue_generator import generateUE, generateSector
@@ -33,8 +33,8 @@ class CU:
 
     def _initAction_(self):
         for i in range(3):
-            self.action.append([random.randint(0, Config().codebookSize - 1),
-                                random.randint(0, Config().powerLevel - 1)])
+            self.action.append([random.randint(0, CODEBOOK_SIZE - 1),
+                                random.randint(0, POWER_LEVEL - 1)])
 
     def getAction(self):
         return self.action
@@ -57,7 +57,7 @@ def plotCU(CU, plt=plt, local=False):
     sectorsPosY = []
     UEsPosX = []
     UEsPosY = []
-    cellSize = Config().cellSize
+    cellSize = CELL_SIZE
     for i in range(3):
         sectorsPosX.append(CU.sectors[i].pos[0])
         sectorsPosY.append(CU.sectors[i].pos[1])

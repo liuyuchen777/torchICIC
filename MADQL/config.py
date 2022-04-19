@@ -5,98 +5,71 @@ Use decorator mode to make Config singleton, save repeat compute codebook, impro
 """
 
 
-def Singleton(cls):
-    _instance = {}
+BS_ANTENNA = 4
+UT_ANTENNA = 4
+BS_HEIGHT = 10.
+UT_HEIGHT = 1.5
 
-    def _singleton():
-        if cls not in _instance:
-            _instance[cls] = cls()
-        return _instance[cls]
+# power level list
+MAX_POWER = 10.  # dBm
+POWER_LEVEL = 5
+POWER_LIST = []
 
-    return _singleton
+# generate power list
+powerGap = MAX_POWER * 2 / (POWER_LEVEL - 1)
+tmpPower = MAX_POWER
+for i in range(POWER_LEVEL):
+    POWER_LIST.append(tmpPower)
+    tmpPower -= powerGap
 
+# beamforming vector list
+CODEBOOK_SIZE = 4
+BEAMFORMER_LIST = np.zeros(shape=[CODEBOOK_SIZE, BS_ANTENNA], dtype=np.cdouble)
 
-# @Singleton
-class Config(object):
+# generate beamformer list
+# need to generate three sector of code matrix
+N = 16  # number of phases
+M = BS_ANTENNA  # number of Antenna
+K = CODEBOOK_SIZE  # codebook size
+for m in range(1, M + 1):
+    for k in range(1, K + 1):
+        BEAMFORMER_LIST[k - 1][m - 1] = np.exp(2j * np.pi / N * int(m * (k + K / 2) % K / (K / N))) / np.sqrt(M)
 
-    def __init__(self):
-        # base station and user terminal
-        self.BSAntenna = 4
-        self.UTAntenna = 4
-        self.BSHeight = 10.
-        self.UTHeight = 1.5
+# wireless channel
+ALPHA = 3  # path loss exponent
+SHADOWING_SIGMA = 8   # db
+GAUSSIAN_SIGMA = 1
+# loss, non-loss
+NOISE_POWER = -100    # Gaussian white noise, dBm
+PATH_NUMBER = 6    # LOS path number
 
-        # power level list
-        self.maxPower = 10.  # dBm
-        self.powerLevel = 5
-        self.powerList = []
-        self._calPowerList_()
+# cellular network
+CELL_SIZE = 100.  # m
+CELL_NUMBER = 7
+R_MIN = 15.
+R_MAX = 60.
+INFERENCE_PENALTY_ALPHA = 0.2
 
-        # beamforming vector list
-        self.codebookSize = 4
-        self.beamformList = np.zeros(shape=[self.codebookSize, self.BSAntenna], dtype=np.cdouble)
-        self._calCodeList_()
+# memory pool
+MP_MAX_SIZE = 10000
+BATCH_SIZE = 512
 
-        # wireless channel
-        self.alpha = 3  # path loss exponent
-        self.ShadowingSigma = 8   # db
-        self.gaussianSigma = 1
-        # loss, non-loss
-        self.noisePower = -100    # Gaussian white noise, dBm
-        self.pathNumber = 6    # LOS path number
-
-        # cellular network
-        self.cellSize = 100.  # m
-        self.cellNumber = 7
-        self.Rmin = 15.
-        self.Rmax = 60.
-        self.interferencePenaltyAlpha = 0.2
-
-        # memory pool
-        self.mpMaxSize = 10000
-        self.batchSize = 512
-
-        # deep learning hyper-parameter
-        self.totalTimeSlot = 300
-        self.learningRate = 1e-4
-        self.regBeta = 0.
-        self.tStep = 256
-        self.gamma = 0.3
-        self.epsilon = 0.3
-        self.evalTimes = 10
-        self.hiddenLayers = [1024, 1024, 1024]
-        self.inputLayer = 576
-        self.outputLayer = 729
-        self.printSlot = 1
-        self.MODEL_PATH = "./model/MADQL.pth"
-
-    def _calPowerList_(self):
-        powerGap = self.maxPower * 2 / (self.powerLevel - 1)
-        tmpPower = self.maxPower
-        for i in range(self.powerLevel):
-            self.powerList.append(tmpPower)
-            tmpPower -= powerGap
-
-    def _calCodeList_(self):
-        # need to generate three sector of code matrix
-        N = 16  # number of phases
-        M = self.BSAntenna      # number of Antenna
-        K = self.codebookSize   # codebook size
-        for m in range(1, M+1):
-            for k in range(1, K+1):
-                self.beamformList[k-1][m-1] = np.exp(2j * np.pi / N * int(m * (k + K / 2) % K / (K/N))) / np.sqrt(M)
+# deep learning hyper-parameter
+TOTAL_TIME_SLOT = 100
+LEARNING_RATE = 1e-4
+REG_BETA = 0.
+T_STEP = 128
+GAMMA = 0.3
+EPSILON = 0.3
+EVAL_TIMES = 10
+HIDDEN_LAYERS = [1024, 1024, 1024]
+INPUT_LAYER = 576
+OUTPUT_LAYER = 729
+PRINT_SLOT = 1
+MODEL_PATH = "./model/MADQL.pth"
 
 
 if __name__ == "__main__":
     # test generate action list
-    config = Config()
-    # print(config.powerList)
-    # print(config.beamformList)
-
-    # test singleton
-    config1 = Config()
-    config2 = Config()
-    if config1 == config2:
-        print("It's singleton!")
-    else:
-        print("Not same instance!")
+    print(POWER_LIST)
+    print(BEAMFORMER_LIST)

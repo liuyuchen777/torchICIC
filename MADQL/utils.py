@@ -1,7 +1,7 @@
 import logging
 from enum import Enum
 import numpy as np
-from config import Config
+from config import *
 import time
 from decision_maker import Random, MADQL, MaxPower, WMMSE, FP, CellES
 import matplotlib.pyplot as plt
@@ -46,7 +46,6 @@ def str2index(index_str):
 
 
 def setLogger(file=True, debug=False):
-    config = Config()
     if debug:
         logLevel = logging.DEBUG
     else:
@@ -63,14 +62,14 @@ def setLogger(file=True, debug=False):
     logging.info("=====================================CONFIG=========================================")
     logging.info(f'START TIME: {time.strftime("%H:%M:%S", time.localtime())}')
     logging.info("-----------------------------------COMMUNICATION------------------------------------")
-    logging.info(f'Power Level: {config.powerLevel}, Codebook Size: {config.codebookSize}, '
-                 f'Cell Length: {config.cellSize} m, Cell Number: {config.cellNumber}')
-    logging.info(f'Path Loss Exponent: {config.alpha}, Log-normal Sigma: {config.ShadowingSigma} db, '
-                 f'Gaussian Sigma: {config.gaussianSigma} db')
+    logging.info(f'Power Level: {POWER_LEVEL}, Codebook Size: {CODEBOOK_SIZE}, '
+                 f'Cell Length: {CELL_SIZE} m, Cell Number: {CELL_NUMBER}')
+    logging.info(f'Path Loss Exponent: {ALPHA}, Log-normal Sigma: {SHADOWING_SIGMA} db, '
+                 f'Gaussian Sigma: {GAUSSIAN_SIGMA} db')
     logging.info("-----------------------------------------DL------------------------------------------")
-    logging.info(f'Batch Size: {config.batchSize}, Total time slot: {config.totalTimeSlot}, '
-                 f'Learning Rate: {config.learningRate}, Reg Beta: {config.regBeta}')
-    logging.info(f'Gamma: {config.gamma}, Epsilon: {config.epsilon}')
+    logging.info(f'Batch Size: {BATCH_SIZE}, Total time slot: {TOTAL_TIME_SLOT}, '
+                 f'Learning Rate: {LEARNING_RATE}, Reg Beta: {REG_BETA}')
+    logging.info(f'Gamma: {GAMMA}, Epsilon: {EPSILON}')
     # network config information
     logging.info("=========================================END=========================================")
 
