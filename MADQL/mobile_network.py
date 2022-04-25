@@ -23,9 +23,12 @@ class MobileNetwork:
         self.CUs = generateCU()
         self.env = Environment(self.CUs)
         """end generate mobile network"""
-        self.rewardRecord = []                      # 7 * time slot
-        self.averageRewardRecord = []               # 1 * time slot
+        self.rewardRecord = []              # scale: 7 * time slot
+        self.averageRewardRecord = []       # scale: 1 * time slot
         self.lossRecord = []
+        """tmp variable"""
+        self.accumulateLoss = 0.
+        self.accumulateAverageReward = 0.
 
     """
     state builder
@@ -64,8 +67,10 @@ class MobileNetwork:
                 beamformer = BEAMFORMER_LIST[action[sectorIndex][0]]
                 power = POWER_LIST[action[sectorIndex][1]]
                 tmp = dBm2num(power) * beamformer.dot(CSI)
-                state[sectorIndex*24+otherSectorIndex*8: sectorIndex*24+otherSectorIndex*8+4] = np.real(tmp)
-                state[sectorIndex*24+otherSectorIndex*8+4: sectorIndex*24+otherSectorIndex*8+8] = np.imag(tmp)
+                state[sectorIndex * 24 + otherSectorIndex * 8: sectorIndex * 24 + otherSectorIndex * 8 + 4] = np.real(
+                    tmp)
+                state[
+                sectorIndex * 24 + otherSectorIndex * 8 + 4: sectorIndex * 24 + otherSectorIndex * 8 + 8] = np.imag(tmp)
         # Inter-CU
         for otherCUIndex in neighborTable[CUIndex]:
             actionHistory = self.CUs[otherCUIndex].getActionHistory()
@@ -80,13 +85,13 @@ class MobileNetwork:
                         beamformer = BEAMFORMER_LIST[actionHistory[otherSectorIndex][0]]
                         power = POWER_LIST[actionHistory[otherSectorIndex][1]]
                         tmp = dBm2num(power) * beamformer.dot(CSI)
-                        state[72+otherCUIndex*72+otherSectorIndex*24+sectorIndex*8:
-                              72+otherCUIndex*72+otherSectorIndex*24+sectorIndex*8+4] = np.real(tmp)
-                        state[72+otherCUIndex*72+otherSectorIndex*24+sectorIndex*8+4:
-                              72+otherCUIndex*72+otherSectorIndex*24+sectorIndex*8+8] = np.imag(tmp)
+                        state[72 + otherCUIndex * 72 + otherSectorIndex * 24 + sectorIndex * 8:
+                              72 + otherCUIndex * 72 + otherSectorIndex * 24 + sectorIndex * 8 + 4] = np.real(tmp)
+                        state[72 + otherCUIndex * 72 + otherSectorIndex * 24 + sectorIndex * 8 + 4:
+                              72 + otherCUIndex * 72 + otherSectorIndex * 24 + sectorIndex * 8 + 8] = np.imag(tmp)
         return state
 
-    def step(self, trainLabel=True):
+    def step(self, train=True):
         """
         one step in training
         record: <s, a, r, s'>
@@ -123,12 +128,13 @@ class MobileNetwork:
                 state = self.buildStateRI(CUIndex)
                 stateRecord.append(state)
                 # take action
-                if self.mp.getSize() < BATCH_SIZE:
+                if self.mp.getSize() < BATCH_SIZE and train:
+                    # memory pool size smaller than batch size
                     action, actionIndex = self.dm.takeActionRandom(self.CUs[CUIndex].getActionHistory())
                     self.CUs[CUIndex].setAction(action)
                 else:
-                    action, actionIndex = self.dm.takeAction(state, self.CUs[CUIndex].getActionHistory(),
-                                                             trainLabel)
+                    # greedy-epsilon or greedy -> depends on train or test
+                    action, actionIndex = self.dm.takeAction(state, self.CUs[CUIndex].getActionHistory(), train)
                     self.CUs[CUIndex].setAction(action)
                 actionRecord.append(actionIndex)
             # calculate reward
@@ -149,45 +155,45 @@ class MobileNetwork:
             # return
             return tsReward, tsAverageReward
 
-    def train(self):
+    def train(self, train=True):
         """train network"""
         for ts in range(TOTAL_TIME_SLOT):
             # step
-            tsReward, tsAverageReward = self.step()
+            tsReward, tsAverageReward = self.step(train=train)
             # record reward
             self.rewardRecord.append(tsReward)
             self.averageRewardRecord.append(tsAverageReward)
-            if self.algorithm == Algorithm.RANDOM \
-                    or self.algorithm == Algorithm.MAX_POWER \
-                    or self.algorithm == Algorithm.CELL_ES:
-                if ts % PRINT_SLOT == 0:
-                    self.logger.info(f'[Train] mode: {self.algorithm},time slot: {ts + 1}, '
-                                     f'system average reward: {tsAverageReward}')
-            elif self.algorithm == Algorithm.MADQL:
-                if self.mp.getSize() > BATCH_SIZE:
-                    loss = self.dm.backProp(self.mp.getBatch())
-                    self.lossRecord.append(loss)
-                    if ts % PRINT_SLOT == 0:
-                        self.logger.info(f'[Train] mode: {self.algorithm}, time slot: {ts}, '
-                                         f'system average reward: {tsAverageReward}, '
-                                         f'loss: {loss}.')
-                    if ts % T_STEP == 0:
-                        # update target DQN parameters
-                        self.dm.updateModelParameter()
-                else:
-                    if ts % PRINT_SLOT == 0:
-                        self.logger.info(f'[Train] mode: {self.algorithm}, time slot: {ts}, '
-                                         f'system average reward: {tsAverageReward}, ')
-                    continue
+
+            if self.algorithm == Algorithm.MADQL and self.mp.getSize() > BATCH_SIZE and train:
+                loss = self.dm.backProp(self.mp.getBatch())
+                self.lossRecord.append(loss)
+                self.accumulateLoss += loss
+                self.accumulateAverageReward += tsAverageReward
+                if ts % PRINT_SLOT == 0 and ts != 0:
+                    self.logger.info(f'[Train] mode: {self.algorithm}, time slot: {ts}, '
+                                     f'system average reward: {self.accumulateAverageReward / PRINT_SLOT}, '
+                                     f'loss: {self.accumulateLoss / PRINT_SLOT}.')
+                    self.accumulateLoss = 0.
+                    self.accumulateAverageReward = 0.
+                # update target DQN parameters
+                if ts % T_STEP == 0 and ts != 0:
+                    self.dm.updateModelParameter()
+            else:
+                self.accumulateAverageReward += tsAverageReward
+                if ts % PRINT_SLOT == 0 and ts != 0:
+                    self.logger.info(f'[Train] mode: {self.algorithm}, time slot: {ts}, '
+                                     f'system average reward: {self.accumulateAverageReward / PRINT_SLOT}')
+                    self.accumulateAverageReward = 0.
         # finish train
-        self.logger.info("training finished")
+        self.logger.info("-----------------------------Training Finished------------------------------------")
         if self.algorithm == Algorithm.MADQL:
             self.dm.saveModel()
-            self.logger.info("model saved")
+            self.logger.info("------------------------------Model Saved---------------------------------------")
 
     """
     cleaner
     """
+
     def cleanReward(self):
         self.cleanRewardRecord()
         self.cleanAverageRewardRecord()
@@ -207,6 +213,7 @@ class MobileNetwork:
         with open('data/reward-data.txt') as jsonFile:
             data = json.load(jsonFile)
         with open('data/reward-data.txt', 'w') as jsonFile:
+            self.logger.info(f"--------------------------Save Rewards as {name}-----------------------------")
             data[name + "-rewards"] = self.rewardRecord
             data[name + "-average-rewards"] = self.averageRewardRecord
             json.dump(data, jsonFile)
@@ -215,6 +222,7 @@ class MobileNetwork:
         with open('data/loss-data.txt') as jsonFile:
             data = json.load(jsonFile)
         with open('data/loss-data.txt', 'w') as jsonFile:
+            self.logger.info(f"--------------------------Load Rewards {name}-----------------------------")
             data[name + "-loss"] = self.lossRecord
             json.dump(data, jsonFile)
 

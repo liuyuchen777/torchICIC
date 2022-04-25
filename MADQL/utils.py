@@ -69,7 +69,7 @@ def setLogger(file=True, debug=False):
     logging.info("-----------------------------------------DL------------------------------------------")
     logging.info(f'Batch Size: {BATCH_SIZE}, Total time slot: {TOTAL_TIME_SLOT}, '
                  f'Learning Rate: {LEARNING_RATE}, Reg Beta: {REG_BETA}')
-    logging.info(f'Gamma: {GAMMA}, Epsilon: {EPSILON}')
+    logging.info(f'Gamma: {GAMMA}, Epsilon: {EPSILON}, Epsilon Decrease: {DECREASE_FACTOR}')
     # network config information
     logging.info("=========================================END=========================================")
 
@@ -88,10 +88,11 @@ class Algorithm(Enum):
     CELL_ES = 6
 
 
-def setDecisionMaker(algorithm):
+def setDecisionMaker(algorithm, mode="NEW"):
     """
     Return instance of decision maker base on algorithm
     Args:
+        mode: NEW or LOAD_MODEL
         algorithm:
 
     Returns:
@@ -106,7 +107,7 @@ def setDecisionMaker(algorithm):
     elif algorithm == Algorithm.WMMSE:
         return WMMSE()
     elif algorithm == Algorithm.MADQL:
-        return MADQL()
+        return MADQL(mode)
     elif algorithm == Algorithm.CELL_ES:
         return CellES()
     else:

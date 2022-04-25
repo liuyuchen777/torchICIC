@@ -80,12 +80,38 @@ def trainMADQL(mn):
     mn.algorithm = Algorithm.MADQL
     mn.dm = setDecisionMaker(mn.algorithm)
     mn.train()
-    mn.saveRewards("MADQL_TRAIN")
+    mn.saveRewards("MADQL_TRAIN_DECREASE")
+
+
+def randomAndMADQL(mn):
+    plotMobileNetwork(mn)
+
+    # Eval MADQL
+    mn.loadRewards("MADQL_TRAIN")
+    averageRewards1 = mn.averageRewardRecord[500:]
+    cdf(averageRewards1, label="MADQL")
+    mn.cleanReward()
+
+    # Random
+    mn.loadRewards("RANDOM")
+    averageRewards2 = mn.averageRewardRecord
+    cdf(averageRewards2, label="Random")
+    mn.cleanReward()
+
+    # Cell ES
+    mn.loadRewards("CELL_ES")
+    averageRewards3 = mn.averageRewardRecord
+    cdf(averageRewards3, label="Cell ES")
+    mn.cleanReward()
+
+    # plot
+    plt.legend(loc='upper left')
+    plt.show()
 
 
 if __name__ == "__main__":
     setLogger()
-    EXECUTION_MODE = "TRAIN_MADQL"
+    EXECUTION_MODE = "EVAL_MADQL"
 
     if EXECUTION_MODE == "NETWORK_STRUCTURE":
         """[test] plot network structure"""
@@ -96,11 +122,11 @@ if __name__ == "__main__":
         testSaveLoadMobileNetwork()
     elif EXECUTION_MODE == "RAND_AND_MAX_POWER":
         """[test] random and max power"""
-        mn = MobileNetwork()
+        mn = loadMobileNetwork()
         randAndMaxPower(mn)
     elif EXECUTION_MODE == "RAND_AND_CELL_ES":
         """[test] cell ES and random"""
-        mn = MobileNetwork()
+        mn = loadMobileNetwork()
         randAndCellES(mn)
     elif EXECUTION_MODE == "QUICK_TEST_MADQL":
         """[test] quick test MADQL"""
@@ -110,3 +136,6 @@ if __name__ == "__main__":
         """[test] train MADQL model"""
         mn = loadMobileNetwork()
         trainMADQL(mn)
+    elif EXECUTION_MODE == "EVAL_MADQL":
+        mn = loadMobileNetwork()
+        randomAndMADQL(mn)

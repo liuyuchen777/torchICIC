@@ -55,17 +55,18 @@ MP_MAX_SIZE = 10000
 BATCH_SIZE = 512
 
 # deep learning hyper-parameter
-TOTAL_TIME_SLOT = 100
-LEARNING_RATE = 1e-4
-REG_BETA = 0.
-T_STEP = 128
-GAMMA = 0.3
-EPSILON = 0.3
+TOTAL_TIME_SLOT = 1000
+LEARNING_RATE = 1e-6                # optimizer learning rate
+REG_BETA = 0.2                      # regularization factor
+T_STEP = 128                        # update DQN parameter
+GAMMA = 0.3                         # reward penalty
+EPSILON = 0.3                       # Greedy-Epsilon
+DECREASE_FACTOR = 0.995             # Decrease epsilon by EPSILON * DECREASE_FACTOR
 EVAL_TIMES = 10
-HIDDEN_LAYERS = [1024, 1024, 1024]
+HIDDEN_LAYERS = [2048, 2048, 2048]
 INPUT_LAYER = 576
-OUTPUT_LAYER = 729
-PRINT_SLOT = 1
+OUTPUT_LAYER = 729                  # 9 * 9 * 9
+PRINT_SLOT = 20                     # print log every PRINT_SLOT
 MODEL_PATH = "./model/MADQL.pth"
 
 

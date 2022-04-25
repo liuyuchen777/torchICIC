@@ -40,38 +40,72 @@ class Environment:
             print(f'{v.getCSI()}')
 
     def step(self):
-        for v in self.channels.values():
-            v.step()
+        for channel in self.channels.values():
+            channel.step()
+
+    """Partial Calculation Method"""
+
+    def calDirectChannel(self, cu, sector, actionIndex):
+        beamformer = BEAMFORMER_LIST[actionIndex[sector.index][0]]
+        power = POWER_LIST[actionIndex[sector.index][1]]
+        index = [cu.index, sector.index, cu.index, sector.index]
+
+        directChannel = self.channels[index2str(index)].getCSI()
+        signalPower = dBm2num(power) * np.power(np.linalg.norm(beamformer * directChannel), 4)
+
+        return signalPower
+
+    def calIntraCellInterference(self, cu, sector, actionIndex):
+        intraCellInterference = 0.
+
+        for otherSector in cu.sectors:
+            if sector.index != otherSector.index:
+                beamformer = BEAMFORMER_LIST[actionIndex[otherSector.index][0]]
+                power = POWER_LIST[actionIndex[otherSector.index][1]]
+                index = [cu.index, otherSector.index, cu.index, sector.index]
+                # same cu channel
+                intraChannel = self.channels[index2str(index)].getCSI()
+                intraCellInterference += dBm2num(power) * np.power(np.linalg.norm(np.transpose(beamformer) * np.transpose(intraChannel) * intraChannel * beamformer), 2)
+
+        return intraCellInterference
+
+    def calNoisePower(self, cu, sector, actionIndex):
+        beamformer = BEAMFORMER_LIST[actionIndex[sector.index][0]]
+        index = [cu.index, sector.index, cu.index, sector.index]
+        directChannel = self.channels[index2str(index)].getCSI()
+
+        return dBm2num(NOISE_POWER) * np.power(np.linalg.norm(beamformer * directChannel), 2)
+
+    def calInterCellInterference(self, cu, sector):
+        interCellInterference = 0.
+
+        for otherCUIndex in neighborTable[cu.index]:
+            otherCU = self.CUs[otherCUIndex]
+            otherActionIndex = otherCU.getActionHistory()
+            for otherCUSector in otherCU.sectors:
+                index = [otherCU.index, otherCUSector.index, cu.index, sector.index]
+                if judgeSkip(index):
+                    continue
+                beamformer = BEAMFORMER_LIST[otherActionIndex[otherCUSector.index][0]]
+                power = POWER_LIST[otherActionIndex[otherCUSector.index][1]]
+                ocsChannel = self.channels[index2str(index)].getCSI()
+                interCellInterference += dBm2num(power) * np.power(np.linalg.norm(np.transpose(beamformer) * np.transpose(ocsChannel) * ocsChannel * beamformer), 2)
+
+        return interCellInterference
+
+    """Integration Calculation Method"""
 
     def calLocalReward(self, CUIndex, actionIndex):
         """
-        this reward only consider Intra-CU interference
-        for single CU in specific action Index
+        This reward only consider Intra-CU interference for single CU in specific action Index
+        This reward calculation function is used by Cell ES algorithm
         """
         cu = self.CUs[CUIndex]
         r = 0.
         for sector in cu.sectors:
-            # 1. direct channel (up)
-            beamformer = BEAMFORMER_LIST[actionIndex[sector.index][0]]
-            power = POWER_LIST[actionIndex[sector.index][1]]
-            index = [cu.index, sector.index, cu.index, sector.index]
-            # direct channel
-            directChannel = self.channels[index2str(index)].getCSI()
-            signalPower = dBm2num(power) * np.power(np.linalg.norm(beamformer * directChannel), 4)
-            # 2. bottom
-            # 2.1 Gaussian noise
-            noisePower = dBm2num(NOISE_POWER) * np.power(np.linalg.norm(beamformer * directChannel), 2)
-            intraCellInterference = 0.
-            # 2.2 intra-CU interference
-            for otherSector in cu.sectors:
-                if sector.index != otherSector.index:
-                    beamformer = BEAMFORMER_LIST[actionIndex[otherSector.index][0]]
-                    power = POWER_LIST[actionIndex[otherSector.index][1]]
-                    index = [cu.index, otherSector.index, cu.index, sector.index]
-                    # same cu channel
-                    intraChannel = self.channels[index2str(index)].getCSI()
-                    intraCellInterference += dBm2num(power) * np.power(np.linalg.norm(np.transpose(beamformer)
-                                        * np.transpose(intraChannel) * intraChannel * beamformer), 2)
+            signalPower = self.calDirectChannel(cu, sector, actionIndex)
+            noisePower = self.calNoisePower(cu, sector, actionIndex)
+            intraCellInterference = self.calIntraCellInterference(cu, sector, actionIndex)
             # summation
             SINR = signalPower / (noisePower + intraCellInterference)
             cap = np.log2(1 + SINR)
@@ -89,52 +123,20 @@ class Environment:
         """
         reward = []
         for cu in self.CUs:
-            # main loop calculate reward in each CU
             actionIndex = cu.getAction()
             r = 0.
             for sector in cu.sectors:
-                # 1. direct channel
-                beamformer = BEAMFORMER_LIST[actionIndex[sector.index][0]]
-                power = POWER_LIST[actionIndex[sector.index][1]]
-                index = [cu.index, sector.index, cu.index, sector.index]
-                directChannel = self.channels[index2str(index)].getCSI()
-                signalPower = dBm2num(power) * np.power(np.linalg.norm(beamformer * directChannel), 4)
-                # 2. bottom
-                # 2.1 Gaussian noise
-                noisePower = dBm2num(NOISE_POWER) * np.power(np.linalg.norm(beamformer * directChannel), 2)
-                intraCellInterference = 0.
-                # 2.2 intra-CU interference
-                for otherSector in cu.sectors:
-                    if sector.index != otherSector.index:
-                        beamformer = BEAMFORMER_LIST[actionIndex[otherSector.index][0]]
-                        power = POWER_LIST[actionIndex[otherSector.index][1]]
-                        index = [cu.index, otherSector.index, cu.index, sector.index]
-                        # same cu channel
-                        intraChannel = self.channels[index2str(index)].getCSI()
-                        intraCellInterference += dBm2num(power) * np.power(np.linalg.norm(np.transpose(beamformer)
-                                            * np.transpose(intraChannel) * intraChannel * beamformer), 2)
-                # 2.3 inter-CU interference
-                interCellInterference = 0.
-                for otherCUIndex in neighborTable[cu.index]:
-                    otherCU = self.CUs[otherCUIndex]
-                    otherActionIndex = otherCU.getActionHistory()
-                    for otherCUSector in otherCU.sectors:
-                        index = [otherCU.index, otherCUSector.index, cu.index, sector.index]
-                        if judgeSkip(index):
-                            continue
-                        beamformer = BEAMFORMER_LIST[otherActionIndex[otherCUSector.index][0]]
-                        power = POWER_LIST[otherActionIndex[otherCUSector.index][1]]
-                        ocsChannel = self.channels[index2str(index)].getCSI()
-                        interCellInterference += dBm2num(power) * np.power(np.linalg.norm(np.transpose(beamformer)
-                                            * np.transpose(ocsChannel) * ocsChannel * beamformer), 2)
-                # 3. use SINR calculate capacity
+                signalPower = self.calDirectChannel(cu, sector, actionIndex)
+                noisePower = self.calNoisePower(cu, sector, actionIndex)
+                intraCellInterference = self.calIntraCellInterference(cu, sector, actionIndex)
+                interCellInterference = self.calInterCellInterference(cu, sector)
+
                 SINR = signalPower / (noisePower + interCellInterference + intraCellInterference)
                 cap = np.log2(1 + SINR)
                 r += cap
-            # 4. calculate average reward in CU
             r /= 3
             reward.append(r)
-        # 5. consider others
+        # interference penalty
         rewardRevised = []
         alpha = INFERENCE_PENALTY_ALPHA
         for CUIndex in range(len(reward)):

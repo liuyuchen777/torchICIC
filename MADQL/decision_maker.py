@@ -3,10 +3,34 @@ import random
 
 import torch.optim
 import torch.nn as nn
-import numpy as np
 
 from config import *
 from dqn import DQN
+
+
+def takeActionBaseIndex(index, previous):
+    action = []
+
+    for sector in range(3):
+        power = index % 3
+        index //= 3
+        beamformer = index % 3
+        index //= 3
+        beamformerIndex = previous[sector][0]
+        powerIndex = previous[sector][1]
+        # beamformer
+        if beamformer == 0 and beamformerIndex != 0:
+            beamformerIndex -= 1
+        elif beamformer == 2 and beamformerIndex != CODEBOOK_SIZE - 1:
+            beamformerIndex += 1
+        # power
+        if power == 0 and powerIndex != 0:
+            powerIndex -= 1
+        elif power == 2 and powerIndex != POWER_LEVEL - 1:
+            powerIndex += 1
+        action.append([beamformerIndex, powerIndex])
+
+    return action
 
 
 class WMMSE:
@@ -23,7 +47,7 @@ class Random:
     def takeAction(self):
         action = []
         actionIndex = random.randint(0, OUTPUT_LAYER - 1)
-        for i in range(3):
+        for _ in range(3):
             """random beamformer and power"""
             codebookIndex = random.randint(0, CODEBOOK_SIZE - 1)
             powerIndex = random.randint(0, POWER_LEVEL - 1)
@@ -35,7 +59,7 @@ class MaxPower:
     def takeAction(self):
         action = []
         actionIndex = random.randint(0, OUTPUT_LAYER - 1)
-        for i in range(3):
+        for _ in range(3):
             codebookIndex = random.randint(0, CODEBOOK_SIZE - 1)
             powerIndex = POWER_LEVEL - 1     # choose the maximum power
             action.append([codebookIndex, powerIndex])
@@ -73,66 +97,56 @@ MADQL Algorithm Agent
 
 
 class MADQL:
-    def __init__(self, name="new"):
-        # general tool
+    def __init__(self, mode="NEW"):
+        """
+        init MADQL decision maker and DQN network
+        Args:
+            name: NEW or LOAD_MODEL
+        """
         self.logger = logging.getLogger()
-        # define network
+        # target network and train network, update target to train every T_STEP
         self.trainDQN = DQN()
         self.targetDQN = DQN()
-        if name != "new":
+        if mode == "LOAD_MODEL":
+            self.logger.info(f"----------------Load Model From {MODEL_PATH}------------------")
             self.trainDQN.state_dict(torch.load(MODEL_PATH))
+        elif mode == "NEW":
+            self.logger.info("----------------Create New Network------------------")
         # copy parameter of train DQN to target DQN
         self.targetDQN.load_state_dict(self.trainDQN.state_dict())
-        self.optimizer = torch.optim.Adam(self.trainDQN.parameters(), lr=LEARNING_RATE,
-                                          weight_decay=REG_BETA)
+        # set optimizer and loss
+        self.optimizer = torch.optim.Adam(self.trainDQN.parameters(), lr=LEARNING_RATE, weight_decay=REG_BETA)
         self.loss = nn.MSELoss()
         # set tensor on GPU
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.trainDQN.to(self.device)
         self.targetDQN.to(self.device)
+        # greedy-epsilon
+        self.epsilon = EPSILON
         # check version
         print("PyTorch Version: \n", torch.__version__)
         print("GPU Device: \n", self.device)
 
-    def takeActionBaseIndex(self, index, previous):
-        action = []
-        for i in range(3):
-            power = index % 3
-            index //= 3
-            beamformer = index % 3
-            index //= 3
-            beamformerIndex = previous[i][0]
-            powerIndex = previous[i][1]
-            # beamformer
-            if beamformer == 0 and beamformerIndex != 0:
-                beamformerIndex -= 1
-            elif beamformer == 2 and beamformerIndex != CODEBOOK_SIZE - 1:
-                beamformerIndex += 1
-            # power
-            if power == 0 and powerIndex != 0:
-                powerIndex -= 1
-            elif power == 2 and powerIndex != POWER_LEVEL - 1:
-                powerIndex += 1
-            action.append([beamformerIndex, powerIndex])
-        return action
-
     def takeActionRandom(self, previous):
         # random
         actionIndex = random.randint(0, OUTPUT_LAYER - 1)
-        action = self.takeActionBaseIndex(actionIndex, previous)
+        action = takeActionBaseIndex(actionIndex, previous)
         return action, actionIndex
 
-    def takeAction(self, state, previous, trainLabel=True):
+    def takeAction(self, state, previous, train=True):
         """state is defined in MobileNetwork.buildState"""
         # epsilon-greedy policy
-        if np.random.rand() < EPSILON and trainLabel:
+        if np.random.rand() < self.epsilon and train:
+            # random choose
             return self.takeActionRandom(previous)
         else:
+            # choose optimal
+            self.epsilon = self.epsilon * DECREASE_FACTOR
             with torch.no_grad():
-                input = torch.unsqueeze(torch.unsqueeze(torch.tensor(state, dtype=torch.float32), 0), 0).to(self.device)
-                predict = self.targetDQN.forward(input)
+                network_input = torch.unsqueeze(torch.unsqueeze(torch.tensor(state, dtype=torch.float32), 0), 0).to(self.device)
+                predict = self.targetDQN.forward(network_input)
             actionIndex = torch.argmax(predict).item()
-            action = self.takeActionBaseIndex(actionIndex, previous)
+            action = takeActionBaseIndex(actionIndex, previous)
             return action, actionIndex
 
     def backProp(self, recordBatch):
@@ -168,4 +182,5 @@ class MADQL:
         self.targetDQN.load_state_dict(self.trainDQN.state_dict())
 
     def saveModel(self):
+        self.logger.info(f"----------------Save Model To {MODEL_PATH}------------------")
         torch.save(self.trainDQN.state_dict(), MODEL_PATH)
