@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from config import *
 import random
@@ -32,9 +34,8 @@ class CU:
         return self.UEs
 
     def _initAction_(self):
-        for i in range(3):
-            self.action.append([random.randint(0, CODEBOOK_SIZE - 1),
-                                random.randint(0, POWER_LEVEL - 1)])
+        for _ in range(3):
+            self.action.append([random.randint(0, CODEBOOK_SIZE - 1), random.randint(0, POWER_LEVEL - 1)])
 
     def getAction(self):
         return self.action

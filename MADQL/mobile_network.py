@@ -23,8 +23,8 @@ class MobileNetwork:
         self.CUs = generateCU()
         self.env = Environment(self.CUs)
         """end generate mobile network"""
-        self.rewardRecord = []              # scale: 7 * time slot
-        self.averageRewardRecord = []       # scale: 1 * time slot
+        self.rewardRecord = []  # scale: 7 * time slot
+        self.averageRewardRecord = []  # scale: 1 * time slot
         self.lossRecord = []
         """tmp variable"""
         self.accumulateLoss = 0.
@@ -66,11 +66,11 @@ class MobileNetwork:
                 CSI = channel.getCSI()
                 beamformer = BEAMFORMER_LIST[action[sectorIndex][0]]
                 power = POWER_LIST[action[sectorIndex][1]]
-                tmp = dBm2num(power) * beamformer.dot(CSI)
-                state[sectorIndex * 24 + otherSectorIndex * 8: sectorIndex * 24 + otherSectorIndex * 8 + 4] = np.real(
-                    tmp)
-                state[
-                sectorIndex * 24 + otherSectorIndex * 8 + 4: sectorIndex * 24 + otherSectorIndex * 8 + 8] = np.imag(tmp)
+                tmp = dBm2num(power) * np.matmul(CSI, beamformer)
+                state[sectorIndex * 24 + otherSectorIndex * 8: sectorIndex * 24 + otherSectorIndex * 8 + 4] \
+                    = np.real(tmp)
+                state[sectorIndex * 24 + otherSectorIndex * 8 + 4: sectorIndex * 24 + otherSectorIndex * 8 + 8] \
+                    = np.imag(tmp)
         # Inter-CU
         for otherCUIndex in neighborTable[CUIndex]:
             actionHistory = self.CUs[otherCUIndex].getActionHistory()
@@ -84,7 +84,7 @@ class MobileNetwork:
                         CSI = channel.getCSI()  # H_t
                         beamformer = BEAMFORMER_LIST[actionHistory[otherSectorIndex][0]]
                         power = POWER_LIST[actionHistory[otherSectorIndex][1]]
-                        tmp = dBm2num(power) * beamformer.dot(CSI)
+                        tmp = dBm2num(power) * np.matmul(CSI, beamformer)
                         state[72 + otherCUIndex * 72 + otherSectorIndex * 24 + sectorIndex * 8:
                               72 + otherCUIndex * 72 + otherSectorIndex * 24 + sectorIndex * 8 + 4] = np.real(tmp)
                         state[72 + otherCUIndex * 72 + otherSectorIndex * 24 + sectorIndex * 8 + 4:

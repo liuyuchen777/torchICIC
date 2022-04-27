@@ -21,5 +21,4 @@ class MemoryPool:
         return self.size
 
     def getBatch(self, size=BATCH_SIZE):
-        random.shuffle(self.pool)
-        return self.pool[:size]
+        return random.sample(self.pool, size)

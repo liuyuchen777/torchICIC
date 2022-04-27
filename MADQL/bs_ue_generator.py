@@ -7,6 +7,8 @@ from config import *
 When use single model for all CU, we need to keep position of UE same in each CU
 """
 
+SAME_DISTRIBUTION = True
+
 radius_random_seed = [np.random.rand(), np.random.rand(), np.random.rand()]
 angle_random_seed = [np.random.rand(), np.random.rand(), np.random.rand()]
 
@@ -29,8 +31,12 @@ def generateUE(index, sectors):
     h = UT_HEIGHT
     for i in range(3):
         # generate r and theta
-        r = R * radius_random_seed[i] + R_MIN
-        theta = (angle_random_seed[i] * 120 + 120 * i)
+        if SAME_DISTRIBUTION:
+            r = R * radius_random_seed[i] + R_MIN
+            theta = (angle_random_seed[i] * 120 + 120 * i)
+        else:
+            r = R * np.random.rand() + R_MIN
+            theta = (np.random.rand() * 120 + 120 * i)
         theta = theta / 360 * 2 * np.pi
         # r-theta to x-y
         posX = sectors[i].pos[0] + r * np.cos(theta)

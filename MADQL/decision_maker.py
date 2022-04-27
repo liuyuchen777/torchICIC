@@ -19,15 +19,24 @@ def takeActionBaseIndex(index, previous):
         beamformerIndex = previous[sector][0]
         powerIndex = previous[sector][1]
         # beamformer
-        if beamformer == 0 and beamformerIndex != 0:
+        if beamformer == 0:
             beamformerIndex -= 1
-        elif beamformer == 2 and beamformerIndex != CODEBOOK_SIZE - 1:
+            if beamformerIndex < 0:
+                beamformerIndex = CODEBOOK_SIZE - 1
+        elif beamformer == 2:
             beamformerIndex += 1
+            if beamformerIndex >= CODEBOOK_SIZE:
+                beamformerIndex = 0
         # power
-        if power == 0 and powerIndex != 0:
+        if power == 0:
             powerIndex -= 1
-        elif power == 2 and powerIndex != POWER_LEVEL - 1:
+            if powerIndex < 0:
+                powerIndex = POWER_LEVEL - 1
+        elif power == 2:
             powerIndex += 1
+            if powerIndex >= POWER_LEVEL:
+                powerIndex = 0
+        # append single sector action to action
         action.append([beamformerIndex, powerIndex])
 
     return action
@@ -133,12 +142,12 @@ class MADQL:
         action = takeActionBaseIndex(actionIndex, previous)
         return action, actionIndex
 
-    def takeAction(self, state, previous, train=True):
+    def takeAction(self, state, previousValue, train=True):
         """state is defined in MobileNetwork.buildState"""
         # epsilon-greedy policy
         if np.random.rand() < self.epsilon and train:
             # random choose
-            return self.takeActionRandom(previous)
+            return self.takeActionRandom(previousValue)
         else:
             # choose optimal
             self.epsilon = self.epsilon * DECREASE_FACTOR
@@ -146,7 +155,7 @@ class MADQL:
                 network_input = torch.unsqueeze(torch.unsqueeze(torch.tensor(state, dtype=torch.float32), 0), 0).to(self.device)
                 predict = self.targetDQN.forward(network_input)
             actionIndex = torch.argmax(predict).item()
-            action = takeActionBaseIndex(actionIndex, previous)
+            action = takeActionBaseIndex(actionIndex, previousValue)
             return action, actionIndex
 
     def backProp(self, recordBatch):
@@ -179,6 +188,7 @@ class MADQL:
 
     def updateModelParameter(self):
         self.logger.info("----------------Target DQN Parameter Updates!------------------")
+        self.logger.info(f"----------------Current Epsilon: {self.epsilon}------------------")
         self.targetDQN.load_state_dict(self.trainDQN.state_dict())
 
     def saveModel(self):

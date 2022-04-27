@@ -12,12 +12,12 @@ Functions to convert number to dBm/dB (power)
 
 
 def dBm2num(dB):
-    num = np.power(10., dB / 10.) / 1000.
+    num = (10 ** (dB / 10)) / 1000
     return num
 
 
 def dB2num(dB):
-    num = np.power(10., dB / 10.)
+    num = 10 ** (dB / 10)
     return num
 
 

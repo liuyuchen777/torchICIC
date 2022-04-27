@@ -16,6 +16,7 @@ def testSaveLoadMobileNetwork():
 
 
 def randAndCellES(mn):
+    plotMobileNetwork(mn)
     """compare ES, random and plot reward"""
     # Cell ES
     mn.algorithm = Algorithm.CELL_ES
@@ -111,7 +112,7 @@ def randomAndMADQL(mn):
 
 if __name__ == "__main__":
     setLogger()
-    EXECUTION_MODE = "EVAL_MADQL"
+    EXECUTION_MODE = "RAND_AND_CELL_ES"
 
     if EXECUTION_MODE == "NETWORK_STRUCTURE":
         """[test] plot network structure"""
@@ -122,11 +123,11 @@ if __name__ == "__main__":
         testSaveLoadMobileNetwork()
     elif EXECUTION_MODE == "RAND_AND_MAX_POWER":
         """[test] random and max power"""
-        mn = loadMobileNetwork()
+        mn = MobileNetwork()
         randAndMaxPower(mn)
     elif EXECUTION_MODE == "RAND_AND_CELL_ES":
         """[test] cell ES and random"""
-        mn = loadMobileNetwork()
+        mn = MobileNetwork()
         randAndCellES(mn)
     elif EXECUTION_MODE == "QUICK_TEST_MADQL":
         """[test] quick test MADQL"""
@@ -134,8 +135,8 @@ if __name__ == "__main__":
         quickTestMQDQL(mn)
     elif EXECUTION_MODE == "TRAIN_MADQL":
         """[test] train MADQL model"""
-        mn = loadMobileNetwork()
+        mn = MobileNetwork()
         trainMADQL(mn)
     elif EXECUTION_MODE == "EVAL_MADQL":
-        mn = loadMobileNetwork()
+        mn = MobileNetwork()
         randomAndMADQL(mn)

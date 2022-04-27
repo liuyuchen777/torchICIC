@@ -1,3 +1,5 @@
+import numpy as np
+
 from config import *
 from utils import index2str, neighborTable, judgeSkip, dBm2num
 from channel import Channel
@@ -51,11 +53,19 @@ class Environment:
         index = [cu.index, sector.index, cu.index, sector.index]
 
         directChannel = self.channels[index2str(index)].getCSI()
-        signalPower = dBm2num(power) * np.power(np.linalg.norm(beamformer * directChannel), 4)
+        tmpPower = dBm2num(power)
+        tmpChannel = np.power(np.linalg.norm(np.matmul(directChannel, beamformer)), 4)
+        signalPower = tmpPower * tmpChannel
 
         return signalPower
 
     def calIntraCellInterference(self, cu, sector, actionIndex):
+        # direct channel
+        directIndex = [cu.index, sector.index, cu.index, sector.index]
+        directChannel = self.channels[index2str(directIndex)].getCSI()
+        directBeamformer = BEAMFORMER_LIST[actionIndex[sector.index][0]]
+
+        # intra-interference calculation
         intraCellInterference = 0.
 
         for otherSector in cu.sectors:
@@ -65,7 +75,14 @@ class Environment:
                 index = [cu.index, otherSector.index, cu.index, sector.index]
                 # same cu channel
                 intraChannel = self.channels[index2str(index)].getCSI()
-                intraCellInterference += dBm2num(power) * np.power(np.linalg.norm(np.transpose(beamformer) * np.transpose(intraChannel) * intraChannel * beamformer), 2)
+                tmpPower = dBm2num(power)
+                tmpChannel = np.power(np.linalg.norm(
+                    np.matmul(
+                        np.matmul(directBeamformer.transpose().conjugate(), directChannel.transpose().conjugate()),
+                        np.matmul(intraChannel, beamformer)
+                    )
+                ), 2)
+                intraCellInterference += tmpPower * tmpChannel
 
         return intraCellInterference
 
@@ -76,7 +93,13 @@ class Environment:
 
         return dBm2num(NOISE_POWER) * np.power(np.linalg.norm(beamformer * directChannel), 2)
 
-    def calInterCellInterference(self, cu, sector):
+    def calInterCellInterference(self, cu, sector, actionIndex):
+        # direct channel
+        directIndex = [cu.index, sector.index, cu.index, sector.index]
+        directChannel = self.channels[index2str(directIndex)].getCSI()
+        directBeamformer = BEAMFORMER_LIST[actionIndex[sector.index][0]]
+
+        # inter-CU
         interCellInterference = 0.
 
         for otherCUIndex in neighborTable[cu.index]:
@@ -89,7 +112,14 @@ class Environment:
                 beamformer = BEAMFORMER_LIST[otherActionIndex[otherCUSector.index][0]]
                 power = POWER_LIST[otherActionIndex[otherCUSector.index][1]]
                 ocsChannel = self.channels[index2str(index)].getCSI()
-                interCellInterference += dBm2num(power) * np.power(np.linalg.norm(np.transpose(beamformer) * np.transpose(ocsChannel) * ocsChannel * beamformer), 2)
+                tmpPower = dBm2num(power)
+                tmpChannel = np.power(np.linalg.norm(
+                    np.matmul(
+                        np.matmul(directBeamformer.transpose().conjugate(), directChannel.transpose().conjugate()),
+                        np.matmul(ocsChannel, beamformer)
+                    )
+                ), 2)
+                interCellInterference += tmpPower * tmpChannel
 
         return interCellInterference
 
@@ -103,6 +133,7 @@ class Environment:
         cu = self.CUs[CUIndex]
         r = 0.
         for sector in cu.sectors:
+            index = [cu.index, sector.index, cu.index, sector.index]
             signalPower = self.calDirectChannel(cu, sector, actionIndex)
             noisePower = self.calNoisePower(cu, sector, actionIndex)
             intraCellInterference = self.calIntraCellInterference(cu, sector, actionIndex)
@@ -129,7 +160,7 @@ class Environment:
                 signalPower = self.calDirectChannel(cu, sector, actionIndex)
                 noisePower = self.calNoisePower(cu, sector, actionIndex)
                 intraCellInterference = self.calIntraCellInterference(cu, sector, actionIndex)
-                interCellInterference = self.calInterCellInterference(cu, sector)
+                interCellInterference = self.calInterCellInterference(cu, sector, actionIndex)
 
                 SINR = signalPower / (noisePower + interCellInterference + intraCellInterference)
                 cap = np.log2(1 + SINR)
