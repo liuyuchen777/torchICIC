@@ -7,7 +7,7 @@ from config import *
 When use single model for all CU, we need to keep position of UE same in each CU
 """
 
-SAME_DISTRIBUTION = True
+SAME_DISTRIBUTION = False
 
 radius_random_seed = [np.random.rand(), np.random.rand(), np.random.rand()]
 angle_random_seed = [np.random.rand(), np.random.rand(), np.random.rand()]

@@ -14,8 +14,8 @@ class DQN(nn.Module):
 
     def forward(self, input):
         # flow1
-        out = self.inputLayer(input)
-        out = self.hiddenLayer1(out)
-        out = self.hiddenLayer2(out)
+        out = nn.ELU(self.inputLayer(input))
+        out = nn.ELU(self.hiddenLayer1(out))
+        out = nn.ELU(self.hiddenLayer2(out))
         out = self.outputLayer(out)
         return out

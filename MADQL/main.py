@@ -42,6 +42,7 @@ def randAndCellES(mn):
 
 
 def randAndMaxPower(mn):
+    plotMobileNetwork(mn)
     # Random
     mn.algorithm = Algorithm.RANDOM
     mn.dm = setDecisionMaker(mn.algorithm)
@@ -61,6 +62,8 @@ def randAndMaxPower(mn):
     mn.saveRewards("Max_POWER")
     cdf(averageRewards2, label="Max Power")
 
+    ax = plt.gca()
+    ax.set_xlim([0, 1.0])
     plt.legend(loc='upper left')
     plt.show()
 
@@ -112,7 +115,7 @@ def randomAndMADQL(mn):
 
 if __name__ == "__main__":
     setLogger()
-    EXECUTION_MODE = "RAND_AND_CELL_ES"
+    EXECUTION_MODE = "RAND_AND_MAX_POWER"
 
     if EXECUTION_MODE == "NETWORK_STRUCTURE":
         """[test] plot network structure"""

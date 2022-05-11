@@ -41,6 +41,8 @@ NOISE_POWER = -100      # Gaussian white noise, dBm
 PATH_NUMBER = 6         # LOS path number
 RICIAN_FACTOR = 10      # K_R
 
+rho = 0.6425            # Markov Channel Change
+
 # cellular network
 CELL_SIZE = 30.  # m
 CELL_NUMBER = 7
@@ -53,7 +55,7 @@ MP_MAX_SIZE = 10000
 BATCH_SIZE = 512
 
 # deep learning hyper-parameter
-TOTAL_TIME_SLOT = 1000
+TOTAL_TIME_SLOT = 400
 LEARNING_RATE = 1e-6                # optimizer learning rate
 REG_BETA = 0.2                      # regularization factor
 T_STEP = 128                        # update DQN parameter

@@ -91,7 +91,7 @@ class Environment:
         index = [cu.index, sector.index, cu.index, sector.index]
         directChannel = self.channels[index2str(index)].getCSI()
 
-        return dBm2num(NOISE_POWER) * np.power(np.linalg.norm(beamformer * directChannel), 2)
+        return dBm2num(NOISE_POWER) * np.power(np.linalg.norm(np.matmul(directChannel, beamformer)), 2)
 
     def calInterCellInterference(self, cu, sector, actionIndex):
         # direct channel
