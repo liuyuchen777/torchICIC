@@ -1,8 +1,16 @@
+import json
+
 import matplotlib.pyplot as plt
 
 from ue import UE
 from sector import Sector
 from config import *
+
+
+SAME_DISTRIBUTION = False
+
+radius_random_seed = np.random.rand()
+angle_random_seed = np.random.rand()
 
 
 def generateSector(centerIndex, centerX, centerY):
@@ -22,8 +30,12 @@ def generateUE(centerIndex, sectors):
     h = UT_HEIGHT
     for sector, i in zip(sectors, range(3)):
         # generate r and theta
-        r = R * np.random.rand() + R_MIN
-        theta = (np.random.rand() * 120 + 120 * i) / 360 * 2 * np.pi
+        if SAME_DISTRIBUTION:
+            r = R * radius_random_seed + R_MIN
+            theta = (angle_random_seed * 120 + 120 * i) / 360 * 2 * np.pi
+        else:
+            r = R * np.random.rand() + R_MIN
+            theta = (np.random.rand() * 120 + 120 * i) / 360 * 2 * np.pi
         # r-theta to x-y
         posX = sector.getPosition()[0] + r * np.cos(theta)
         posY = sector.getPosition()[1] + r * np.sin(theta)
@@ -103,5 +115,28 @@ def plotCell(centerX, centerY, sectors, UEs):
     plt.plot(point[:, 0], point[:, 1], color='k')
 
 
-def loadMobileNetwork():
-    return [], []
+def loadMobileNetwork(name="default"):
+    with open(MOBILE_NETWORK_DATA_PATH) as jsonFile:
+        data = json.load(jsonFile)
+        UEPositions = data[name + "-UE-positions"]
+        sectorPositions = data[name + "-sector-positions"]
+        sectors = []
+        UEs = []
+        for i in range(len(sectorPositions)):
+            sectors.append(Sector(i, sectorPositions[i]))
+            UEs.append(UE(i, UEPositions[i]))
+    return sectors, UEs
+
+
+def saveMobileNetwork(sectors, UEs, name="default"):
+    sectorPositions = []
+    UEPositions = []
+    for sector, UE in zip(sectors, UEs):
+        sectorPositions.append(sector.getPosition())
+        UEPositions.append(UE.getPosition())
+    with open(MOBILE_NETWORK_DATA_PATH) as jsonFile:
+        data = json.load(jsonFile)
+    with open(MOBILE_NETWORK_DATA_PATH, 'w') as jsonFile:
+        data[name + "-UE-positions"] = UEPositions
+        data[name + "-sector-positions"] = sectorPositions
+        json.dump(data, jsonFile)

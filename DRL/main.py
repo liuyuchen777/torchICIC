@@ -1,5 +1,5 @@
 from RL_simulator import RLSimulator
-import numpy as np
+
 from hyper_parameter import *
 from const import *
 from dqn_agent import Agent

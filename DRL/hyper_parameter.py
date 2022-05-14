@@ -18,6 +18,6 @@ nodes_num = [1024, 1024, 1024, 1024]
 epochs_num = 30
 learning_rate = 0.001
 memory_pool_size = batch_size
-model_path = "../../model/RL_model/"
+model_path = "./model/"
 log_path = "./log/"
 num_exp = 10

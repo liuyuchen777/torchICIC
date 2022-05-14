@@ -20,5 +20,5 @@ class MemoryPool:
     def getSize(self):
         return self.size
 
-    def getBatch(self, size=BATCH_SIZE):
+    def getBatch(self, size=BATCH_SIZE//(CELL_NUMBER*3)):
         return random.sample(self.pool, size)

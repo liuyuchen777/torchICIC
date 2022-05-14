@@ -55,13 +55,13 @@ MP_MAX_SIZE = 10000
 BATCH_SIZE = 512
 
 # deep learning hyper-parameter
-TOTAL_TIME_SLOT = 400
+TOTAL_TIME_SLOT = 10000
 LEARNING_RATE = 1e-6                # optimizer learning rate
 REG_BETA = 0.2                      # regularization factor
 T_STEP = 128                        # update DQN parameter
 GAMMA = 0.3                         # reward penalty
-EPSILON = 0.5                       # Greedy-Epsilon
-DECREASE_FACTOR = 0.99              # Decrease epsilon by EPSILON * DECREASE_FACTOR
+EPSILON = 0.3                       # Greedy-Epsilon
+DECREASE_FACTOR = 1.              # Decrease epsilon by EPSILON * DECREASE_FACTOR
 EVAL_TIMES = 10
 HIDDEN_LAYERS = [2048, 2048, 2048]
 INPUT_LAYER = 576

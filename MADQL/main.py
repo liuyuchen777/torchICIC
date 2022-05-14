@@ -62,10 +62,10 @@ def randAndMaxPower(mn):
     mn.saveRewards("Max_POWER")
     cdf(averageRewards2, label="Max Power")
 
-    ax = plt.gca()
-    ax.set_xlim([0, 1.0])
     plt.legend(loc='upper left')
     plt.show()
+
+    saveMobileNetwork(mn)
 
 
 def quickTestMQDQL(mn):
@@ -115,7 +115,7 @@ def randomAndMADQL(mn):
 
 if __name__ == "__main__":
     setLogger()
-    EXECUTION_MODE = "RAND_AND_MAX_POWER"
+    EXECUTION_MODE = "TRAIN_MADQL"
 
     if EXECUTION_MODE == "NETWORK_STRUCTURE":
         """[test] plot network structure"""
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         randAndMaxPower(mn)
     elif EXECUTION_MODE == "RAND_AND_CELL_ES":
         """[test] cell ES and random"""
-        mn = MobileNetwork()
+        mn = loadMobileNetwork()
         randAndCellES(mn)
     elif EXECUTION_MODE == "QUICK_TEST_MADQL":
         """[test] quick test MADQL"""
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         quickTestMQDQL(mn)
     elif EXECUTION_MODE == "TRAIN_MADQL":
         """[test] train MADQL model"""
-        mn = MobileNetwork()
+        mn = loadMobileNetwork()
         trainMADQL(mn)
     elif EXECUTION_MODE == "EVAL_MADQL":
         mn = MobileNetwork()

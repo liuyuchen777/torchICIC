@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch.nn.functional as F
 
 from config import *
 
@@ -14,8 +15,8 @@ class DQN(nn.Module):
 
     def forward(self, input):
         # flow1
-        out = nn.ELU(self.inputLayer(input))
-        out = nn.ELU(self.hiddenLayer1(out))
-        out = nn.ELU(self.hiddenLayer2(out))
+        out = F.relu(self.inputLayer(input))
+        out = F.relu(self.hiddenLayer1(out))
+        out = F.relu(self.hiddenLayer2(out))
         out = self.outputLayer(out)
         return out

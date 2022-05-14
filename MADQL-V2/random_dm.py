@@ -10,5 +10,8 @@ class Random:
         self.logger = logging.getLogger()
         self.algorithm = Algorithm.RANDOM
 
-    def takeAction(self):
-        return [random.randint(0, POWER_LEVEL - 1), random.randint(0, CODEBOOK_SIZE - 1)]
+    def takeAction(self, linkNumber):
+        actions = []
+        for _ in range(linkNumber):
+            actions.append([random.randint(0, POWER_LEVEL - 1), random.randint(0, CODEBOOK_SIZE - 1)])
+        return actions

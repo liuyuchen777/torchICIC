@@ -1,26 +1,28 @@
+import json
 import logging
-from datetime import datetime
 
 from config import *
 from utils import Algorithm, calCapacity
 from descision_maker import setDecisionMaker
-from mobile_network_generator import generateMobileNetwork, loadMobileNetwork, plotMobileNetwork
+from mobile_network_generator import generateMobileNetwork, loadMobileNetwork, plotMobileNetwork, saveMobileNetwork
 from channel_generator import generateChannel
 
 
 class MobileNetwork:
-    def __init__(self, loadNetwork=False, decisionMaker=Algorithm.RANDOM, loadModel=False):
+    def __init__(self, loadNetwork="default", newNetwork=False, decisionMaker=Algorithm.RANDOM, loadModel=False):
         self.logger = logging.getLogger()
-        if loadNetwork:
+        if loadNetwork != "default" and newNetwork == False:
             """load sector/UE position from local file"""
-            self.sectors, self.UEs = loadMobileNetwork()
+            self.sectors, self.UEs = loadMobileNetwork(loadNetwork)
         else:
             self.sectors, self.UEs = generateMobileNetwork()
         self.channels = generateChannel(self.sectors, self.UEs)
         self.dm = setDecisionMaker(decisionMaker, loadModel)
+        self.accumulateCapacity = 0.
         self.capacity = []                                      # number of links * time slot
         self.averageCapacity = []                               # 1 * time slot
         self.actionHistory = []                                 # 2 * number of links * time slot
+        saveMobileNetwork(self.sectors, self.UEs, name=loadNetwork)
 
     def getSectors(self):
         return self.sectors
@@ -43,36 +45,46 @@ class MobileNetwork:
         for channel in self.channels.values():
             channel.update()
 
-    # def saveRecord(self, prefix="SimulationData-" + datetime.now().strftime("%m/%d/%Y-%H:%M:%S") + "-"):
-    #
+    def saveRecord(self, prefix="default-"):
+        with open(SIMULATION_DATA_PATH) as jsonFile:
+            data = json.load(jsonFile)
+        with open(SIMULATION_DATA_PATH, 'w') as jsonFile:
+            self.logger.info(f"--------------------------Save Rewards as {prefix}-----------------------------")
+            data[prefix + "capacity"] = self.capacity
+            data[prefix + "averageCapacity"] = self.averageCapacity
+            data[prefix + "action"] = self.actionHistory
+            json.dump(data, jsonFile)
+        print()
 
     def step(self):
         for ts in range(TOTAL_TIME_SLOT):
             """take action"""
             actions = []
             if self.dm.algorithm == Algorithm.RANDOM or self.dm.algorithm == Algorithm.MAX_POWER:
-                for _ in range(len(self.sectors)):
-                    actions.append(self.dm.takeAction())
+                actions = self.dm.takeAction(len(self.sectors))
             elif self.dm.algorithm == Algorithm.CELL_ES:
                 """CELL_ES only work when CELL_NUMBER is 1"""
-                actions.extend(self.dm.takeAction(self.channels))
+                actions = self.dm.takeAction(self.channels)
             elif self.dm.algorithm == Algorithm.MADQL:
-                for i in range(len(self.sectors)):
-                    actions.append(self.dm.takeAction(i, self.actionHistory[ts], self.channels))
-            elif self.dm.algorithm == Algorithm.CNN:
-                for i in range(len(self.sectors)):
-                    actions.append(self.dm.takeAction(i, self.channels))
+                actions = self.dm.takeAction(self.channels, len(self.sectors))
             """calculate capacity"""
             currentCapacity = calCapacity(actions, self.channels)
+            # self.logger.info(f'actions = {actions}')
             """record"""
             self.actionHistory.append(actions)
             self.capacity.append(currentCapacity)
-            average = sum(currentCapacity) / len(currentCapacity)
-            self.averageCapacity.append(average)
+            averageCapacity = sum(currentCapacity) / len(currentCapacity)
+            self.averageCapacity.append(averageCapacity)
             """update"""
             self.updateChannel()
             """print log"""
-            self.logger.info(f'mode: {self.dm.algorithm}, time slot: {ts + 1}, system average capacity: {average}')
+            if ts != 0 and ts % PRINT_SLOT == 0:
+                self.logger.info(f'mode: {self.dm.algorithm}, time slot: {ts + 1}, '
+                                 f'system average capacity: {self.accumulateCapacity / PRINT_SLOT}')
+                self.accumulateCapacity = 0.
+            self.accumulateCapacity += averageCapacity
+        """save reward"""
+        self.saveRecord(prefix=str(self.dm.algorithm)+"-")
 
 
 if __name__ == "__main__":

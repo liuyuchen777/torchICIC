@@ -67,8 +67,8 @@ class Channel:
 
     def update(self):
         self.CSIHistory = self.CSI
-        self.CSI = rho * self.CSIHistory + np.sqrt(1 - rho ** 2) * self._calCSI_()
-        # self.CSI = self._calCSI_()
+        # self.CSI = rho * self.CSIHistory + np.sqrt(1 - rho ** 2) * self._calCSI_()
+        self.CSI = self._calCSI_()
 
     def getCSI(self):
         return self.CSI

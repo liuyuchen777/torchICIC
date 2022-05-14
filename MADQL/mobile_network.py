@@ -197,6 +197,8 @@ class MobileNetwork:
     def cleanReward(self):
         self.cleanRewardRecord()
         self.cleanAverageRewardRecord()
+        self.accumulateAverageReward = 0.
+        self.accumulateLoss = 0.
 
     def cleanRewardRecord(self):
         self.rewardRecord = []

@@ -10,5 +10,8 @@ class MaxPower:
         self.logger = logging.getLogger()
         self.algorithm = Algorithm.MAX_POWER
 
-    def takeAction(self):
-        return [POWER_LEVEL - 1, random.randint(0, CODEBOOK_SIZE - 1)]
+    def takeAction(self, linkNumber):
+        actions = []
+        for _ in range(linkNumber):
+            actions.append([POWER_LEVEL - 1, random.randint(0, CODEBOOK_SIZE - 1)])
+        return actions

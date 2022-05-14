@@ -77,10 +77,9 @@ class Environment:
                 intraChannel = self.channels[index2str(index)].getCSI()
                 tmpPower = dBm2num(power)
                 tmpChannel = np.power(np.linalg.norm(
-                    np.matmul(
-                        np.matmul(directBeamformer.transpose().conjugate(), directChannel.transpose().conjugate()),
-                        np.matmul(intraChannel, beamformer)
-                    )
+                    np.matmul(np.matmul(np.matmul(
+                        directBeamformer.transpose().conjugate(), directChannel.transpose().conjugate()),
+                        intraChannel), beamformer)
                 ), 2)
                 intraCellInterference += tmpPower * tmpChannel
 

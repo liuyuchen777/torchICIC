@@ -23,7 +23,7 @@ class Channel:
         self.distance = self._calDistance_()
         self.shadowing = np.random.normal(0., SHADOWING_SIGMA)
         self.largeScale = np.power(self.distance / 1000, ALPHA)
-        self.beta = 1 / dB2num(self.largeScale + self.shadowing)
+        self.beta = 1 / dB2num(self.largeScale)
         self.CSI = self._calCSI_()
         self.CSIHistory = self.CSI     # csi in last time slot
 

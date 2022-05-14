@@ -47,33 +47,24 @@ CELL_SIZE = 30.                     # m
 CELL_NUMBER = 1
 R_MIN = 2.
 R_MAX = 20.
-INFERENCE_PENALTY_ALPHA = 0.2
 
 # memory pool
-MP_MAX_SIZE = 10000
+MP_MAX_SIZE = 4096
 BATCH_SIZE = 512
 
 # DRL hyper-parameter
-TOTAL_TIME_SLOT = 1000
-LEARNING_RATE = 1e-6                # optimizer learning rate
+TOTAL_TIME_SLOT = 100000
+LEARNING_RATE = 1e-3                # optimizer learning rate
 REG_BETA = 0.2                      # regularization factor
-T_STEP = 128                        # update DQN parameter
-GAMMA = 0.3                         # Q-value penalty
-EPSILON = 0.5                       # Greedy-Epsilon
-DECREASE_FACTOR = 0.999             # Decrease epsilon by EPSILON * DECREASE_FACTOR
-EVAL_TIMES = 10
-HIDDEN_LAYERS = [2048, 2048, 2048]
-INPUT_LAYER = 576
-OUTPUT_LAYER = 729
-PRINT_SLOT = 20                     # print log every PRINT_SLOT
-
-# CNN hyper-parameter
-
+T_STEP = 256                        # update DQN parameter
+EPSILON = 1                         # Greedy-Epsilon
+DECREASE_FACTOR = 0.95              # Decrease epsilon by EPSILON * DECREASE_FACTOR
+PRINT_SLOT = 256                     # print log every PRINT_SLOT
 
 # storage path
-MODEL_PATH = "C:\MADQL\model-v2\model.pth"
-DATA_PATH = "./simulation_data/data"
-
+MODEL_PATH = "./model/model.pth"
+SIMULATION_DATA_PATH = "./simulation_data/data.txt"
+MOBILE_NETWORK_DATA_PATH = "./network_data/network.txt"
 
 if __name__ == "__main__":
     # test generate action list

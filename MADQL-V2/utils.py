@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 from config import *
 
+
 """
 Functions to convert number to dBm/dB (power)
 """
@@ -50,7 +51,7 @@ def setLogger(file=True, debug=False):
     logging.info("-----------------------------------------DL------------------------------------------")
     logging.info(f'Batch Size: {BATCH_SIZE}, Total time slot: {TOTAL_TIME_SLOT}, '
                  f'Learning Rate: {LEARNING_RATE}, Reg Beta: {REG_BETA}')
-    logging.info(f'Gamma: {GAMMA}, Epsilon: {EPSILON}, Epsilon Decrease: {DECREASE_FACTOR}')
+    logging.info(f'Epsilon: {EPSILON}, Epsilon Decrease: {DECREASE_FACTOR}')
     # network config information
     logging.info("=========================================END=========================================")
 
@@ -60,7 +61,6 @@ class Algorithm(Enum):
     MAX_POWER = 2
     MADQL = 3
     CELL_ES = 4
-    CNN = 5
 
 
 # Interference skip list -> due sector isolation
@@ -122,3 +122,13 @@ def calCapacity(actions, channels):
 def cdf(x, plot=True, *args, **kwargs):
     x, y = sorted(x), np.arange(len(x)) / len(x)
     plt.plot(x, y, *args, **kwargs) if plot else (x, y)
+
+
+def action2Index(action):
+    return action[0] * (POWER_LEVEL - 1) + action[1]
+
+
+def index2Action(index):
+    beamformer = index % CODEBOOK_SIZE
+    power = index // POWER_LEVEL
+    return [power, beamformer]
