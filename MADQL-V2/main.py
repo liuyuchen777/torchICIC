@@ -6,32 +6,16 @@ from utils import setLogger, cdf, Algorithm
 from config import *
 from mobile_network import MobileNetwork, plotMobileNetwork
 from mobile_network_generator import saveMobileNetwork, loadMobileNetwork
-
-
-def loadData(name="default"):
-    with open(SIMULATION_DATA_PATH) as jsonFile:
-        data = json.load(jsonFile)
-    with open(SIMULATION_DATA_PATH, 'w') as jsonFile:
-        return data[name]
-
-
-def plotFigure():
-    MADQL = loadData("Algorithm.MADQL-averageCapacity")
-    Random = loadData("Algorithm.RANDOM-averageCapacity")
-
-    cdf(MADQL, label="MADQL")
-    cdf(Random, label="Random")
-
-    plt.show()
+from plot_figure import plotFinalReportCapacity
 
 
 if __name__ == "__main__":
     setLogger()
     controller = "RANDOM_AND_MAX_POWER"
     if controller == "RANDOM_AND_MAX_POWER":
-        mn = MobileNetwork(loadNetwork="3-Links")
+        # mn = MobileNetwork()
 
-        plotMobileNetwork(mn.getSectors(), mn.getUEs())
+        # plotMobileNetwork(mn.getSectors(), mn.getUEs())
 
         # mn.dm = setDecisionMaker(Algorithm.RANDOM)
         # mn.step()
@@ -50,7 +34,7 @@ if __name__ == "__main__":
         #
         # plt.show()
         #
-        mn.dm = setDecisionMaker(Algorithm.MADQL)
-        mn.step()
+        # mn.dm = setDecisionMaker(Algorithm.MADQL)
+        # mn.step()
 
-        # plotFigure()
+        plotFinalReportCapacity()

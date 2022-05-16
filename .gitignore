@@ -5,3 +5,5 @@ checkpoints
 model
 log
 data
+network_data
+simulation_data

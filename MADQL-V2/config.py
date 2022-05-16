@@ -44,7 +44,7 @@ rho = 0.6425                        # Markov Channel Change
 
 # cellular network
 CELL_SIZE = 30.                     # m
-CELL_NUMBER = 1
+CELL_NUMBER = 7
 R_MIN = 2.
 R_MAX = 20.
 
@@ -54,7 +54,7 @@ BATCH_SIZE = 512
 
 # DRL hyper-parameter
 TOTAL_TIME_SLOT = 100000
-LEARNING_RATE = 1e-3                # optimizer learning rate
+LEARNING_RATE = 1e-4                # optimizer learning rate
 REG_BETA = 0.2                      # regularization factor
 T_STEP = 256                        # update DQN parameter
 EPSILON = 1                         # Greedy-Epsilon

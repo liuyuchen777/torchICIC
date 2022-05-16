@@ -66,7 +66,7 @@ EVAL_TIMES = 10
 HIDDEN_LAYERS = [2048, 2048, 2048]
 INPUT_LAYER = 576
 OUTPUT_LAYER = 729                  # 9 * 9 * 9
-PRINT_SLOT = 20                     # print log every PRINT_SLOT
+PRINT_SLOT = 1                     # print log every PRINT_SLOT
 MODEL_PATH = "./model/MADQL.pth"
 
 

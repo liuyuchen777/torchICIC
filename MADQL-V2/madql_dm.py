@@ -1,7 +1,6 @@
 import logging
 import random
 
-import numpy as np
 import torch.nn as nn
 import torch.optim
 import torch
@@ -44,6 +43,7 @@ class MADQL:
         if loadModel:
             self.logger.info(f"----------------Load Model From {MODEL_PATH}------------------")
             self.trainDQN.state_dict(torch.load(MODEL_PATH))
+            self.targetDQN.state_dict(torch.load(MODEL_PATH))
         else:
             self.logger.info("----------------Create New Neural Network------------------")
         # copy parameter of train DQN to target DQN
@@ -65,8 +65,7 @@ class MADQL:
         states = np.zeros([linkNumber, 2, 12, 12], dtype=float)
         for index in range(linkNumber):
             states[index, :] = self.buildState(index, channels)
-        outputs = self.targetDQN.forward(torch.from_numpy(states).float().to(self.device))\
-            .cpu().detach().numpy()
+        outputs = self.targetDQN.forward(torch.from_numpy(states).float().to(self.device)).cpu().detach().numpy()
         actions = []
         if np.random.rand() < self.epsilon and trainNetwork:
             actions = self.takeActionRandom(linkNumber)

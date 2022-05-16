@@ -2,7 +2,7 @@ import json
 import logging
 
 from config import *
-from utils import Algorithm, calCapacity
+from utils import Algorithm, calCapacity, saveData
 from descision_maker import setDecisionMaker
 from mobile_network_generator import generateMobileNetwork, loadMobileNetwork, plotMobileNetwork, saveMobileNetwork
 from channel_generator import generateChannel
@@ -46,15 +46,10 @@ class MobileNetwork:
             channel.update()
 
     def saveRecord(self, prefix="default-"):
-        with open(SIMULATION_DATA_PATH) as jsonFile:
-            data = json.load(jsonFile)
-        with open(SIMULATION_DATA_PATH, 'w') as jsonFile:
-            self.logger.info(f"--------------------------Save Rewards as {prefix}-----------------------------")
-            data[prefix + "capacity"] = self.capacity
-            data[prefix + "averageCapacity"] = self.averageCapacity
-            data[prefix + "action"] = self.actionHistory
-            json.dump(data, jsonFile)
-        print()
+        self.logger.info(f"--------------------------Save Rewards as {prefix}-----------------------------")
+        saveData(self.capacity, name=prefix+"capacity")
+        saveData(self.averageCapacity, name=prefix+"averageCapacity")
+        saveData(self.actionHistory, name=prefix+"action")
 
     def step(self):
         for ts in range(TOTAL_TIME_SLOT):
@@ -85,6 +80,9 @@ class MobileNetwork:
             self.accumulateCapacity += averageCapacity
         """save reward"""
         self.saveRecord(prefix=str(self.dm.algorithm)+"-")
+        """save model"""
+        if self.dm.algorithm == Algorithm.MADQL:
+            self.dm.saveModel()
 
 
 if __name__ == "__main__":

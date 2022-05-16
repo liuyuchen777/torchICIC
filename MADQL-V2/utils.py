@@ -1,3 +1,4 @@
+import json
 import logging
 from enum import Enum
 
@@ -5,7 +6,6 @@ import time
 import matplotlib.pyplot as plt
 
 from config import *
-
 
 """
 Functions to convert number to dBm/dB (power)
@@ -113,7 +113,9 @@ def calCapacity(actions, channels):
                 otherPower = dBm2num(POWER_LIST[actions[j][0]])
                 otherBeamformer = BEAMFORMER_LIST[actions[j][1]]
                 otherChannel = channels[generateChannelIndex(i, j)].getCSI()
-                interferencePower += otherPower * np.power(np.linalg.norm(np.matmul(np.matmul(np.matmul(beamformer.transpose().conjugate(), directChannel.transpose().conjugate()), otherChannel), otherBeamformer)), 2)
+                interferencePower += otherPower * np.power(np.linalg.norm(np.matmul(
+                    np.matmul(np.matmul(beamformer.transpose().conjugate(), directChannel.transpose().conjugate()),
+                              otherChannel), otherBeamformer)), 2)
         capacity.append(np.log2(1 + signalPower / (noisePower + interferencePower)))
 
     return capacity
@@ -132,3 +134,17 @@ def index2Action(index):
     beamformer = index % CODEBOOK_SIZE
     power = index // POWER_LEVEL
     return [power, beamformer]
+
+
+def loadData(path=SIMULATION_DATA_PATH, name="default"):
+    with open(path, 'r') as jsonFile:
+        data = json.load(jsonFile)
+        return data[name]
+
+
+def saveData(input, path=SIMULATION_DATA_PATH, name="default"):
+    with open(path) as jsonFile:
+        data = json.load(jsonFile)
+    with open(path, 'w') as jsonFile:
+        data[name] = input
+        json.dump(data, jsonFile)

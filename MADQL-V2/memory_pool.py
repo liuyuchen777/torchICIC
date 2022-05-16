@@ -1,4 +1,5 @@
 import random
+from collections import deque
 
 from config import *
 
@@ -6,19 +7,13 @@ from config import *
 class MemoryPool:
     def __init__(self, maxSize=MP_MAX_SIZE):
         self.maxSize = maxSize
-        self.pool = []
-        self.size = 0
+        self.pool = deque([], maxlen=MP_MAX_SIZE)
 
     def push(self, record):
-        if self.getSize() >= self.maxSize:
-            self.pool.pop(0)
-            self.pool.append(record)
-        else:
-            self.pool.append(record)
-            self.size += 1
+        self.pool.append(record)
 
     def getSize(self):
-        return self.size
+        return len(self.pool)
 
     def getBatch(self, size=BATCH_SIZE//(CELL_NUMBER*3)):
         return random.sample(self.pool, size)
