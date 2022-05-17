@@ -52,7 +52,7 @@ def setLogger(file=True, debug=False):
     logging.info("-----------------------------------------DL------------------------------------------")
     logging.info(f'Batch Size: {BATCH_SIZE}, Total time slot: {TOTAL_TIME_SLOT}, '
                  f'Learning Rate: {LEARNING_RATE}, Reg Beta: {REG_BETA}')
-    logging.info(f'Epsilon: {EPSILON}, Epsilon Decrease: {DECREASE_FACTOR}')
+    logging.info(f'Epsilon: {EPSILON}, Epsilon Decrease: {EPSILON_DECREASE}')
     # network config information
     logging.info("=========================================END=========================================")
 

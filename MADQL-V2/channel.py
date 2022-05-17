@@ -25,27 +25,19 @@ class Channel:
         """
         csi = np.zeros(shape=[UT_ANTENNA, BS_ANTENNA], dtype=complex)
         for path in range(PATH_NUMBER):
-            # Angle of Departure
+            # AoA and AoD
             AoD = np.zeros(shape=[BS_ANTENNA, 1], dtype=complex)
-            if path == 0:
-                thetaSend = 0
-            else:
-                thetaSend = np.random.rand() * 2 * np.pi
+            AoA = np.zeros(shape=[UT_ANTENNA, 1], dtype=complex)
+            thetaSend = np.random.rand() * 2 * np.pi if path == 0 else 0.
+            thetaReceive = np.random.rand() * 2 * np.pi if path == 0 else 0.
             for n in range(BS_ANTENNA):
                 AoD[n][0] = np.exp(-np.pi * np.sin(thetaSend) * 1j * n)
-
-            # Angle of Arrival
-            AoA = np.zeros(shape=[UT_ANTENNA, 1], dtype=complex)
-            if path == 0:
-                thetaReceive = 0
-            else:
-                thetaReceive = np.random.rand() * 2 * np.pi  # receive angle could be [0, 2pi)
             for m in range(UT_ANTENNA):
                 AoA[m][0] = np.exp(-np.pi * np.sin(thetaReceive) * 1j * m)
 
             # h
             if path == 0:
-                h = np.sqrt(self.ricianFactor / (1 + self.ricianFactor))
+                h = np.sqrt(self.ricianFactor / (1 + self.ricianFactor))    # LoS
             else:
                 hReal = np.random.normal(0., GAUSSIAN_SIGMA)
                 hImage = np.random.normal(0., GAUSSIAN_SIGMA)

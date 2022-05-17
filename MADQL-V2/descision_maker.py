@@ -6,15 +6,6 @@ from max_power_dm import MaxPower
 
 
 def setDecisionMaker(algorithm, loadModel=False):
-    """
-    Return instance of decision maker base on algorithm
-    Args:
-        loadModel: create new SDL or load exist SDL
-        algorithm:
-
-    Returns:
-        decision maker
-    """
     if algorithm == Algorithm.RANDOM:
         return Random()
     elif algorithm == Algorithm.MAX_POWER:

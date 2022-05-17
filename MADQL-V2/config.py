@@ -44,22 +44,26 @@ rho = 0.6425                        # Markov Channel Change
 
 # cellular network
 CELL_SIZE = 30.                     # m
-CELL_NUMBER = 7
+CELL_NUMBER = 1
 R_MIN = 2.
 R_MAX = 20.
 
 # memory pool
 MP_MAX_SIZE = 4096
-BATCH_SIZE = 512
+BATCH_SIZE = 486                    # 3-x
 
 # IDQL hyper-parameter
 TOTAL_TIME_SLOT = 100000
 LEARNING_RATE = 1e-4                # optimizer learning rate
 REG_BETA = 0.2                      # regularization factor
-T_STEP = 256                        # update DQN parameter
-EPSILON = 1                         # Greedy-Epsilon
-DECREASE_FACTOR = 0.95              # Decrease epsilon by EPSILON * DECREASE_FACTOR
-PRINT_SLOT = 256                     # print log every PRINT_SLOT
+T_STEP = 512                        # update DQN parameter
+EPSILON = 0.6                       # Greedy-Epsilon
+EPSILON_MIN = 1e-2                  # Min of epsilon value
+EPSILON_DECREASE = 1e-4
+PRINT_SLOT = 64                     # print log every PRINT_SLOT
+
+# Q-network
+INPUT_CHANNEL = 2
 
 # storage path
 MODEL_PATH = "./model/model.pth"
