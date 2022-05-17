@@ -4,6 +4,7 @@ from enum import Enum
 
 import time
 import matplotlib.pyplot as plt
+from scipy.stats.kde import gaussian_kde
 
 from config import *
 
@@ -148,3 +149,12 @@ def saveData(input, path=SIMULATION_DATA_PATH, name="default"):
     with open(path, 'w') as jsonFile:
         data[name] = input
         json.dump(data, jsonFile)
+
+
+def pdf(data, *args, **kwargs):
+    # create kernel, given an array it will estimate the probability over that values
+    kde = gaussian_kde(data)
+    # these are the values over which your kernel will be evaluated
+    distSpace = np.linspace(min(data), max(data), 1000)
+    # plot the results
+    plt.plot(distSpace, kde(distSpace), *args, **kwargs)

@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils import loadData, cdf
+from utils import loadData, cdf, pdf
+from channel import Channel
 
 
 def plotFinalReportCapacity():
@@ -32,4 +33,38 @@ def plotFinalReportCapacity():
     plt.xlabel("System Capacity (bps/Hz)")
     plt.ylabel("CDF of Reward")
     plt.legend(loc='upper left')
+    plt.show()
+
+
+def plotRicianChannel():
+    """[test] pdf of channel"""
+    channel = Channel([0., 0., 10.], [100., 100., 1.5])
+
+    channel.setRicianFactor(10)
+    channels = []
+    for i in range(5000):
+        norm = np.linalg.norm(channel.getCSI())
+        channels.append(norm)
+        channel.update()
+    pdf(channels, linestyle=":", label="K=10")
+
+    channel.setRicianFactor(5)
+    channels = []
+    for i in range(5000):
+        norm = np.linalg.norm(channel.getCSI())
+        channels.append(norm)
+        channel.update()
+    pdf(channels, linestyle="-", label="K=5")
+
+    channel.setRicianFactor(2)
+    channels = []
+    for i in range(5000):
+        norm = np.linalg.norm(channel.getCSI())
+        channels.append(norm)
+        channel.update()
+    pdf(channels, linestyle="--", label="K=2")
+
+    plt.legend(loc='upper right')
+    plt.xlabel("Norm of Channel")
+    plt.ylabel("Probability")
     plt.show()

@@ -52,7 +52,7 @@ R_MAX = 20.
 MP_MAX_SIZE = 4096
 BATCH_SIZE = 512
 
-# DRL hyper-parameter
+# IDQL hyper-parameter
 TOTAL_TIME_SLOT = 100000
 LEARNING_RATE = 1e-4                # optimizer learning rate
 REG_BETA = 0.2                      # regularization factor

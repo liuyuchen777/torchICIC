@@ -1,6 +1,3 @@
-import matplotlib.pyplot as plt
-from scipy.stats.kde import gaussian_kde
-
 from config import *
 
 
@@ -12,18 +9,10 @@ def calDistance(sectorPosition, uePosition):
     return np.sqrt(dis)
 
 
-def plotPDF(data):
-    # create kernel, given an array it will estimate the probability over that values
-    kde = gaussian_kde(data)
-    # these are the values over which your kernel will be evaluated
-    distSpace = np.linspace(min(data), max(data), 1000)
-    # plot the results
-    plt.plot(distSpace, kde(distSpace))
-
-
 class Channel:
-    def __init__(self, sectorPosition, uePosition):
+    def __init__(self, sectorPosition, uePosition, ricianFactor=RICIAN_FACTOR):
         self.distance = calDistance(sectorPosition, uePosition)
+        self.ricianFactor = ricianFactor
         self.beta = np.sqrt(1 / (np.power(self.distance / 1000, ALPHA)))
         self.CSI = self._calCSI_()
         self.CSIHistory = self.CSI
@@ -56,12 +45,12 @@ class Channel:
 
             # h
             if path == 0:
-                h = np.sqrt(RICIAN_FACTOR / (1 + RICIAN_FACTOR))
+                h = np.sqrt(self.ricianFactor / (1 + self.ricianFactor))
             else:
                 hReal = np.random.normal(0., GAUSSIAN_SIGMA)
                 hImage = np.random.normal(0., GAUSSIAN_SIGMA)
                 h = hReal + 1j * hImage
-                h = h * np.sqrt(1 / ((1 + RICIAN_FACTOR) * (PATH_NUMBER - 1)))
+                h = h * np.sqrt(1 / ((1 + self.ricianFactor) * (PATH_NUMBER - 1)))
             csi += h * AoA * np.transpose(AoD)
         return csi * self.beta
 
@@ -76,47 +65,5 @@ class Channel:
     def getCSIHistory(self):
         return self.CSIHistory
 
-
-if __name__ == "__main__":
-    EXECUTION_MODE = "CHANNEL_PDF"
-
-    if EXECUTION_MODE == "SINGLE_CHANNEL":
-        """[test] single channel value"""
-        channel = Channel([0., 0., 10.], [10., 10., 1.5])
-        print("CSI: ")
-        print(channel.getCSI())
-    elif EXECUTION_MODE == "CHANNEL_PDF":
-        """[test] pdf of channel"""
-        channel = Channel([0., 0., 10.], [100., 100., 1.5])
-
-        RICIAN_FACTOR = 10
-        channels = []
-        for i in range(20000):
-            norm = np.linalg.norm(channel.getCSI())
-            channels.append(norm)
-            channel.update()
-        plotPDF(channels)
-
-        RICIAN_FACTOR = 5
-        channels = []
-        for i in range(20000):
-            norm = np.linalg.norm(channel.getCSI())
-            channels.append(norm)
-            channel.update()
-        plotPDF(channels)
-
-        RICIAN_FACTOR = 2
-        channels = []
-        for i in range(20000):
-            norm = np.linalg.norm(channel.getCSI())
-            channels.append(norm)
-            channel.update()
-        plotPDF(channels)
-
-        plt.show()
-    elif EXECUTION_MODE == "TEST_PLOT_PDF":
-        """[test] pdf function work or not"""
-        gaussianData = np.random.normal(loc=0., scale=1., size=100000)
-        plotPDF(gaussianData)
-        plt.hist(gaussianData, color='blue', edgecolor='black', bins=2000)
-        plt.show()
+    def setRicianFactor(self, ricianFactor):
+        self.ricianFactor = ricianFactor

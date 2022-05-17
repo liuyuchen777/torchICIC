@@ -9,7 +9,7 @@ def setDecisionMaker(algorithm, loadModel=False):
     """
     Return instance of decision maker base on algorithm
     Args:
-        loadModel: create new NN or load exist NN
+        loadModel: create new SDL or load exist SDL
         algorithm:
 
     Returns:

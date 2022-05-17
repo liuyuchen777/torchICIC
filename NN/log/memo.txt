@@ -1,1 +1,0 @@
-This log floder is for NN code log.
