@@ -55,15 +55,13 @@ class MobileNetwork:
             """take action"""
             actions = []
             if self.dm.algorithm == Algorithm.RANDOM or self.dm.algorithm == Algorithm.MAX_POWER:
-                actions = self.dm.takeAction(len(self.sectors))
+                actions = self.dm.takeAction()
             elif self.dm.algorithm == Algorithm.CELL_ES:
-                """CELL_ES only work when CELL_NUMBER is 1"""
-                actions = self.dm.takeAction(self.channels)
+                actions = self.dm.takeAction(self.channels)     # CELL_ES only work when CELL_NUMBER is 1
             elif self.dm.algorithm == Algorithm.MADQL:
                 actions = self.dm.takeAction(self.channels, len(self.sectors))
             """calculate capacity"""
             currentCapacity = calCapacity(actions, self.channels)
-            # self.logger.info(f'actions = {actions}')
             """record"""
             self.actionHistory.append(actions)
             self.capacity.append(currentCapacity)
@@ -74,7 +72,8 @@ class MobileNetwork:
             """print log"""
             if ts != 0 and ts % PRINT_SLOT == 0:
                 self.logger.info(f'mode: {self.dm.algorithm}, time slot: {ts + 1}, '
-                                 f'system average capacity: {self.accumulateCapacity / PRINT_SLOT}')
+                                 f'system average capacity: {self.accumulateCapacity / PRINT_SLOT}, '
+                                 f'action: {actions}')
                 self.accumulateCapacity = 0.
             self.accumulateCapacity += averageCapacity
         """save reward"""

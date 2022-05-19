@@ -5,7 +5,31 @@ Use decorator mode to make Config singleton, save repeat compute codebook, impro
 """
 
 
-BS_ANTENNA = 4
+def dft_matrix(n):
+    """
+    return a n*n DFT matrix
+    """
+    dft_i, dft_j = np.meshgrid(np.arange(n), np.arange(n))
+    omega = np.exp(- 2 * np.pi * 1J / n)
+    w = np.power(omega, dft_i * dft_j) / np.sqrt(n)
+    return w
+
+
+def generateBeamformer(utAntenna):
+    beamformer = []
+    dftMatrixZ = dft_matrix(utAntenna)
+    dftMatrixY = dft_matrix(utAntenna)
+    for i in range(utAntenna):
+        if i in (1, 2):
+            continue
+        for j in range(utAntenna):
+            precodingMatrix = np.expand_dims(dftMatrixZ[:, i], -1) * np.expand_dims(dftMatrixY[j, :], 0)
+            precodingMatrix = precodingMatrix.reshape((-1, 1))
+            beamformer.append(precodingMatrix)
+    return beamformer
+
+
+BS_ANTENNA = 16
 UT_ANTENNA = 4
 BS_HEIGHT = 10.
 UT_HEIGHT = 1.5
@@ -22,14 +46,8 @@ for i in range(POWER_LEVEL):
     tmpPower -= powerGap
 
 # beamformer vector list
-CODEBOOK_SIZE = 4
-BEAMFORMER_LIST = np.zeros(shape=[CODEBOOK_SIZE, BS_ANTENNA], dtype=np.cdouble)
-NUMBER_OF_PHASE = 16
-
-for m in range(1, BS_ANTENNA + 1):
-    for k in range(1, CODEBOOK_SIZE + 1):
-        BEAMFORMER_LIST[k - 1][m - 1] = np.exp(2j * np.pi / NUMBER_OF_PHASE
-            * int(m * (k + CODEBOOK_SIZE / 2) % CODEBOOK_SIZE / (CODEBOOK_SIZE / NUMBER_OF_PHASE))) / np.sqrt(BS_ANTENNA)
+CODEBOOK_SIZE = 8
+BEAMFORMER_LIST = generateBeamformer(UT_ANTENNA)
 
 # wireless channel
 ALPHA = 3                           # path loss exponent
@@ -49,21 +67,21 @@ R_MIN = 2.
 R_MAX = 20.
 
 # memory pool
-MP_MAX_SIZE = 4096
-BATCH_SIZE = 486                    # 3-x
+MP_MAX_SIZE = 1024
+BATCH_SIZE = 256                    # 3-x
 
 # IDQL hyper-parameter
-TOTAL_TIME_SLOT = 100000
+TOTAL_TIME_SLOT = 50000
 LEARNING_RATE = 1e-4                # optimizer learning rate
-REG_BETA = 0.2                      # regularization factor
-T_STEP = 512                        # update DQN parameter
-EPSILON = 0.6                       # Greedy-Epsilon
+EPSILON = 1                         # Greedy-Epsilon
 EPSILON_MIN = 1e-2                  # Min of epsilon value
 EPSILON_DECREASE = 1e-4
-PRINT_SLOT = 64                     # print log every PRINT_SLOT
+PRINT_SLOT = 128                    # print log every PRINT_SLOT
 
 # Q-network
-INPUT_CHANNEL = 2
+INPUT_LAYER = int((3 * CELL_NUMBER) ** 2 * CODEBOOK_SIZE)
+OUTPUT_LAYER = CODEBOOK_SIZE * POWER_LEVEL
+HIDDEN_LAYER = [1024, 1024, 1024, 1024]
 
 # storage path
 MODEL_PATH = "./model/model.pth"
@@ -74,3 +92,4 @@ if __name__ == "__main__":
     # test generate action list
     print(POWER_LIST)
     print(BEAMFORMER_LIST)
+    print(f"len of beamformer： {len(BEAMFORMER_LIST)}")

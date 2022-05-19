@@ -1,4 +1,5 @@
 """ DQN agent at each base station """
+import logging
 
 import numpy as np
 import random
@@ -22,6 +23,7 @@ class DQN:
                  memory_size=500,
                  batch_size=32,
                  e_greedy_decay=1e-4):
+        self.logger = logging.getLogger()
         self.n_actions = n_actions
         self.n_features = n_features
         self.lr = lr
@@ -48,13 +50,13 @@ class DQN:
 
         tar_nn = NeuralNetwork()
         eval_nn = NeuralNetwork()
-        self.model1 = tar_nn.get_model()
-        self.model2 = eval_nn.get_model()
+        self.targetNetwork = tar_nn.get_model()
+        self.trainNetwork = eval_nn.get_model()
         self.target_replace_op()
         # RMSProp optimizer
         optimizer = RMSprop(lr=self.lr, decay=self.lr_decay)
 
-        self.model2.compile(loss='mse', optimizer=optimizer)
+        self.trainNetwork.compile(loss='mse', optimizer=optimizer)
 
     def _store_transition_(self, s, a, r, s_):
         if not hasattr(self, 'memory_counter'):
@@ -72,20 +74,19 @@ class DQN:
         # epsilon greedy
         if random.uniform(0, 1) > self.epsilon:
             observation = observation[np.newaxis, :]
-            actions_value = self.model2.predict(observation)
+            actions_value = self.trainNetwork.predict(observation)
             action = np.argmax(actions_value)
         else:
             action = random.randint(0, self.n_actions - 1)
         return action
 
     def save(self):
-        self.model2.save('data/model.h5')
-        self.model2.save_weights('data/weights.h5')
+        self.trainNetwork.save('data/model.h5')
+        self.trainNetwork.save_weights('data/weights.h5')
 
     def target_replace_op(self):
-        temp = self.model2.get_weights()
-        self.model1.set_weights(temp)
-        print('Parameters updated')
+        self.targetNetwork.set_weights(self.trainNetwork.get_weights())
+        self.logger.info('-----------------Parameters updated--------------------')
 
     def learn(self):
         # update target network's params
@@ -100,8 +101,8 @@ class DQN:
 
         # mini-batch data
         batch_memory = self.memory[sample_index, :]
-        q_next = self.model1.predict(batch_memory[:, -self.n_features:])
-        q_eval = self.model2.predict(batch_memory[:, :self.n_features])
+        q_next = self.targetNetwork.predict(batch_memory[:, -self.n_features:])
+        q_eval = self.trainNetwork.predict(batch_memory[:, :self.n_features])
         q_target = q_eval.copy()
 
         batch_index = np.arange(self.batch_size, dtype=np.int32)
@@ -109,8 +110,9 @@ class DQN:
         reward = batch_memory[:, self.n_features + 1]
         q_target[batch_index, eval_act_index] = reward + self.gamma * np.max(q_next, axis=1)
 
-        hist = self.model2.fit(batch_memory[:, :self.n_features], q_target, verbose=0)
+        hist = self.trainNetwork.fit(batch_memory[:, :self.n_features], q_target, verbose=0)
         self.loss.append(hist.history['loss'][0])
+        self.logger.info(f"train slot = {self.learn_step_counter}, loss = {hist.history['loss'][0]}")
 
         self.epsilon = max(self.epsilon / (1 + self.epsilon_decay), self.epsilon_min)
         self.learn_step_counter += 1

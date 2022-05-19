@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
-import matplotlib.pyplot as plt
 from hyper_parameter import *
 
 
@@ -46,7 +45,6 @@ class QNetwork(object):
         :param y: output action
         :return: MSE loss
         """
-        # FIXME: need to use minibatch size to train model and epochs
         # convert x, y to tensor
         x_tensor = torch.from_numpy(x.astype(np.float32))
         y_tensor = torch.from_numpy(y.astype(np.float32))

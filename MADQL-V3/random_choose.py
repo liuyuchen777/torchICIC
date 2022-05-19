@@ -18,7 +18,6 @@ utility = []
 rate_m = []
 cn.draw_topology()
 for _ in range(c.total_slots):
-    print(_)
     actions = cn.random_choose_actions()
     cn.update(ir_change=False, actions=actions)
     utility.append(cn.get_ave_utility())

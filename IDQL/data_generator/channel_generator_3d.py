@@ -105,12 +105,6 @@ def single_channel_generator_3d(K_factor, N_path, N_component, max_delay, AoD, A
         x[:, 1:] = 0 * x[:, 1:]  # prevent power_temp == 0.
     else:
         x[:, 1:] = (1 / (K + 1))**0.5 * x[:, 1:] / (power_temp**0.5)
- 
-    # Delay_mean = np.sum(Delay * np.abs(x)**2) / np.sum(np.abs(x)**2)
-    # Delay_spread = (np.sum((Delay - Delay_mean)**2 * np.abs(x)**2) / np.sum(np.abs(x)**2))**0.5
-
-    # if check_nan(Delay_spread):
-    #     print('NaN occurs in Delay_spread')
     
     Angle_scaler = 0.57
     # AoD and AoA of each component is generated
@@ -132,9 +126,6 @@ def single_channel_generator_3d(K_factor, N_path, N_component, max_delay, AoD, A
             Phi[J, I, 1] = Laplace_rand(Phi[0, I, 1], Angle_scaler, 1, 1)
             Theta[J, I] = Laplace_rand(Theta[0, I], Angle_scaler, 1, 1)
 
-    # Phi_mean = np.sum(Phi * np.abs(x)**2) / np.sum(np.abs(x)**2)
-    # Phi_spread = (np.sum((Phi - Phi_mean)**2 * np.abs(x)**2) / np.sum(np.abs(x)**2))**0.5
-
     H = np.zeros(shape=(N_component,N_path,n_r,n_t), dtype=complex)
     IR = np.zeros(shape=(max_delay,n_r,n_t), dtype=complex)
     for I in range(N_path):
@@ -154,6 +145,7 @@ def single_channel_generator_3d(K_factor, N_path, N_component, max_delay, AoD, A
             H[J,I,:,:] = np.dot(AF_r, AF_t) * x[J,I]
             #Impulse response on each time tap
             IR[Delay[J,I]-1,:,:] += H[J,I,:,:]
+
     return IR, H, Delay
 
 

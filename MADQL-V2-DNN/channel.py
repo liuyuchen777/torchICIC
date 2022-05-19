@@ -1,4 +1,7 @@
+import random
+
 from config import *
+from utils import dB2num
 
 
 def calDistance(sectorPosition, uePosition):
@@ -12,10 +15,13 @@ def calDistance(sectorPosition, uePosition):
 class Channel:
     def __init__(self, sectorPosition, uePosition, ricianFactor=RICIAN_FACTOR):
         self.distance = calDistance(sectorPosition, uePosition)
-        self.ricianFactor = ricianFactor
-        self.beta = np.sqrt(1 / (np.power(self.distance / 1000, ALPHA)))
+        self.ricianFactor = dB2num(ricianFactor)
+        self.pathLoss = self._calPathLoss_()
         self.CSI = self._calCSI_()
-        self.CSIHistory = self.CSI
+
+    def _calPathLoss_(self):
+        shadowing = dB2num(SHADOWING_SIGMA * random.random())
+        return 1 / np.sqrt(self.distance ** ALPHA)
 
     def _calCSI_(self):
         """
@@ -28,8 +34,8 @@ class Channel:
             # AoA and AoD
             AoD = np.zeros(shape=[BS_ANTENNA, 1], dtype=complex)
             AoA = np.zeros(shape=[UT_ANTENNA, 1], dtype=complex)
-            thetaSend = np.random.rand() * 2 * np.pi if path == 0 else 0.
-            thetaReceive = np.random.rand() * 2 * np.pi if path == 0 else 0.
+            thetaSend = np.random.rand() * 2 * np.pi
+            thetaReceive = np.random.rand() * 2 * np.pi
             for n in range(BS_ANTENNA):
                 AoD[n][0] = np.exp(-np.pi * np.sin(thetaSend) * 1j * n)
             for m in range(UT_ANTENNA):
@@ -39,23 +45,19 @@ class Channel:
             if path == 0:
                 h = np.sqrt(self.ricianFactor / (1 + self.ricianFactor))    # LoS
             else:
-                hReal = np.random.normal(0., GAUSSIAN_SIGMA)
-                hImage = np.random.normal(0., GAUSSIAN_SIGMA)
-                h = hReal + 1j * hImage
+                hTheta = np.random.rand() * 2 * np.pi
+                h = np.cos(hTheta) + 1j * np.sin(hTheta)
                 h = h * np.sqrt(1 / ((1 + self.ricianFactor) * (PATH_NUMBER - 1)))
-            csi += h * AoA * np.transpose(AoD)
-        return csi * self.beta
+            csi += h * np.matmul(AoA, np.transpose(AoD))
+        csi = csi * self.pathLoss
+        return csi
 
     def update(self):
-        self.CSIHistory = self.CSI
-        # self.CSI = rho * self.CSIHistory + np.sqrt(1 - rho ** 2) * self._calCSI_()
         self.CSI = self._calCSI_()
 
     def getCSI(self):
         return self.CSI
 
-    def getCSIHistory(self):
-        return self.CSIHistory
-
     def setRicianFactor(self, ricianFactor):
         self.ricianFactor = ricianFactor
+

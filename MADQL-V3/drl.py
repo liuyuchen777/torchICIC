@@ -6,6 +6,7 @@ import numpy as np
 import scipy.io as sio
 from config import Config
 import os
+import functions as f
 os.environ['MKL_NUM_THREADS'] = '1'
 
 
@@ -16,8 +17,8 @@ cn = CN()
 utility = []
 cn.draw_topology()
 rate_m = []
+f.set_logger()
 for _ in range(c.total_slots):
-    print(_)
     s = cn.observe()
     actions = cn.choose_actions(s)
     cn.update(ir_change=False, actions=actions)

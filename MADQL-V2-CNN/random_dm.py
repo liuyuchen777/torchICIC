@@ -16,6 +16,7 @@ class Random:
     def __init__(self):
         self.logger = logging.getLogger()
         self.algorithm = Algorithm.RANDOM
+        self.linkNumber = 3 * CELL_NUMBER
 
-    def takeAction(self, linkNumber):
-        return takeActionRandom(linkNumber)
+    def takeAction(self):
+        return takeActionRandom(self.linkNumber)

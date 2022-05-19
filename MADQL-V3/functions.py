@@ -1,4 +1,6 @@
 """ some functions required in the simulation """
+import logging
+import time
 
 import scipy.io as sio
 import numpy as np
@@ -49,3 +51,18 @@ def cal_throughput(H, W, noise_power):
         SINR[i] = r_power[i, i] / IN
     U = np.log2(1 + SINR)
     return sum(U) / M
+
+
+def set_logger(file=True, debug=False):
+    if debug:
+        logLevel = logging.DEBUG
+    else:
+        logLevel = logging.INFO
+    if file:
+        logFilePath = "./log/" + time.strftime("%Y-%m-%d") + ".log"
+        logging.basicConfig(format='%(asctime)s, %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                            datefmt='%H:%M:%S', level=logLevel,
+                            handlers=[logging.FileHandler(logFilePath), logging.StreamHandler()])
+    else:
+        logging.basicConfig(format='%(asctime)s, %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                            datefmt='%H:%M:%S', level=logLevel)

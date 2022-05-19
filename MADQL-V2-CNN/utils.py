@@ -158,3 +158,11 @@ def pdf(data, *args, **kwargs):
     distSpace = np.linspace(min(data), max(data), 1000)
     # plot the results
     plt.plot(distSpace, kde(distSpace), *args, **kwargs)
+
+
+def maxNormalization(x):
+    return x / np.max(x)
+
+
+def logMaxNormalization(x):
+    return np.log10(np.abs(x / np.max(x)))

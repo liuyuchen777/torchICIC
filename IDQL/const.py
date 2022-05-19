@@ -135,3 +135,5 @@ if is_beam_forming:
             precoding_matrices.append(precoding_matrix)
 else:
     precoding_matrices = [-1]
+
+print(len(precoding_matrices))

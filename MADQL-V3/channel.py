@@ -35,8 +35,7 @@ class Channel:
         self.aod = self.norminal_aod + (np.random.rand(self.multi_paths) - 0.5) * self.angular_spread
         self.sv = np.zeros((self.multi_paths, self.bs.n_antennas), dtype=complex)
         for i in range(self.multi_paths):
-            self.sv[i, :] = np.exp(1j * np.pi * np.cos(self.aod[i]) * np.arange(self.bs.n_antennas)) \
-                              / np.sqrt(self.bs.n_antennas)
+            self.sv[i, :] = np.exp(1j * np.pi * np.cos(self.aod[i]) * np.arange(self.bs.n_antennas)) / np.sqrt(self.bs.n_antennas)
 
     def _cal_csi_(self, ir_change):
         if ir_change:
