@@ -1,0 +1,21 @@
+index of channel:
+    string form: "0-12"
+    transmitter index 0, receiver index 12
+
+12BS Model:
+position of sector and ue:
+    anti-clockwise, i is center number
+    * from -180 to -60  -> index i * 3
+    * from -60 to 60    -> index i * 3 + 1
+    * from 60 to 180    -> index i * 3 + 2
+
+    anti-clockwise
+    * center    -> i = 0
+    * -150      -> i = 1
+    * -90       -> i = 2
+    * -30       -> i = 3
+    * 30        -> i = 4
+    * 90        -> i = 5
+    * 150       -> i = 6
+
+State Input:

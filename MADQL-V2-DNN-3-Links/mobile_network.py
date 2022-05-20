@@ -72,7 +72,8 @@ class MobileNetwork:
             """print log"""
             if ts != 0 and ts % PRINT_SLOT == 0:
                 self.logger.info(f'mode: {self.dm.algorithm}, time slot: {ts + 1}, '
-                                 f'system average capacity: {self.accumulateCapacity / PRINT_SLOT}')
+                                 f'system average capacity: {self.accumulateCapacity / PRINT_SLOT}, '
+                                 f'action: {actions}')
                 self.accumulateCapacity = 0.
             self.accumulateCapacity += averageCapacity
         """save reward"""

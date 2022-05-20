@@ -31,8 +31,8 @@ class Channel:
             # AoA and AoD
             AoD = np.zeros(shape=[BS_ANTENNA, 1], dtype=complex)
             AoA = np.zeros(shape=[UT_ANTENNA, 1], dtype=complex)
-            thetaSend = np.random.rand() * 2 * np.pi if path != 0 else 0.
-            thetaReceive = np.random.rand() * 2 * np.pi if path != 0 else 0.
+            thetaSend = np.random.rand() * 2 * np.pi
+            thetaReceive = np.random.rand() * 2 * np.pi
             for n in range(BS_ANTENNA):
                 AoD[n][0] = np.exp(-np.pi * np.sin(thetaSend) * 1j * n)
             for m in range(UT_ANTENNA):

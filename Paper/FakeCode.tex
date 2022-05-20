@@ -15,8 +15,7 @@
 	% title of algorithm
 	\label{alg}
 	\begin{algorithmic}[1]
-		\State Establish a pair of DQNs (a trained DQN with weights $\theta$ and a target DQN with weights $\bm{\theta}^-$) and an empty experience pool $M$ for all direct links;
-		\State Initialize the trained DQN wih random weights; set $\bm{\theta}^-=\bm{\theta}$;
+		\State Initialize DQN with weights wih random weights $\bm{\theta}$ and an empty experience pool $M$ for links;
 		\State In time slot $t$ when number of record in memory pool smaller than $M_b$, sector takes action randomly and stores the corresponding experience $\langle s, a, r \rangle$ in its experience pool.
 		\Repeat
 		\State Sector $k$ build its state $s_k$ in time slot $t$ base on local CSI and exchanged CSI, $\forall k \in K$;
@@ -24,8 +23,7 @@
 		\State Sector $k$ executes the chosen action $a_k$, then gets an immediate reward $r_k=R(s_k, a_k)$, $\forall k \in K$;
 		\State Sector $k$ saves its new experience $\langle s_k, a_k, r_k \rangle$ into experience pool;
 		\State Samples a mini-batch consisting of $M_b$ experiences from experience pool $M$;
-		\State Updates weights $\bm{\theta}$ of trained DQN;
-		\State Updates $\bm{\theta}^-$ with $\bm{\theta}$ every $T_{step}$ time slots;
+		\State Updates weights $\bm{\theta}$;
 		\Until{$t>T_{train}$}
 	\end{algorithmic}
 \end{algorithm}

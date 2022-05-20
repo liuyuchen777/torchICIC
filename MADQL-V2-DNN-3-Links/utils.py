@@ -167,16 +167,3 @@ def average(x):
 def mid(x):
     x = sorted(x)
     return x[len(x) // 2]
-
-
-def buildCUIndexList(index):
-    if index % 3 == 0:
-        otherIndex1 = index + 2
-        otherIndex2 = index + 1
-    elif index % 3 == 1:
-        otherIndex1 = index - 1
-        otherIndex2 = index + 1
-    else:
-        otherIndex1 = index - 1
-        otherIndex2 = index - 2
-    return [index, otherIndex1, otherIndex2]

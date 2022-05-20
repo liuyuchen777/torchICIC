@@ -15,7 +15,7 @@ def dft_matrix(n):
     return w
 
 
-def generateBeamformerList(utAntenna):
+def generateBeamformer(utAntenna):
     beamformer = []
     dftMatrixZ = dft_matrix(utAntenna)
     dftMatrixY = dft_matrix(utAntenna)
@@ -29,16 +29,6 @@ def generateBeamformerList(utAntenna):
     return beamformer
 
 
-def generatePowerList(maxPower, powerLevel):
-    powerList = []
-    powerGap = MAX_POWER * 2 / (POWER_LEVEL - 1)
-    tmpPower = MAX_POWER
-    for i in range(POWER_LEVEL):
-        powerList.append(tmpPower)
-        tmpPower -= powerGap
-    return powerList
-
-
 BS_ANTENNA = 16
 UT_ANTENNA = 4
 BS_HEIGHT = 10.
@@ -47,11 +37,17 @@ UT_HEIGHT = 1.5
 # power level list
 MAX_POWER = 10.  # dBm
 POWER_LEVEL = 5
-POWER_LIST = generatePowerList(MAX_POWER, POWER_LEVEL)
+POWER_LIST = []
+
+powerGap = MAX_POWER * 2 / (POWER_LEVEL - 1)
+tmpPower = MAX_POWER
+for i in range(POWER_LEVEL):
+    POWER_LIST.append(tmpPower)
+    tmpPower -= powerGap
 
 # beamformer vector list
 CODEBOOK_SIZE = 8
-BEAMFORMER_LIST = generateBeamformerList(UT_ANTENNA)
+BEAMFORMER_LIST = generateBeamformer(UT_ANTENNA)
 
 # wireless channel
 ALPHA = 3                           # path loss exponent
@@ -66,9 +62,9 @@ rho = 0.6425                        # Markov Channel Change
 
 # cellular network
 CELL_SIZE = 30.                     # m
-CELL_NUMBER = 7
-R_MIN = 5.
-R_MAX = 20.
+CELL_NUMBER = 1
+R_MIN = 25.
+R_MAX = 30.
 
 # memory pool
 MP_MAX_SIZE = 2048
@@ -80,11 +76,10 @@ LEARNING_RATE = 1e-4                # optimizer learning rate
 EPSILON = 1                         # Greedy-Epsilon
 EPSILON_MIN = 1e-2                  # Min of epsilon value
 EPSILON_DECREASE = 1e-4
-PRINT_SLOT = 128                    # print log every PRINT_SLOT
+PRINT_SLOT = 1                      # print log every PRINT_SLOT
 
 # Q-network
-INPUT_LAYER = int((3 * CELL_NUMBER) ** 2 * CODEBOOK_SIZE) \
-    if CELL_NUMBER == 1 else int(2 * (3 * CELL_NUMBER) ** 2 * CODEBOOK_SIZE)
+INPUT_LAYER = int((3 * CELL_NUMBER) ** 2 * CODEBOOK_SIZE)
 OUTPUT_LAYER = CODEBOOK_SIZE * POWER_LEVEL
 HIDDEN_LAYER = [1024, 1024, 1024, 1024]
 

@@ -7,7 +7,7 @@ import torch.nn.functional as F
 
 from config import *
 from memory_pool import MemoryPool
-from utils import Algorithm, calCapacity, action2Index, index2Action, generateChannelIndex, buildCUIndexList
+from utils import Algorithm, calCapacity, action2Index, index2Action, generateChannelIndex
 from random_dm import takeActionRandom
 
 
@@ -96,18 +96,24 @@ class MADQL:
 
     def buildState(self, index, channels):
         state = np.zeros(INPUT_LAYER, dtype=float)
-        # local information
-        indexes = buildCUIndexList(index)
+        if index % 3 == 0:
+            otherIndex1 = index + 2
+            otherIndex2 = index + 1
+        elif index % 3 == 1:
+            otherIndex1 = index - 1
+            otherIndex2 = index + 1
+        else:
+            otherIndex1 = index - 1
+            otherIndex2 = index - 2
+        indexes = [index, otherIndex1, otherIndex2]
         count = 0
-        for i in range(3):
-            for j in range(3):
+        for i in range(self.linkNumber):
+            for j in range(self.linkNumber):
                 for k in range(CODEBOOK_SIZE):
                     channel = channels[generateChannelIndex(indexes[i], indexes[j])].getCSI()
                     beamformer = BEAMFORMER_LIST[k]
                     state[count] = np.linalg.norm(np.matmul(channel, beamformer))
                     count += 1
-        # exchanged information
-
         return state / np.max(state)
 
     def train(self, trainNetwork):

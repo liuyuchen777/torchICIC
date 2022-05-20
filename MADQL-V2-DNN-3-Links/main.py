@@ -10,10 +10,10 @@ from channel import Channel
 
 if __name__ == "__main__":
     setLogger()
-    EXECUTION_MODE = "RANDOM_AND_MAX_POWER"
+    EXECUTION_MODE = "PLOT_FINAL_PDF"
 
     # load/create mobile network and plot
-    mn = MobileNetwork(loadModel="21-Links", newNetwork=True)
+    mn = MobileNetwork()
     plotMobileNetwork(mn.getSectors(), mn.getUEs())
 
     if EXECUTION_MODE == "RANDOM_AND_MAX_POWER":
