@@ -13,15 +13,18 @@ def calDistance(sectorPosition, uePosition):
 
 
 class Channel:
-    def __init__(self, sectorPosition, uePosition, ricianFactor=RICIAN_FACTOR):
+    def __init__(self, sectorPosition, uePosition, ricianFactor=RICIAN_FACTOR, isShadowing=False):
         self.distance = calDistance(sectorPosition, uePosition)
         self.ricianFactor = dB2num(ricianFactor)
-        self.pathLoss = self._calPathLoss_()
+        self.pathLoss = self._calPathLoss_(isShadowing)
         self.CSI = self._calCSI_()
 
-    def _calPathLoss_(self):
-        # shadowing = dB2num(SHADOWING_SIGMA * random.random())
-        return 1 / np.sqrt(self.distance ** ALPHA)
+    def _calPathLoss_(self, isShadowing):
+        if isShadowing:
+            shadowing = dB2num(SHADOWING_SIGMA * random.random())
+            return 1 / np.sqrt(self.distance ** ALPHA + shadowing)
+        else:
+            return 1 / np.sqrt(self.distance ** ALPHA)
 
     def _calCSI_(self):
         """
@@ -60,3 +63,6 @@ class Channel:
 
     def setRicianFactor(self, ricianFactor):
         self.ricianFactor = ricianFactor
+
+    def getPathLoss(self):
+        return self.pathLoss

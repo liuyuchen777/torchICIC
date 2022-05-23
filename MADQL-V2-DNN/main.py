@@ -4,20 +4,19 @@ from descision_maker import setDecisionMaker
 from utils import setLogger, cdf, Algorithm, pdf
 from config import *
 from mobile_network import MobileNetwork, plotMobileNetwork
-from plot_figure import plotRicianChannel, calIndicator, plotRewardChange, plotTempReportCapacity
+from plot_figure import plotRicianChannel, calIndicator
 from channel import Channel
 
 
 if __name__ == "__main__":
     setLogger()
-    EXECUTION_MODE = "RANDOM_AND_MAX_POWER"
+    EXECUTION_MODE = "TRAIN_MADQL"
 
     # load/create mobile network and plot
-    mn = MobileNetwork(loadModel="21-Links", newNetwork=True)
+    mn = MobileNetwork(loadModel="21-Links")
     plotMobileNetwork(mn.getSectors(), mn.getUEs())
 
     if EXECUTION_MODE == "RANDOM_AND_MAX_POWER":
-
         mn.dm = setDecisionMaker(Algorithm.RANDOM)
         mn.step()
         cdf(mn.getAverageCapacity(), label="RANDOM")
@@ -55,6 +54,4 @@ if __name__ == "__main__":
         plt.hist(gaussianData, color='blue', edgecolor='black', bins=2000)
         plt.show()
     elif EXECUTION_MODE == "PLOT_FINAL_PDF":
-        plotRewardChange()
-        plotTempReportCapacity()
-        calIndicator("simulation_data/reward-data-003.txt")
+        calIndicator("./simulation_data/data.txt")

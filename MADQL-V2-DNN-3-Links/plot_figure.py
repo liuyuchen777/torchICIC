@@ -120,6 +120,7 @@ def plotRewardChange():
 
 def calIndicator(dataPath):
     MADQL = loadData(path=dataPath, name="Algorithm.MADQL-averageCapacity")
+    MADQL = MADQL[-2000:]
     random = loadData(path=dataPath, name="Algorithm.RANDOM-averageCapacity")
     maxPower = loadData(path=dataPath, name="Algorithm.MAX_POWER-averageCapacity")
     cellES = loadData(path=dataPath, name="Algorithm.CELL_ES-averageCapacity")

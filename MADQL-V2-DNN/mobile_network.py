@@ -5,6 +5,7 @@ from utils import Algorithm, calCapacity, saveData
 from descision_maker import setDecisionMaker
 from mobile_network_generator import generateMobileNetwork, loadMobileNetwork, plotMobileNetwork, saveMobileNetwork
 from channel_generator import generateChannel
+from env import Environment
 
 
 class MobileNetwork:
@@ -15,7 +16,7 @@ class MobileNetwork:
             self.sectors, self.UEs = loadMobileNetwork(loadNetwork)
         else:
             self.sectors, self.UEs = generateMobileNetwork()
-        self.channels = generateChannel(self.sectors, self.UEs)
+        self.env = Environment(self.sectors, self.UEs)
         self.dm = setDecisionMaker(decisionMaker, loadModel)
         self.accumulateCapacity = 0.
         self.capacity = []                                      # number of links * time slot
@@ -40,10 +41,6 @@ class MobileNetwork:
         self.averageCapacity = []
         self.actionHistory = []
 
-    def updateChannel(self):
-        for channel in self.channels.values():
-            channel.update()
-
     def saveRecord(self, prefix="default-"):
         self.logger.info(f"--------------------------Save Rewards as {prefix}-----------------------------")
         saveData(self.capacity, name=prefix+"capacity")
@@ -57,18 +54,18 @@ class MobileNetwork:
             if self.dm.algorithm == Algorithm.RANDOM or self.dm.algorithm == Algorithm.MAX_POWER:
                 actions = self.dm.takeAction()
             elif self.dm.algorithm == Algorithm.CELL_ES:
-                actions = self.dm.takeAction(self.channels)     # CELL_ES only work when CELL_NUMBER is 1
+                actions = self.dm.takeAction(self.env)     # CELL_ES only work when CELL_NUMBER is 1
             elif self.dm.algorithm == Algorithm.MADQL:
-                actions = self.dm.takeAction(self.channels, len(self.sectors))
+                actions = self.dm.takeAction(self.env, len(self.sectors))
             """calculate capacity"""
-            currentCapacity = calCapacity(actions, self.channels)
+            currentCapacity = calCapacity(actions, self.env)
             """record"""
             self.actionHistory.append(actions)
             self.capacity.append(currentCapacity)
             averageCapacity = sum(currentCapacity) / len(currentCapacity)
             self.averageCapacity.append(averageCapacity)
             """update"""
-            self.updateChannel()
+            self.env.update()
             """print log"""
             if ts != 0 and ts % PRINT_SLOT == 0:
                 self.logger.info(f'mode: {self.dm.algorithm}, time slot: {ts + 1}, '

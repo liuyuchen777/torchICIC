@@ -60,9 +60,11 @@ class MADQL:
                 actions.append(index2Action(actionIndex))
         return actions
 
-    def calReward(self, actions, channels):
-        capacities = calCapacity(actions, channels)
-        return sum(capacities) / len(capacities)
+    def calReward(self, actions, env):
+        capacities = calCapacity(actions, env)
+        averageCapacity = sum(capacities) / len(capacities)
+        rewards = [averageCapacity for i in range(self.linkNumber)]
+        return rewards
 
     def decreaseEpsilon(self):
         self.epsilon = max(self.epsilon / (1 + EPSILON_DECREASE), EPSILON_MIN)
@@ -73,19 +75,19 @@ class MADQL:
                              f'current epsilon = {self.epsilon}')
             self.accumulateLoss = 0.
 
-    def takeAction(self, channels, trainNetwork=True):
+    def takeAction(self, env, trainNetwork=True):
         # build state and forward
         states = np.zeros([self.linkNumber, INPUT_LAYER], dtype=float)
         for index in range(self.linkNumber):
-            states[index, :] = self.buildState(index, channels)
+            states[index, :] = self.buildState(index, env)
         with torch.no_grad():
             outputs = self.DQN(torch.from_numpy(states).float().to(self.device)).cpu().detach().numpy()
         # take action
         actions = self.epsilonGreedyPolicy(outputs, trainNetwork)
         # calculate reward and update Q value
-        reward = self.calReward(actions, channels)
+        rewards = self.calReward(actions, env)
         for index in range(self.linkNumber):
-            outputs[index, action2Index(actions[index])] = reward
+            outputs[index, action2Index(actions[index])] = rewards[index]
         states = np.split(states, 3)
         outputs = np.split(outputs, 3)
         self.memoryPool.push([[state, output] for state, output in zip(states, outputs)])
@@ -94,7 +96,7 @@ class MADQL:
 
         return actions
 
-    def buildState(self, index, channels):
+    def buildState(self, index, env):
         state = np.zeros(INPUT_LAYER, dtype=float)
         # local information
         indexes = buildCUIndexList(index)
@@ -102,7 +104,7 @@ class MADQL:
         for i in range(3):
             for j in range(3):
                 for k in range(CODEBOOK_SIZE):
-                    channel = channels[generateChannelIndex(indexes[i], indexes[j])].getCSI()
+                    channel = env.getChannel(indexes[i], indexes[j]).getCSI()
                     beamformer = BEAMFORMER_LIST[k]
                     state[count] = np.linalg.norm(np.matmul(channel, beamformer))
                     count += 1

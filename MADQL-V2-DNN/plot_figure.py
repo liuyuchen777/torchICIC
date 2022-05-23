@@ -5,14 +5,12 @@ from utils import loadData, cdf, pdf, average, mid
 from channel import Channel
 
 
-def plotTempReportCapacity():
-    DATA_PATH = "simulation_data/reward-data-003.txt"
-
-    MADQL = loadData(path=DATA_PATH, name="Algorithm.MADQL-averageCapacity")
+def plotTempReportCapacity(dataPath="simulation_data/reward-data-003.txt"):
+    MADQL = loadData(path=dataPath, name="Algorithm.MADQL-averageCapacity")
     MADQL = MADQL[-2000:]
-    random = loadData(path=DATA_PATH, name="Algorithm.RANDOM-averageCapacity")
-    maxPower = loadData(path=DATA_PATH, name="Algorithm.MAX_POWER-averageCapacity")
-    cellES = loadData(path=DATA_PATH, name="Algorithm.CELL_ES-averageCapacity")
+    random = loadData(path=dataPath, name="Algorithm.RANDOM-averageCapacity")
+    maxPower = loadData(path=dataPath, name="Algorithm.MAX_POWER-averageCapacity")
+    cellES = loadData(path=dataPath, name="Algorithm.CELL_ES-averageCapacity")
 
     cdf(MADQL, color="red", linestyle=":", label="MADQL")
     cdf(random, color="blue", linestyle="--", label="Random")
@@ -25,13 +23,11 @@ def plotTempReportCapacity():
     plt.show()
 
 
-def plotFinalReportCapacity():
-    DATA_PATH = "./simulation_data/reward-data-001.txt"
-
-    MADQL = loadData(path=DATA_PATH, name="MADQL-average-rewards")
-    random = loadData(path=DATA_PATH, name="Random-average-rewards")
-    cellES = loadData(path=DATA_PATH, name="CELL_ES-average-rewards")
-    maxPower = loadData(path=DATA_PATH, name="MaxPower-average-rewards")
+def plotFinalReportCapacity(dataPath="./simulation_data/reward-data-001.txt"):
+    MADQL = loadData(path=dataPath, name="MADQL-average-rewards")
+    random = loadData(path=dataPath, name="Random-average-rewards")
+    cellES = loadData(path=dataPath, name="CELL_ES-average-rewards")
+    maxPower = loadData(path=dataPath, name="MaxPower-average-rewards")
 
     cdf(MADQL, color="red", linestyle=":", label="MADQL")
     cdf(random, color="blue", linestyle="--", label="Random")
@@ -92,8 +88,8 @@ def plotRicianChannel():
     plt.show()
 
 
-def plotRewardChange():
-    MADQL = loadData(path="simulation_data/reward-data-003.txt", name="Algorithm.MADQL-averageCapacity")
+def plotRewardChange(dataPath="simulation_data/reward-data-003.txt"):
+    MADQL = loadData(path=dataPath, name="Algorithm.MADQL-averageCapacity")
     averageMADQL = []
     PAGE = 100
     temp = []
@@ -119,12 +115,12 @@ def plotRewardChange():
 
 
 def calIndicator(dataPath):
-    MADQL = loadData(path=dataPath, name="Algorithm.MADQL-averageCapacity")
     random = loadData(path=dataPath, name="Algorithm.RANDOM-averageCapacity")
     maxPower = loadData(path=dataPath, name="Algorithm.MAX_POWER-averageCapacity")
-    cellES = loadData(path=dataPath, name="Algorithm.CELL_ES-averageCapacity")
+    # cellES = loadData(path=dataPath, name="Algorithm.CELL_ES-averageCapacity")
+    # MADQL = loadData(path=dataPath, name="Algorithm.MADQL-averageCapacity")
 
-    print(f"MADQL average: {average(MADQL)}, mid: {mid(MADQL)}")
     print(f"Random average: {average(random)}, mid: {mid(random)}")
     print(f"Max Power average: {average(maxPower)}, mid: {mid(maxPower)}")
-    print(f"Cell ES average: {average(cellES)}, mid: {mid(cellES)}")
+    # print(f"Cell ES average: {average(cellES)}, mid: {mid(cellES)}")
+    # print(f"MADQL average: {average(MADQL)}, mid: {mid(MADQL)}")

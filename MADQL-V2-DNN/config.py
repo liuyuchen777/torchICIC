@@ -39,6 +39,17 @@ def generatePowerList(maxPower, powerLevel):
     return powerList
 
 
+def calInputLayer(cellNumber, codebookSize):
+    if cellNumber == 1:
+        return int((3 * cellNumber) ** 2 * codebookSize)
+    else:
+        return int(2 * (3 * cellNumber) ** 2 * codebookSize)
+
+
+def calOutputLayer(powerLevel, codebookSize):
+    return powerLevel * codebookSize
+
+
 BS_ANTENNA = 16
 UT_ANTENNA = 4
 BS_HEIGHT = 10.
@@ -72,26 +83,27 @@ R_MAX = 20.
 
 # memory pool
 MP_MAX_SIZE = 2048
-BATCH_SIZE = 256                    # 3-x
+BATCH_SIZE = 256
 
 # IDQL hyper-parameter
-TOTAL_TIME_SLOT = 2000
-LEARNING_RATE = 1e-4                # optimizer learning rate
+TOTAL_TIME_SLOT = 5000
+LEARNING_RATE = 1e-3                # optimizer learning rate
 EPSILON = 1                         # Greedy-Epsilon
 EPSILON_MIN = 1e-2                  # Min of epsilon value
-EPSILON_DECREASE = 1e-4
-PRINT_SLOT = 128                    # print log every PRINT_SLOT
+EPSILON_DECREASE = 1e-3
+PRINT_SLOT = 50                     # print log every PRINT_SLOT
+TOP_PATH_LOSS = 9
 
 # Q-network
-INPUT_LAYER = int((3 * CELL_NUMBER) ** 2 * CODEBOOK_SIZE) \
-    if CELL_NUMBER == 1 else int(2 * (3 * CELL_NUMBER) ** 2 * CODEBOOK_SIZE)
-OUTPUT_LAYER = CODEBOOK_SIZE * POWER_LEVEL
+INPUT_LAYER = calInputLayer(CELL_NUMBER, CODEBOOK_SIZE)
+OUTPUT_LAYER = calOutputLayer(POWER_LEVEL, CODEBOOK_SIZE)
 HIDDEN_LAYER = [1024, 1024, 1024, 1024]
 
 # storage path
 MODEL_PATH = "./model/model.pth"
-SIMULATION_DATA_PATH = "simulation_data/reward-data-003.txt"
+SIMULATION_DATA_PATH = "simulation_data/data.txt"
 MOBILE_NETWORK_DATA_PATH = "./network_data/network.txt"
+
 
 if __name__ == "__main__":
     # test generate action list

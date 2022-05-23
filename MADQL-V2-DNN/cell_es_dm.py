@@ -5,7 +5,7 @@ from utils import Algorithm, calCapacity
 from config import *
 
 
-def beamCellES(channels):
+def beamCellES(env):
     actions = []
     maxCapacity = 0.
     for beamformer1 in range(CODEBOOK_SIZE):
@@ -16,14 +16,14 @@ def beamCellES(channels):
                     [random.randint(0, POWER_LEVEL - 1), beamformer2],
                     [random.randint(0, POWER_LEVEL - 1), beamformer3]
                 ]
-                tmpCapacity = sum(calCapacity(tmpActions, channels))
+                tmpCapacity = sum(calCapacity(tmpActions, env))
                 if tmpCapacity > maxCapacity:
                     maxCapacity = tmpCapacity
                     actions = tmpActions
     return actions
 
 
-def powerCellES(channels):
+def powerCellES(env):
     actions = []
     maxCapacity = 0.
     for power1 in range(POWER_LEVEL):
@@ -35,14 +35,14 @@ def powerCellES(channels):
                         [power2, random.randint(0, CODEBOOK_SIZE - 1)],
                         [power3, random.randint(0, CODEBOOK_SIZE - 1)]
                     ]
-                    tmpCapacity = sum(calCapacity(tmpActions, channels))
+                    tmpCapacity = sum(calCapacity(tmpActions, env))
                     if tmpCapacity > maxCapacity:
                         maxCapacity = tmpCapacity
                         actions = tmpActions
     return actions
 
 
-def powerBeamCellES(channels):
+def powerBeamCellES(env):
     actions = []
     maxCapacity = 0.
     for power1 in range(POWER_LEVEL):
@@ -56,7 +56,7 @@ def powerBeamCellES(channels):
                                 [power2, beamformer2],
                                 [power3, beamformer3]
                             ]
-                            tmpCapacity = sum(calCapacity(tmpActions, channels))
+                            tmpCapacity = sum(calCapacity(tmpActions, env))
                             if tmpCapacity > maxCapacity:
                                 maxCapacity = tmpCapacity
                                 actions = tmpActions
@@ -70,5 +70,5 @@ class CellES:
         self.logger = logging.getLogger()
         self.algorithm = Algorithm.CELL_ES
 
-    def takeAction(self, channels):
-        return powerCellES(channels)
+    def takeAction(self, env):
+        return powerCellES(env)

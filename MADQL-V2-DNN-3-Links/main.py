@@ -55,6 +55,6 @@ if __name__ == "__main__":
         plt.hist(gaussianData, color='blue', edgecolor='black', bins=2000)
         plt.show()
     elif EXECUTION_MODE == "PLOT_FINAL_PDF":
-        plotRewardChange()
-        plotTempReportCapacity()
+        # plotRewardChange()
+        # plotTempReportCapacity()
         calIndicator("simulation_data/reward-data-003.txt")

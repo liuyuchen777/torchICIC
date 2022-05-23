@@ -94,13 +94,13 @@ def generateChannelIndex(transmitterIndex, receiverIndex):
     return f'{transmitterIndex}-{receiverIndex}'
 
 
-def calCapacity(actions, channels):
+def calCapacity(actions, env):
     capacity = []
 
     for i in range(len(actions)):
         power = dBm2num(POWER_LIST[actions[i][0]])
         beamformer = BEAMFORMER_LIST[actions[i][1]]
-        directChannel = channels[generateChannelIndex(i, i)].getCSI()
+        directChannel = env.getChannel(i, i).getCSI()
         """signal"""
         signalPower = power * np.power(np.linalg.norm(np.matmul(directChannel, beamformer)), 4)
         """noise"""
@@ -108,12 +108,12 @@ def calCapacity(actions, channels):
         """interference"""
         interferencePower = 0.
         for j in range(len(actions)):
-            if i == j or j in SKIP_LIST[i]:
+            if env.isDirectLink(i, j) or env.isIsolated(i, j):
                 continue
             else:
                 otherPower = dBm2num(POWER_LIST[actions[j][0]])
                 otherBeamformer = BEAMFORMER_LIST[actions[j][1]]
-                otherChannel = channels[generateChannelIndex(i, j)].getCSI()
+                otherChannel = env.getChannel(j, i).getCSI()
                 interferencePower += otherPower * np.power(np.linalg.norm(np.matmul(
                     np.matmul(np.matmul(beamformer.transpose().conjugate(), directChannel.transpose().conjugate()),
                               otherChannel), otherBeamformer)), 2)
