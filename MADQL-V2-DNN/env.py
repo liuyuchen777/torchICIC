@@ -26,6 +26,7 @@ class Environment:
         return i == j
 
     def _calTopPathLoss_(self):
+        """top N j->i path loss"""
         topPathLossList = {}
         for i in range(3 * CELL_NUMBER):
             # get list of (link index, path loss)
@@ -34,7 +35,7 @@ class Environment:
                 if self.isDirectLink(i, j) or self.isIsolated(i, j):
                     continue
                 else:
-                    pathLoss.append((j, self.getChannel(i, j).getPathLoss()))
+                    pathLoss.append((j, self.getChannel(j, i).getPathLoss()))
             # sort
             sortedPathLoss = sorted(pathLoss, key=lambda tup: tup[1])
             linkIndexes = [pathLoss[0] for pathLoss in sortedPathLoss[0:TOP_PATH_LOSS]]

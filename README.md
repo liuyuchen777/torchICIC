@@ -15,6 +15,8 @@ Multi-Agent Deep Reinforcement Learning for Inter-Cell Interference Control
 
 `/MADQL-V2-CNN` CNN DQN for MADQL ICIC
 
+`/MADQL-v2-DNN` DNN DQN for MADQL ICIC -> recommend start point
+
 `/MADQL-v2-DNN-3-Links` DNN DQN for MADQL ICIC archive, result in final report
 
 `/Paper` Pseudo Code for MADQL ICIC Algorithm 

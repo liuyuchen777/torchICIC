@@ -5,17 +5,17 @@ from utils import loadData, cdf, pdf, average, mid
 from channel import Channel
 
 
-def plotTempReportCapacity(dataPath="simulation_data/reward-data-003.txt"):
+def plotTempReportCapacity(dataPath):
     MADQL = loadData(path=dataPath, name="Algorithm.MADQL-averageCapacity")
     MADQL = MADQL[-2000:]
     random = loadData(path=dataPath, name="Algorithm.RANDOM-averageCapacity")
-    maxPower = loadData(path=dataPath, name="Algorithm.MAX_POWER-averageCapacity")
-    cellES = loadData(path=dataPath, name="Algorithm.CELL_ES-averageCapacity")
+    # maxPower = loadData(path=dataPath, name="Algorithm.MAX_POWER-averageCapacity")
+    # cellES = loadData(path=dataPath, name="Algorithm.CELL_ES-averageCapacity")
 
-    cdf(MADQL, color="red", linestyle=":", label="MADQL")
+    cdf(MADQL, color="red", linestyle="-", label="MADQL")
     cdf(random, color="blue", linestyle="--", label="Random")
-    cdf(maxPower, color="orange", linestyle="-", label="Max Power")
-    cdf(cellES, color="green", linestyle="-.", label="Cell ES")
+    # cdf(maxPower, color="orange", linestyle="-", label="Max Power")
+    # cdf(cellES, color="green", linestyle="-.", label="Cell ES")
 
     plt.xlabel("System Capacity (bps/Hz)")
     plt.ylabel("CDF of Reward")
@@ -116,11 +116,12 @@ def plotRewardChange(dataPath="simulation_data/reward-data-003.txt"):
 
 def calIndicator(dataPath):
     random = loadData(path=dataPath, name="Algorithm.RANDOM-averageCapacity")
-    maxPower = loadData(path=dataPath, name="Algorithm.MAX_POWER-averageCapacity")
+    # maxPower = loadData(path=dataPath, name="Algorithm.MAX_POWER-averageCapacity")
     # cellES = loadData(path=dataPath, name="Algorithm.CELL_ES-averageCapacity")
-    # MADQL = loadData(path=dataPath, name="Algorithm.MADQL-averageCapacity")
+    MADQL = loadData(path=dataPath, name="Algorithm.MADQL-averageCapacity")
+    MADQL = MADQL[-2000:]
 
     print(f"Random average: {average(random)}, mid: {mid(random)}")
-    print(f"Max Power average: {average(maxPower)}, mid: {mid(maxPower)}")
+    # print(f"Max Power average: {average(maxPower)}, mid: {mid(maxPower)}")
     # print(f"Cell ES average: {average(cellES)}, mid: {mid(cellES)}")
-    # print(f"MADQL average: {average(MADQL)}, mid: {mid(MADQL)}")
+    print(f"MADQL average: {average(MADQL)}, mid: {mid(MADQL)}")

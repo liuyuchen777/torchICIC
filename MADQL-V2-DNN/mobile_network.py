@@ -4,12 +4,12 @@ from config import *
 from utils import Algorithm, calCapacity, saveData
 from descision_maker import setDecisionMaker
 from mobile_network_generator import generateMobileNetwork, loadMobileNetwork, plotMobileNetwork, saveMobileNetwork
-from channel_generator import generateChannel
 from env import Environment
 
 
 class MobileNetwork:
-    def __init__(self, loadNetwork="default", newNetwork=False, decisionMaker=Algorithm.RANDOM, loadModel=False):
+    def __init__(self, loadNetwork="default", newNetwork=False, decisionMaker=Algorithm.RANDOM, loadModel=False,
+                 trainNetwork=True, totalTimeSlot=TOTAL_TIME_SLOT, printSlot=PRINT_SLOT):
         self.logger = logging.getLogger()
         if loadNetwork != "default" and newNetwork == False:
             """load sector/UE position from local file"""
@@ -21,8 +21,12 @@ class MobileNetwork:
         self.accumulateCapacity = 0.
         self.capacity = []                                      # number of links * time slot
         self.averageCapacity = []                               # 1 * time slot
-        self.actionHistory = []                                 # 2 * number of links * time slot
-        saveMobileNetwork(self.sectors, self.UEs, name=loadNetwork)
+        self.actionHistory = []                                 # 2 * number of links * time slots
+        self.trainNetwork = trainNetwork
+        self.totalTimeSlot = totalTimeSlot
+        self.printSlot = printSlot
+        if newNetwork:
+            saveMobileNetwork(self.sectors, self.UEs, name=loadNetwork)
 
     def getSectors(self):
         return self.sectors
@@ -47,8 +51,11 @@ class MobileNetwork:
         saveData(self.averageCapacity, name=prefix+"averageCapacity")
         saveData(self.actionHistory, name=prefix+"action")
 
+    def setTotalTimeSlot(self, timeSlot):
+        self.totalTimeSlot = timeSlot
+
     def step(self):
-        for ts in range(TOTAL_TIME_SLOT):
+        for ts in range(self.totalTimeSlot):
             """take action"""
             actions = []
             if self.dm.algorithm == Algorithm.RANDOM or self.dm.algorithm == Algorithm.MAX_POWER:
@@ -56,7 +63,7 @@ class MobileNetwork:
             elif self.dm.algorithm == Algorithm.CELL_ES:
                 actions = self.dm.takeAction(self.env)     # CELL_ES only work when CELL_NUMBER is 1
             elif self.dm.algorithm == Algorithm.MADQL:
-                actions = self.dm.takeAction(self.env, len(self.sectors))
+                actions = self.dm.takeAction(self.env, trainNetwork=self.trainNetwork)
             """calculate capacity"""
             currentCapacity = calCapacity(actions, self.env)
             """record"""
@@ -67,7 +74,7 @@ class MobileNetwork:
             """update"""
             self.env.update()
             """print log"""
-            if ts != 0 and ts % PRINT_SLOT == 0:
+            if ts != 0 and ts % self.printSlot == 0:
                 self.logger.info(f'mode: {self.dm.algorithm}, time slot: {ts + 1}, '
                                  f'system average capacity: {self.accumulateCapacity / PRINT_SLOT}')
                 self.accumulateCapacity = 0.

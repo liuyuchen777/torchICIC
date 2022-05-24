@@ -31,9 +31,9 @@ def generateBeamformerList(utAntenna):
 
 def generatePowerList(maxPower, powerLevel):
     powerList = []
-    powerGap = MAX_POWER * 2 / (POWER_LEVEL - 1)
-    tmpPower = MAX_POWER
-    for i in range(POWER_LEVEL):
+    powerGap = maxPower * 2 / (powerLevel - 1)
+    tmpPower = maxPower
+    for i in range(powerLevel):
         powerList.append(tmpPower)
         tmpPower -= powerGap
     return powerList
@@ -41,9 +41,9 @@ def generatePowerList(maxPower, powerLevel):
 
 def calInputLayer(cellNumber, codebookSize):
     if cellNumber == 1:
-        return int((3 * cellNumber) ** 2 * codebookSize)
+        return int(9 * codebookSize)
     else:
-        return int(2 * (3 * cellNumber) ** 2 * codebookSize)
+        return int(9 * codebookSize * 2)
 
 
 def calOutputLayer(powerLevel, codebookSize):
@@ -86,13 +86,14 @@ MP_MAX_SIZE = 2048
 BATCH_SIZE = 256
 
 # IDQL hyper-parameter
-TOTAL_TIME_SLOT = 5000
-LEARNING_RATE = 1e-3                # optimizer learning rate
+TOTAL_TIME_SLOT = 2000
+LEARNING_RATE = 1e-4                # optimizer learning rate
 EPSILON = 1                         # Greedy-Epsilon
 EPSILON_MIN = 1e-2                  # Min of epsilon value
 EPSILON_DECREASE = 1e-3
 PRINT_SLOT = 50                     # print log every PRINT_SLOT
 TOP_PATH_LOSS = 9
+INTERFERENCE_PENALTY = 0.5
 
 # Q-network
 INPUT_LAYER = calInputLayer(CELL_NUMBER, CODEBOOK_SIZE)

@@ -26,6 +26,17 @@ class Channel:
         else:
             return 1 / np.sqrt(self.distance ** ALPHA)
 
+    def _calAoAAoD_(self):
+        AoD = np.zeros(shape=[BS_ANTENNA, 1], dtype=complex)
+        AoA = np.zeros(shape=[UT_ANTENNA, 1], dtype=complex)
+        thetaSend = np.random.rand() * 2 * np.pi
+        thetaReceive = np.random.rand() * 2 * np.pi
+        for n in range(BS_ANTENNA):
+            AoD[n][0] = np.exp(-np.pi * np.sin(thetaSend) * 1j * n)
+        for m in range(UT_ANTENNA):
+            AoA[m][0] = np.exp(-np.pi * np.sin(thetaReceive) * 1j * m)
+        return AoA, AoD
+
     def _calCSI_(self):
         """
         Calculate small-scale fading
@@ -34,16 +45,7 @@ class Channel:
         """
         csi = np.zeros(shape=[UT_ANTENNA, BS_ANTENNA], dtype=complex)
         for path in range(PATH_NUMBER):
-            # AoA and AoD
-            AoD = np.zeros(shape=[BS_ANTENNA, 1], dtype=complex)
-            AoA = np.zeros(shape=[UT_ANTENNA, 1], dtype=complex)
-            thetaSend = np.random.rand() * 2 * np.pi
-            thetaReceive = np.random.rand() * 2 * np.pi
-            for n in range(BS_ANTENNA):
-                AoD[n][0] = np.exp(-np.pi * np.sin(thetaSend) * 1j * n)
-            for m in range(UT_ANTENNA):
-                AoA[m][0] = np.exp(-np.pi * np.sin(thetaReceive) * 1j * m)
-
+            AoA, AoD = self._calAoAAoD_()
             # h
             if path == 0:
                 h = np.sqrt(self.ricianFactor / (1 + self.ricianFactor))    # LoS
