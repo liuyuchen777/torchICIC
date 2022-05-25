@@ -7,7 +7,7 @@ from mobile_network import MobileNetwork, plotMobileNetwork
 
 if __name__ == "__main__":
     setLogger()
-    EXECUTION_MODE = "TEST_MADQL"
+    EXECUTION_MODE = "TRAIN_MADQL"
 
     if EXECUTION_MODE == "TEST_RANDOM":
         mn = MobileNetwork(loadNetwork="21-Links", totalTimeSlot=2000, printSlot=10)
@@ -30,8 +30,8 @@ if __name__ == "__main__":
 
         plt.show()
     elif EXECUTION_MODE == "TRAIN_MADQL":
-        prefix = "alpha0.5"
-        mn = MobileNetwork(loadNetwork="21-Links", totalTimeSlot=5000, printSlot=50, savePrefix=prefix)
+        prefix = "alpha10"
+        mn = MobileNetwork(loadNetwork="21-Links", totalTimeSlot=20000, printSlot=50, savePrefix=prefix)
         plotMobileNetwork(mn.getSectors(), mn.getUEs())
 
         mn.dm = setDecisionMaker(Algorithm.MADQL)

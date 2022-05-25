@@ -72,21 +72,39 @@ class MADQL:
                 for index in indexes:
                     rewards[i] += capacities[index]
                 rewards[i] /= 3
-                rewardPenalty = 0.
-                for j in range(self.linkNumber):
-                    if i == j:
-                        continue
-                    else:
-                        beamformer = BEAMFORMER_LIST[actions[i][1]]
-                        channel = env.getChannel(i, j).getCSI()
-                        rewardPenalty += np.linalg.norm(np.matmul(channel, beamformer))
-                rewardPenalty = sigmoid(rewardPenalty)
+                rewardPenalty = self.calInterferencePenaltySig(actions, env, i)
                 rewards[i] = rewards[i] - INTERFERENCE_PENALTY * rewardPenalty
         else:
             """Number of  CU = 1"""
             averageCapacity = sum(capacities) / len(capacities)
             rewards = [averageCapacity for _ in range(self.linkNumber)]
         return rewards
+
+    def calInterferencePenaltySig(self, actions, env, index):
+        rewardPenalty = 0.
+        beamformer = BEAMFORMER_LIST[actions[index][1]]
+        for j in range(self.linkNumber):
+            if index == j:
+                continue
+            else:
+                channel = env.getChannel(index, j).getCSI()
+                rewardPenalty += np.linalg.norm(np.matmul(channel, beamformer))
+        rewardPenalty = sigmoid(rewardPenalty)
+        return rewardPenalty
+
+    def calInterferencePenaltyLog(self, actions, env, index):
+        """log2"""
+        rewardPenalty = 0.
+        power = dBm2num(POWER_LIST[actions[index][0]])
+        beamformer = BEAMFORMER_LIST[actions[index][1]]
+        for j in range(self.linkNumber):
+            if index == j:
+                continue
+            else:
+                channel = env.getChannel(index, j).getCSI()
+                rewardPenalty += np.log2(1+power * np.linalg.norm(np.matmul(channel, beamformer))/dBm2num(NOISE_POWER))
+        rewardPenalty /= self.linkNumber - 1
+        return rewardPenalty
 
     def decreaseEpsilon(self):
         self.epsilon = max(self.epsilon / (1 + EPSILON_DECREASE), EPSILON_MIN)
