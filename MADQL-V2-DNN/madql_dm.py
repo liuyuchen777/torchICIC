@@ -7,7 +7,7 @@ import torch.nn.functional as F
 
 from config import *
 from memory_pool import MemoryPool
-from utils import Algorithm, calCapacity, action2Index, index2Action, buildCUIndexList, dBm2num
+from utils import Algorithm, calCapacity, action2Index, index2Action, buildCUIndexList, dBm2num, sigmoid
 from random_dm import takeActionRandom
 
 
@@ -35,12 +35,15 @@ class MADQL:
         self.epsilon = EPSILON
         self.linkNumber = 3 * CELL_NUMBER
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.DQN = DQN(INPUT_LAYER, OUTPUT_LAYER).to(self.device)
-        if loadModel == True:
+        self.logger.info(f"--------------------Device {self.device}-----------------------")
+        if loadModel:
             self.logger.info(f"----------------Load Model From {MODEL_PATH}------------------")
-            self.DQN.state_dict(torch.load(MODEL_PATH))
+            self.DQN = DQN(INPUT_LAYER, OUTPUT_LAYER)
+            self.DQN.load_state_dict(torch.load(MODEL_PATH))
+            self.DQN.to(self.device)
         else:
             self.logger.info("----------------Create New Neural Network------------------")
+            self.DQN = DQN(INPUT_LAYER, OUTPUT_LAYER).to(self.device)
         # set optimizer and loss
         self.optimizer = torch.optim.Adam(self.DQN.parameters(), lr=LEARNING_RATE)
         self.loss = nn.MSELoss()
@@ -65,20 +68,19 @@ class MADQL:
         rewards = [0. for _ in range(self.linkNumber)]
         if CELL_NUMBER > 1:
             for i in range(len(rewards)):
-                rewardPenalty = 0.
                 indexes = buildCUIndexList(i)
                 for index in indexes:
                     rewards[i] += capacities[index]
                 rewards[i] /= 3
+                rewardPenalty = 0.
                 for j in range(self.linkNumber):
                     if i == j:
                         continue
                     else:
-                        power = dBm2num(POWER_LIST[actions[i][0]])
                         beamformer = BEAMFORMER_LIST[actions[i][1]]
                         channel = env.getChannel(i, j).getCSI()
-                        rewardPenalty += np.log2(1 + power * np.linalg.norm(np.matmul(channel, beamformer)))
-                rewardPenalty /= self.linkNumber - 1
+                        rewardPenalty += np.linalg.norm(np.matmul(channel, beamformer))
+                rewardPenalty = sigmoid(rewardPenalty)
                 rewards[i] = rewards[i] - INTERFERENCE_PENALTY * rewardPenalty
         return rewards
 

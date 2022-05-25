@@ -9,7 +9,7 @@ from env import Environment
 
 class MobileNetwork:
     def __init__(self, loadNetwork="default", newNetwork=False, decisionMaker=Algorithm.RANDOM, loadModel=False,
-                 trainNetwork=True, totalTimeSlot=TOTAL_TIME_SLOT, printSlot=PRINT_SLOT):
+                 trainNetwork=True, totalTimeSlot=TOTAL_TIME_SLOT, printSlot=PRINT_SLOT, savePrefix="default"):
         self.logger = logging.getLogger()
         if loadNetwork != "default" and newNetwork == False:
             """load sector/UE position from local file"""
@@ -25,6 +25,7 @@ class MobileNetwork:
         self.trainNetwork = trainNetwork
         self.totalTimeSlot = totalTimeSlot
         self.printSlot = printSlot
+        self.savePrefix = savePrefix
         if newNetwork:
             saveMobileNetwork(self.sectors, self.UEs, name=loadNetwork)
 
@@ -55,6 +56,8 @@ class MobileNetwork:
         self.totalTimeSlot = timeSlot
 
     def step(self):
+        self.logger.info(f"-------------------Total Time Slot: {self.totalTimeSlot}------------------")
+        self.logger.info(f"----------------------Prefix {self.savePrefix}---------------------")
         for ts in range(self.totalTimeSlot):
             """take action"""
             actions = []
@@ -80,7 +83,7 @@ class MobileNetwork:
                 self.accumulateCapacity = 0.
             self.accumulateCapacity += averageCapacity
         """save reward"""
-        self.saveRecord(prefix=str(self.dm.algorithm)+"-")
+        self.saveRecord(prefix=self.savePrefix+"-"+str(self.dm.algorithm)+"-")
         """save model"""
         if self.dm.algorithm == Algorithm.MADQL:
             self.dm.saveModel()

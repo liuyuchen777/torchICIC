@@ -50,8 +50,7 @@ def setLogger(file=True, debug=False):
     logging.info(f'Path Loss Exponent: {ALPHA}, Log-normal Sigma: {SHADOWING_SIGMA} db, '
                  f'Gaussian Sigma: {GAUSSIAN_SIGMA} db')
     logging.info("-----------------------------------------DL------------------------------------------")
-    logging.info(f'Batch Size: {BATCH_SIZE}, Total time slot: {TOTAL_TIME_SLOT}, '
-                 f'Learning Rate: {LEARNING_RATE}, Output Layer: {OUTPUT_LAYER}')
+    logging.info(f'Batch Size: {BATCH_SIZE}, Learning Rate: {LEARNING_RATE}, Output Layer: {OUTPUT_LAYER}')
     logging.info(f'Epsilon: {EPSILON}, Epsilon Decrease: {EPSILON_DECREASE}, Epsilon Min: {EPSILON_MIN}, Input Layer: {INPUT_LAYER}')
     logging.info(f'Network Hidden Layers: {HIDDEN_LAYER}, Interference Penalty: {INTERFERENCE_PENALTY}')
     # network config information
@@ -181,3 +180,7 @@ def buildCUIndexList(index):
         otherIndex1 = index - 1
         otherIndex2 = index - 2
     return [index, otherIndex1, otherIndex2]
+
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-3 * x))

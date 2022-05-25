@@ -4,7 +4,7 @@ from descision_maker import setDecisionMaker
 from utils import setLogger, cdf, Algorithm, pdf
 from config import *
 from mobile_network import MobileNetwork, plotMobileNetwork
-from plot_figure import plotRicianChannel, calIndicator, plotTempReportCapacity
+from plot_figure import plotRicianChannel
 from channel import Channel
 
 
@@ -33,16 +33,15 @@ if __name__ == "__main__":
 
         plt.show()
     elif EXECUTION_MODE == "TRAIN_MADQL":
-        mn = MobileNetwork(loadNetwork="21-Links", totalTimeSlot=5000, printSlot=50)
+        prefix = "alpha1"
+        mn = MobileNetwork(loadNetwork="21-Links", totalTimeSlot=5000, printSlot=50, savePrefix=prefix)
         plotMobileNetwork(mn.getSectors(), mn.getUEs())
 
         mn.dm = setDecisionMaker(Algorithm.MADQL)
         mn.step()
-
-        cdf(mn.getAverageCapacity()[-2000:], label="MADQL")
-        plt.show()
     elif EXECUTION_MODE == "TEST_MADQL":
-        mn = MobileNetwork(loadNetwork="21-Links", trainNetwork=False, totalTimeSlot=2000, printSlot=10)
+        prefix = "test"
+        mn = MobileNetwork(loadNetwork="21-Links", trainNetwork=False, totalTimeSlot=2000, printSlot=10, savePrefix=prefix)
         plotMobileNetwork(mn.getSectors(), mn.getUEs())
 
         mn.dm = setDecisionMaker(Algorithm.MADQL, loadModel=True)
@@ -54,10 +53,7 @@ if __name__ == "__main__":
     elif EXECUTION_MODE == "PLOT_CHANNEL_PDF":
         plotRicianChannel()
     elif EXECUTION_MODE == "TEST_PLOT_PDF":
-        gaussianData = np.random.normal(loc=0., scale=1., size=100000)
+        gaussianData = np.random.normal(loc=0., scale=1., size=10000)
         pdf(gaussianData)
         plt.hist(gaussianData, color='blue', edgecolor='black', bins=2000)
         plt.show()
-    elif EXECUTION_MODE == "PLOT_FINAL_PDF":
-        plotTempReportCapacity(dataPath="./simulation_data/data.txt")
-        calIndicator(dataPath="./simulation_data/data.txt")
