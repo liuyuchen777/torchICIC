@@ -30,8 +30,8 @@ if __name__ == "__main__":
 
         plt.show()
     elif EXECUTION_MODE == "TRAIN_MADQL":
-        prefix = "alpha10"
-        mn = MobileNetwork(loadNetwork="21-Links", totalTimeSlot=20000, printSlot=50, savePrefix=prefix)
+        prefix = "alpha1"
+        mn = MobileNetwork(loadNetwork="21-Links", totalTimeSlot=20000, printSlot=100, savePrefix=prefix)
         plotMobileNetwork(mn.getSectors(), mn.getUEs())
 
         mn.dm = setDecisionMaker(Algorithm.MADQL)

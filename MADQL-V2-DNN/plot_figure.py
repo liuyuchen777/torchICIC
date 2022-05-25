@@ -23,7 +23,7 @@ def calAndPrintIndicator(dataPath, dataName, dataNumber):
 def plotRewardChange(dataPath, dataName, lineStyle):
     data = loadData(path=dataPath, name=dataName)
 
-    data = windowAverage(data, N=500)
+    data = savgolAverage(data, windowLen=501, polyOrder=3)
     timeSlot = range(len(data))
 
     plt.plot(timeSlot, data, lineStyle=lineStyle)
@@ -88,9 +88,9 @@ def plotTempReportCapacity(dataPath):
 
 
 def plotMADQLRewardChange(dataPath):
-    # plotRewardChange(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity", lineStyle="-")
-    # plotRewardChange(dataPath, dataName="alpha0.5-Algorithm.MADQL-averageCapacity", lineStyle="--")
-    plotRewardChange(dataPath, dataName="Algorithm.MADQL-averageCapacity", lineStyle="-")
+    plotRewardChange(dataPath, dataName="alpha0.01-Algorithm.MADQL-averageCapacity", lineStyle="-")
+    plotRewardChange(dataPath, dataName="alpha10-Algorithm.MADQL-averageCapacity", lineStyle="--")
+    plotRewardChange(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity", lineStyle="-")
 
     plt.title("System Capacity Average via Time Slot")
     plt.ylabel("System Capacity (bps/Hz)")
@@ -99,6 +99,6 @@ def plotMADQLRewardChange(dataPath):
 
 
 if __name__ == "__main__":
-    plotDifferentAlpha("./simulation_data/data.txt")
+    # plotDifferentAlpha("./simulation_data/data.txt")
     # plotMADQLRewardChange("./simulation_data/reward-data-003.txt")
-    # plotMADQLRewardChange("./simulation_data/data.txt")
+    plotMADQLRewardChange("./simulation_data/data.txt")
