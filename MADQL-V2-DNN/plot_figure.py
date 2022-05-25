@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
 
 from utils import loadData, cdf, pdf, average, mid
-from channel import Channel
+
+
+"""Element Plot"""
 
 
 def plotCapacityCDF(dataPath, dataName, dataNumber, labelName, lineStyle):
@@ -16,26 +18,6 @@ def calAndPrintIndicator(dataPath, dataName, dataNumber):
     data = loadData(path=dataPath, name=dataName)
     data = data[-1 * dataNumber:]
     print(f"{dataName} average: {average(data)}, mid: {mid(data)}")
-
-
-def plotDifferentAlpha(dataPath):
-    plotCapacityCDF(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    labelName="Alpha=0.1", lineStyle="-")
-    plotCapacityCDF(dataPath, dataName="alpha0.5-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    labelName="Alpha=0.5", lineStyle="--")
-    plotCapacityCDF(dataPath, dataName="alpha10-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    labelName="Alpha=1", lineStyle=":")
-    plotCapacityCDF(dataPath, dataName="alpha1-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    labelName="Alpha=10", lineStyle="-.")
-
-    calAndPrintIndicator(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity", dataNumber=500)
-    calAndPrintIndicator(dataPath, dataName="alpha0.5-Algorithm.MADQL-averageCapacity", dataNumber=500)
-    calAndPrintIndicator(dataPath, dataName="alpha10-Algorithm.MADQL-averageCapacity", dataNumber=500)
-
-    plt.xlabel("System Capacity (bps/Hz)")
-    plt.ylabel("CDF of Reward")
-    plt.legend(loc='upper left')
-    plt.show()
 
 
 def plotRewardChange(dataPath, dataName, lineStyle):
@@ -61,6 +43,34 @@ def windowAverage(data, N):
     return averageData
 
 
+"""Aggregation Plot"""
+
+
+def plotDifferentAlpha(dataPath):
+    plotCapacityCDF(dataPath, dataName="alpha0.01-Algorithm.MADQL-averageCapacity", dataNumber=1000,
+                    labelName="Alpha=0.01", lineStyle="-")
+    plotCapacityCDF(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity", dataNumber=1000,
+                    labelName="Alpha=0.1", lineStyle="-")
+    plotCapacityCDF(dataPath, dataName="alpha0.5-Algorithm.MADQL-averageCapacity", dataNumber=1000,
+                    labelName="Alpha=0.5", lineStyle="--")
+    plotCapacityCDF(dataPath, dataName="alpha10-Algorithm.MADQL-averageCapacity", dataNumber=1000,
+                    labelName="Alpha=1", lineStyle=":")
+    plotCapacityCDF(dataPath, dataName="alpha2-Algorithm.MADQL-averageCapacity", dataNumber=1000,
+                    labelName="Alpha=2", lineStyle=":")
+    plotCapacityCDF(dataPath, dataName="alpha1-Algorithm.MADQL-averageCapacity", dataNumber=1000,
+                    labelName="Alpha=10", lineStyle="-.")
+
+    # calAndPrintIndicator(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity", dataNumber=500)
+    # calAndPrintIndicator(dataPath, dataName="alpha0.5-Algorithm.MADQL-averageCapacity", dataNumber=500)
+    # calAndPrintIndicator(dataPath, dataName="alpha10-Algorithm.MADQL-averageCapacity", dataNumber=500)
+
+    plt.xlabel("System Capacity (bps/Hz)")
+    plt.ylabel("CDF of Reward")
+    plt.legend(loc='upper left')
+    plt.title("Average System Capacity CDF with Different Interference Penalty")
+    plt.show()
+
+
 def plotTempReportCapacity(dataPath):
     plotCapacityCDF(dataPath, dataName="Algorithm.MADQL-averageCapacity", dataNumber=2000,
                     labelName="MADQL", lineStyle="-")
@@ -77,40 +87,6 @@ def plotTempReportCapacity(dataPath):
     plt.show()
 
 
-def plotRicianChannel():
-    """[test] pdf of channel"""
-    channel = Channel([0., 0., 10.], [100., 100., 1.5])
-
-    channel.setRicianFactor(10)
-    channels = []
-    for i in range(5000):
-        norm = np.linalg.norm(channel.getCSI())
-        channels.append(norm)
-        channel.update()
-    pdf(channels, linestyle=":", label="K=10")
-
-    channel.setRicianFactor(5)
-    channels = []
-    for i in range(5000):
-        norm = np.linalg.norm(channel.getCSI())
-        channels.append(norm)
-        channel.update()
-    pdf(channels, linestyle="-", label="K=5")
-
-    channel.setRicianFactor(2)
-    channels = []
-    for i in range(5000):
-        norm = np.linalg.norm(channel.getCSI())
-        channels.append(norm)
-        channel.update()
-    pdf(channels, linestyle="--", label="K=2")
-
-    plt.legend(loc='upper right')
-    plt.xlabel("Norm of Channel")
-    plt.ylabel("Probability")
-    plt.show()
-
-
 def plotMADQLRewardChange(dataPath):
     # plotRewardChange(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity", lineStyle="-")
     # plotRewardChange(dataPath, dataName="alpha0.5-Algorithm.MADQL-averageCapacity", lineStyle="--")
@@ -120,11 +96,6 @@ def plotMADQLRewardChange(dataPath):
     plt.ylabel("System Capacity (bps/Hz)")
     plt.xlabel("Time Slot")
     plt.show()
-
-
-def calIndicator(dataPath):
-    calAndPrintIndicator(dataPath, dataName="Algorithm.RANDOM-averageCapacity", dataNumber=500)
-    calAndPrintIndicator(dataPath, dataName="Algorithm.MADQL-averageCapacity", dataNumber=500)
 
 
 if __name__ == "__main__":

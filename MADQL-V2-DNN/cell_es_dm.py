@@ -71,4 +71,4 @@ class CellES:
         self.algorithm = Algorithm.CELL_ES
 
     def takeAction(self, env):
-        return powerCellES(env)
+        return powerBeamCellES(env)

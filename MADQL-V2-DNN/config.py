@@ -77,7 +77,7 @@ rho = 0.6425                        # Markov Channel Change
 
 # cellular network
 CELL_SIZE = 30.                     # m
-CELL_NUMBER = 7
+CELL_NUMBER = 6
 R_MIN = 5.
 R_MAX = 20.
 
@@ -93,7 +93,7 @@ EPSILON_MIN = 1e-2                  # Min of epsilon value
 EPSILON_DECREASE = 1e-3
 PRINT_SLOT = 50                     # print log every PRINT_SLOT
 TOP_PATH_LOSS = 9
-INTERFERENCE_PENALTY = 10
+INTERFERENCE_PENALTY = 0.5
 
 # Q-network
 INPUT_LAYER = calInputLayer(CELL_NUMBER, CODEBOOK_SIZE)

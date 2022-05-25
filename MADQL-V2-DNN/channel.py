@@ -1,7 +1,43 @@
 import random
 
+import matplotlib.pyplot as plt
+
 from config import *
-from utils import dB2num
+from utils import dB2num, pdf
+
+
+def plotRicianChannel():
+    """[test] pdf of channel"""
+    channel = Channel([0., 0., 10.], [100., 100., 1.5])
+
+    channel.setRicianFactor(10)
+    channels = []
+    for i in range(5000):
+        norm = np.linalg.norm(channel.getCSI())
+        channels.append(norm)
+        channel.update()
+    pdf(channels, linestyle=":", label="K=10")
+
+    channel.setRicianFactor(5)
+    channels = []
+    for i in range(5000):
+        norm = np.linalg.norm(channel.getCSI())
+        channels.append(norm)
+        channel.update()
+    pdf(channels, linestyle="-", label="K=5")
+
+    channel.setRicianFactor(2)
+    channels = []
+    for i in range(5000):
+        norm = np.linalg.norm(channel.getCSI())
+        channels.append(norm)
+        channel.update()
+    pdf(channels, linestyle="--", label="K=2")
+
+    plt.legend(loc='upper right')
+    plt.xlabel("Norm of Channel")
+    plt.ylabel("Probability")
+    plt.show()
 
 
 def calDistance(sectorPosition, uePosition):
@@ -68,3 +104,18 @@ class Channel:
 
     def getPathLoss(self):
         return self.pathLoss
+
+
+if __name__ == "__main__":
+    EXECUTION_MODE = "PRINT_SINGLE_CHANNEL_CSI"
+    if EXECUTION_MODE == "PRINT_SINGLE_CHANNEL_CSI":
+        channel = Channel([0., 0., 10.], [10., 10., 1.5])
+        print("CSI: ")
+        print(channel.getCSI())
+    elif EXECUTION_MODE == "PLOT_CHANNEL_PDF":
+        plotRicianChannel()
+    elif EXECUTION_MODE == "TEST_PLOT_PDF":
+        gaussianData = np.random.normal(loc=0., scale=1., size=10000)
+        pdf(gaussianData)
+        plt.hist(gaussianData, color='blue', edgecolor='black', bins=2000)
+        plt.show()

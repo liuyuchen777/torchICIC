@@ -57,7 +57,7 @@ class MobileNetwork:
 
     def step(self):
         self.logger.info(f"-------------------Total Time Slot: {self.totalTimeSlot}------------------")
-        self.logger.info(f"----------------------Prefix {self.savePrefix}---------------------")
+        self.logger.info(f"----------------------Save Prefix: {self.savePrefix}---------------------")
         for ts in range(self.totalTimeSlot):
             """take action"""
             actions = []
@@ -79,13 +79,13 @@ class MobileNetwork:
             """print log"""
             if ts != 0 and ts % self.printSlot == 0:
                 self.logger.info(f'mode: {self.dm.algorithm}, time slot: {ts + 1}, '
-                                 f'system average capacity: {self.accumulateCapacity / PRINT_SLOT}')
+                                 f'system average capacity: {self.accumulateCapacity / self.printSlot}')
                 self.accumulateCapacity = 0.
             self.accumulateCapacity += averageCapacity
         """save reward"""
         self.saveRecord(prefix=self.savePrefix+"-"+str(self.dm.algorithm)+"-")
         """save model"""
-        if self.dm.algorithm == Algorithm.MADQL:
+        if self.dm.algorithm == Algorithm.MADQL and self.trainNetwork:
             self.dm.saveModel()
 
 

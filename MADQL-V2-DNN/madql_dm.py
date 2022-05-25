@@ -65,8 +65,8 @@ class MADQL:
 
     def calReward(self, actions, env):
         capacities = calCapacity(actions, env)
-        rewards = [0. for _ in range(self.linkNumber)]
         if CELL_NUMBER > 1:
+            rewards = [0. for _ in range(self.linkNumber)]
             for i in range(len(rewards)):
                 indexes = buildCUIndexList(i)
                 for index in indexes:
@@ -82,6 +82,10 @@ class MADQL:
                         rewardPenalty += np.linalg.norm(np.matmul(channel, beamformer))
                 rewardPenalty = sigmoid(rewardPenalty)
                 rewards[i] = rewards[i] - INTERFERENCE_PENALTY * rewardPenalty
+        else:
+            """Number of  CU = 1"""
+            averageCapacity = sum(capacities) / len(capacities)
+            rewards = [averageCapacity for _ in range(self.linkNumber)]
         return rewards
 
     def decreaseEpsilon(self):
@@ -89,7 +93,7 @@ class MADQL:
 
     def printInformation(self):
         if self.trainSlot % PRINT_SLOT == 0:
-            self.logger.info(f'time slot = {self.trainSlot + 1}, average loss = {self.accumulateLoss / PRINT_SLOT}, '
+            self.logger.info(f'train slot = {self.trainSlot + 1}, average loss = {self.accumulateLoss / PRINT_SLOT}, '
                              f'current epsilon = {self.epsilon}')
             self.accumulateLoss = 0.
 
