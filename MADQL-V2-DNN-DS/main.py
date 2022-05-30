@@ -7,10 +7,11 @@ from mobile_network import MobileNetwork, plotMobileNetwork
 
 if __name__ == "__main__":
     setLogger()
-    EXECUTION_MODE = "TRAIN_3_LINKS_MADQL"
+    EXECUTION_MODE = "TRAIN_MADQL"
 
     if EXECUTION_MODE == "TEST_RANDOM":
-        mn = MobileNetwork(loadNetwork="3-Links", totalTimeSlot=2000, printSlot=10)
+        mn = MobileNetwork(loadNetwork="21-Links", totalTimeSlot=2000, printSlot=10)
+        plotMobileNetwork(mn.getSectors(), mn.getUEs())
 
         mn.dm = setDecisionMaker(Algorithm.RANDOM)
         mn.step()
@@ -20,6 +21,7 @@ if __name__ == "__main__":
         plt.show()
     elif EXECUTION_MODE == "TEST_CELL_ES":
         mn = MobileNetwork(loadNetwork="3-Links", totalTimeSlot=2000, printSlot=1)
+        plotMobileNetwork(mn.getSectors(), mn.getUEs())
 
         mn.dm = setDecisionMaker(Algorithm.CELL_ES)
         mn.step()
@@ -28,7 +30,7 @@ if __name__ == "__main__":
 
         plt.show()
     elif EXECUTION_MODE == "TRAIN_MADQL":
-        prefix = "RewardSig"
+        prefix = "RewardLog"
         mn = MobileNetwork(loadNetwork="21-Links", totalTimeSlot=1000, printSlot=50, savePrefix=prefix)
         plotMobileNetwork(mn.getSectors(), mn.getUEs())
 
@@ -37,18 +39,6 @@ if __name__ == "__main__":
     elif EXECUTION_MODE == "TEST_MADQL":
         prefix = "test"
         mn = MobileNetwork(loadNetwork="21-Links", trainNetwork=False, totalTimeSlot=2000, printSlot=10, savePrefix=prefix)
-        plotMobileNetwork(mn.getSectors(), mn.getUEs())
-
-        mn.dm = setDecisionMaker(Algorithm.MADQL, loadModel=True)
-        mn.step()
-    elif EXECUTION_MODE == "TRAIN_3_LINKS_MADQL":
-        """Remember to set CELL_NUMBER to 1"""
-        mn = MobileNetwork(loadNetwork="3-Links", totalTimeSlot=50000, printSlot=100)
-        mn.dm = setDecisionMaker(Algorithm.MADQL)
-        mn.step()
-    elif EXECUTION_MODE == "TEST_3_LINKS_MADQL":
-        prefix = "3-Links-Test"
-        mn = MobileNetwork(loadNetwork="3-Links", trainNetwork=False, totalTimeSlot=2000, printSlot=10, savePrefix=prefix)
         plotMobileNetwork(mn.getSectors(), mn.getUEs())
 
         mn.dm = setDecisionMaker(Algorithm.MADQL, loadModel=True)

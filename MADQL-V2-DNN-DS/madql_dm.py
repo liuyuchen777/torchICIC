@@ -3,29 +3,12 @@ import logging
 import torch.nn as nn
 import torch.optim
 import torch
-import torch.nn.functional as F
 
 from config import *
 from memory_pool import MemoryPool
 from utils import Algorithm, calCapacity, action2Index, index2Action, buildCUIndexList, dBm2num, sigmoid, saveData
 from random_dm import takeActionRandom
-
-
-class DQN(nn.Module):
-    def __init__(self, inputLayer, outputLayer):
-        super(DQN, self).__init__()
-        self.input_layer = nn.Linear(inputLayer, HIDDEN_LAYER[0], bias=True)
-        self.hidden_layer1 = nn.Linear(HIDDEN_LAYER[0], HIDDEN_LAYER[1], bias=True)
-        self.hidden_layer2 = nn.Linear(HIDDEN_LAYER[1], HIDDEN_LAYER[2], bias=True)
-        self.hidden_layer3 = nn.Linear(HIDDEN_LAYER[2], HIDDEN_LAYER[3], bias=True)
-        self.output_layer = nn.Linear(HIDDEN_LAYER[3], outputLayer, bias=True)
-
-    def forward(self, x):
-        out = F.relu(self.input_layer(x))
-        out = F.relu(self.hidden_layer1(out))
-        out = F.relu(self.hidden_layer2(out))
-        out = F.relu(self.hidden_layer3(out))
-        return self.output_layer(out)
+from dqn import DQN
 
 
 class MADQL:
@@ -67,25 +50,30 @@ class MADQL:
 
     def calReward(self, actions, env):
         capacities = calCapacity(actions, env)
-        rewards = [0. for _ in range(self.linkNumber)]
-        sumRewardPenalty = 0.
-        for i in range(len(rewards)):
-            indexes = buildCUIndexList(i)
-            for index in indexes:
-                rewards[i] += capacities[index]
-            rewards[i] /= 3
-            rewardPenalty = self.calInterferencePenaltySig(actions, env, i)
-            sumRewardPenalty += rewardPenalty
-            rewards[i] = rewards[i] - INTERFERENCE_PENALTY * rewardPenalty
-            # append reward penalty -> use for record
-            self.averageRewardPenalties.append(rewardPenalty)
+        if CELL_NUMBER > 1:
+            rewards = [0. for _ in range(self.linkNumber)]
+            sumRewardPenalty = 0.
+            for i in range(len(rewards)):
+                indexes = buildCUIndexList(i)
+                for index in indexes:
+                    rewards[i] += capacities[index]
+                rewards[i] /= 3
+                rewardPenalty = self.calInterferencePenaltyLog(actions, env, i)
+                sumRewardPenalty += rewardPenalty
+                rewards[i] = rewards[i] - INTERFERENCE_PENALTY * rewardPenalty
+                # append reward penalty
+                self.averageRewardPenalties.append(rewardPenalty)
+        else:
+            """Number of  CU = 1"""
+            averageCapacity = sum(capacities) / len(capacities)
+            rewards = [averageCapacity for _ in range(self.linkNumber)]
         return rewards
 
     def calInterferencePenaltySig(self, actions, env, index):
         rewardPenalty = 0.
         beamformer = BEAMFORMER_LIST[actions[index][1]]
         for j in range(self.linkNumber):
-            if index == j and env.isIsolated(index, j):
+            if index == j:
                 continue
             else:
                 channel = env.getChannel(index, j).getCSI()
@@ -99,7 +87,7 @@ class MADQL:
         power = dBm2num(POWER_LIST[actions[index][0]])
         beamformer = BEAMFORMER_LIST[actions[index][1]]
         for j in range(self.linkNumber):
-            if index == j and env.isIsolated(index, j):
+            if index == j:
                 continue
             else:
                 channel = env.getChannel(index, j).getCSI()
@@ -188,4 +176,4 @@ class MADQL:
 
     def saveRecord(self, prefix="default-"):
         self.logger.info(f"-------------Save Penalty as {prefix}-rewardPenalty--------------")
-        saveData(self.averageRewardPenalties, name=prefix + "-rewardPenalty")
+        saveData(self.averageRewardPenalties, name=prefix + "rewardPenalty")

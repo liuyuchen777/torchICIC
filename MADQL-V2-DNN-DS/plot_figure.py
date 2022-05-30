@@ -23,7 +23,7 @@ def calAndPrintIndicator(dataPath, dataName, dataNumber):
 def plotRewardChange(dataPath, dataName, lineStyle):
     data = loadData(path=dataPath, name=dataName)
 
-    data = savgolAverage(data, windowLen=701, polyOrder=5)
+    data = savgolAverage(data, windowLen=501, polyOrder=3)
     timeSlot = range(len(data))
 
     plt.plot(timeSlot, data, lineStyle=lineStyle)
@@ -71,36 +71,36 @@ def plotDifferentAlpha(dataPath):
     plt.show()
 
 
-def plotCapacityCDFCompare(dataPath):
-    plotCapacityCDF(dataPath, dataName="3-Links-Test-Algorithm.MADQL-averageCapacity", dataNumber=2000,
+def plotTempReportCapacity(dataPath):
+    plotCapacityCDF(dataPath, dataName="Algorithm.MADQL-averageCapacity", dataNumber=2000,
                     labelName="MADQL", lineStyle="-")
-    plotCapacityCDF(dataPath, dataName="default-Algorithm.RANDOM-averageCapacity", dataNumber=2000,
+    plotCapacityCDF(dataPath, dataName="Algorithm.RANDOM-averageCapacity", dataNumber=2000,
                     labelName="Random", lineStyle="--")
-    plotCapacityCDF(dataPath, dataName="power-Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
-                    labelName="Power ES", lineStyle="-.")
-    plotCapacityCDF(dataPath, dataName="beam-Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
-                    labelName="Beam ES", lineStyle=":")
-    plotCapacityCDF(dataPath, dataName="default-Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
-                    labelName="Power and Beam ES", lineStyle=":")
+    plotCapacityCDF(dataPath, dataName="Algorithm.MAX_POWER-averageCapacity", dataNumber=2000,
+                    labelName="Max Power", lineStyle="-.")
+    plotCapacityCDF(dataPath, dataName="Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
+                    labelName="Cell ES", lineStyle=":")
 
     plt.xlabel("System Capacity (bps/Hz)")
     plt.ylabel("CDF of Reward")
-    plt.legend(loc='lower right')
+    plt.legend(loc='upper left')
     plt.show()
 
 
 def plotMADQLRewardChange(dataPath):
-    plotRewardChange(dataPath, dataName="default-Algorithm.MADQL-averageCapacity", lineStyle="-")
+    plotRewardChange(dataPath, dataName="alpha0.01-Algorithm.MADQL-averageCapacity", lineStyle="-")
+    plotRewardChange(dataPath, dataName="alpha10-Algorithm.MADQL-averageCapacity", lineStyle="--")
+    plotRewardChange(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity", lineStyle="-")
 
+    plt.title("System Capacity Average via Time Slot")
     plt.ylabel("System Capacity (bps/Hz)")
     plt.xlabel("Time Slot")
     plt.show()
 
 
-def plotRewardPenaltyPDF(dataPath, dataName):
-    reward = loadData(dataPath, dataName)
-    print(f"len of data: {len(reward)}")
-    pdf(reward, label="log")
+def plotRewardPenaltyPDF(dataPath):
+    reward1 = loadData(dataPath, "RewardLog-rewardPenalty")
+    pdf(reward1)
 
     plt.show()
 
@@ -109,7 +109,4 @@ if __name__ == "__main__":
     # plotDifferentAlpha("./simulation_data/data.txt")
     # plotMADQLRewardChange("./simulation_data/reward-data-003.txt")
     # plotMADQLRewardChange("./simulation_data/data.txt")
-    # plotRewardPenaltyPDF("./simulation_data/data.txt", "RewardLogrewardPenalty")
-    # plotRewardPenaltyPDF("./simulation_data/data.txt", "RewardSig-rewardPenalty")
-    # plotMADQLRewardChange("./simulation_data/reward-data-008.txt")
-    plotCapacityCDFCompare("./simulation_data/data.txt")
+    plotRewardPenaltyPDF("./simulation_data/data.txt")

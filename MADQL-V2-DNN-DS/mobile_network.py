@@ -87,7 +87,7 @@ class MobileNetwork:
         """save model"""
         if self.dm.algorithm == Algorithm.MADQL and self.trainNetwork:
             self.dm.saveModel()
-            # self.dm.saveRecord(self.savePrefix)
+            self.dm.saveRecord(self.savePrefix)
 
 
 if __name__ == "__main__":

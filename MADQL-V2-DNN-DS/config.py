@@ -78,7 +78,7 @@ rho = 0.6425                        # Markov Channel Change
 
 # cellular network
 CELL_SIZE = 30.                     # m
-CELL_NUMBER = 1
+CELL_NUMBER = 7
 R_MIN = 5.
 R_MAX = 20.
 
@@ -92,7 +92,7 @@ TOTAL_TIME_SLOT = 2000
 LEARNING_RATE = 1e-3                # optimizer learning rate
 EPSILON = 1                         # Greedy-Epsilon
 EPSILON_MIN = 1e-2                  # Min of epsilon value
-EPSILON_DECREASE = 1e-4
+EPSILON_DECREASE = 1e-3
 PRINT_SLOT = 100                     # print log every PRINT_SLOT
 TOP_PATH_LOSS = 9
 INTERFERENCE_PENALTY = 0.5

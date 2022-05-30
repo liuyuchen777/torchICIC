@@ -122,12 +122,6 @@ def calCapacity(actions, env):
     return capacity
 
 
-def calLocalCapacity(actions, env, CUIndex):
-    capacity = []
-
-    return capacity
-
-
 def cdf(x, plot=True, *args, **kwargs):
     x, y = sorted(x), np.arange(len(x)) / len(x)
     plt.plot(x, y, *args, **kwargs) if plot else (x, y)
@@ -161,7 +155,7 @@ def pdf(data, *args, **kwargs):
     # create kernel, given an array it will estimate the probability over that values
     kde = gaussian_kde(data)
     # these are the values over which your kernel will be evaluated
-    distSpace = np.linspace(min(data), max(data), 2000)
+    distSpace = np.linspace(min(data), max(data), 1000)
     # plot the results
     plt.plot(distSpace, kde(distSpace), *args, **kwargs)
 
@@ -190,9 +184,3 @@ def buildCUIndexList(index):
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-3 * x))
-
-
-def getLinkIndexByCUIndex(CUIndex):
-    indexes = []
-    
-    return indexes
