@@ -124,6 +124,29 @@ def calCapacity(actions, env):
 
 def calLocalCapacity(actions, env, CUIndex):
     capacity = []
+    indexes = getLinkIndexByCUIndex(CUIndex)
+
+    for i in range(3):
+        power = dBm2num(POWER_LIST[actions[i][0]])
+        beamformer = BEAMFORMER_LIST[actions[i][1]]
+        directChannel = env.getChannel(indexes[i], indexes[i]).getCSI()
+        """signal"""
+        signalPower = power * np.power(np.linalg.norm(np.matmul(directChannel, beamformer)), 4)
+        """noise"""
+        noisePower = dBm2num(NOISE_POWER) * np.power(np.linalg.norm(np.matmul(directChannel, beamformer)), 2)
+        """interference"""
+        interferencePower = 0.
+        for j in range(3):
+            if env.isDirectLink(indexes[i], indexes[j]):
+                continue
+            else:
+                otherPower = dBm2num(POWER_LIST[actions[j][0]])
+                otherBeamformer = BEAMFORMER_LIST[actions[j][1]]
+                otherChannel = env.getChannel(indexes[j], indexes[i]).getCSI()
+                interferencePower += otherPower * np.power(np.linalg.norm(np.matmul(
+                    np.matmul(np.matmul(beamformer.transpose().conjugate(), directChannel.transpose().conjugate()),
+                              otherChannel), otherBeamformer)), 2)
+        capacity.append(np.log2(1 + signalPower / (noisePower + interferencePower)))
 
     return capacity
 
@@ -193,6 +216,4 @@ def sigmoid(x):
 
 
 def getLinkIndexByCUIndex(CUIndex):
-    indexes = []
-    
-    return indexes
+    return [CUIndex * 3, CUIndex * 3 + 1, CUIndex * 3 + 2]

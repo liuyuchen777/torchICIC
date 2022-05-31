@@ -1,7 +1,7 @@
 import logging
 import random
 
-from utils import Algorithm, calCapacity
+from utils import Algorithm, calCapacity, calLocalCapacity
 from config import *
 
 
@@ -42,7 +42,7 @@ def powerCellES(env):
     return actions
 
 
-def powerBeamCellES(env):
+def powerBeamCellES(env, CUIndex):
     actions = []
     maxCapacity = 0.
     for power1 in range(POWER_LEVEL):
@@ -56,7 +56,7 @@ def powerBeamCellES(env):
                                 [power2, beamformer2],
                                 [power3, beamformer3]
                             ]
-                            tmpCapacity = sum(calCapacity(tmpActions, env))
+                            tmpCapacity = sum(calLocalCapacity(tmpActions, env, CUIndex))
                             if tmpCapacity > maxCapacity:
                                 maxCapacity = tmpCapacity
                                 actions = tmpActions
@@ -71,4 +71,9 @@ class CellES:
         self.algorithm = Algorithm.CELL_ES
 
     def takeAction(self, env):
-        return powerBeamCellES(env)
+        actions = []
+        for CUIndex in range(CELL_NUMBER):
+            CUActions = powerBeamCellES(env, CUIndex)
+            actions.extend(CUActions)
+        self.logger.info(f"Local ES actions: {actions}")
+        return actions

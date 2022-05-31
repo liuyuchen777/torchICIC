@@ -78,8 +78,7 @@ class MobileNetwork:
             self.env.update()
             """print log"""
             if ts != 0 and ts % self.printSlot == 0:
-                self.logger.info(f'mode: {self.dm.algorithm}, time slot: {ts + 1}, '
-                                 f'system average capacity: {self.accumulateCapacity / self.printSlot}')
+                self.logger.info(f'mode: {self.dm.algorithm}, time slot: {ts + 1}, system average capacity: {self.accumulateCapacity / self.printSlot}')
                 self.accumulateCapacity = 0.
             self.accumulateCapacity += averageCapacity
         """save reward"""
@@ -87,7 +86,6 @@ class MobileNetwork:
         """save model"""
         if self.dm.algorithm == Algorithm.MADQL and self.trainNetwork:
             self.dm.saveModel()
-            # self.dm.saveRecord(self.savePrefix)
 
 
 if __name__ == "__main__":

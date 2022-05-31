@@ -85,7 +85,7 @@ class MADQL:
         rewardPenalty = 0.
         beamformer = BEAMFORMER_LIST[actions[index][1]]
         for j in range(self.linkNumber):
-            if index == j and env.isIsolated(index, j):
+            if env.isDirectLink(j, index) and env.isIsolated(index, j):
                 continue
             else:
                 channel = env.getChannel(index, j).getCSI()
@@ -99,7 +99,7 @@ class MADQL:
         power = dBm2num(POWER_LIST[actions[index][0]])
         beamformer = BEAMFORMER_LIST[actions[index][1]]
         for j in range(self.linkNumber):
-            if index == j and env.isIsolated(index, j):
+            if env.isDirectLink(j, index) and env.isIsolated(index, j):
                 continue
             else:
                 channel = env.getChannel(index, j).getCSI()

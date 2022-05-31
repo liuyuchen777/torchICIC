@@ -74,14 +74,31 @@ def plotDifferentAlpha(dataPath):
 def plotCapacityCDFCompare(dataPath):
     plotCapacityCDF(dataPath, dataName="3-Links-Test-Algorithm.MADQL-averageCapacity", dataNumber=2000,
                     labelName="MADQL", lineStyle="-")
-    plotCapacityCDF(dataPath, dataName="default-Algorithm.RANDOM-averageCapacity", dataNumber=2000,
+    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.RANDOM-averageCapacity", dataNumber=2000,
                     labelName="Random", lineStyle="--")
-    plotCapacityCDF(dataPath, dataName="power-Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
+    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="power-Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
                     labelName="Power ES", lineStyle="-.")
-    plotCapacityCDF(dataPath, dataName="beam-Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
+    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="beam-Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
                     labelName="Beam ES", lineStyle=":")
-    plotCapacityCDF(dataPath, dataName="default-Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
+    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
                     labelName="Power and Beam ES", lineStyle=":")
+
+    calAndPrintIndicator(dataPath, dataName="3-Links-Test-Algorithm.MADQL-averageCapacity", dataNumber=2000)
+    calAndPrintIndicator("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.CELL_ES-averageCapacity", dataNumber=2000)
+
+    plt.xlabel("System Capacity (bps/Hz)")
+    plt.ylabel("CDF of Reward")
+    plt.legend(loc='lower right')
+    plt.show()
+
+
+def plot21LinkCDFCompare():
+    plotCapacityCDF("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.MADQL-averageCapacity",
+                    dataNumber=2000, labelName="MADQL", lineStyle="-")
+    plotCapacityCDF("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.RANDOM-averageCapacity",
+                    dataNumber=2000, labelName="Random", lineStyle="--")
+    plotCapacityCDF("./simulation_data/reward-data-017.txt", dataName="default-Algorithm.CELL_ES-averageCapacity",
+                    dataNumber=2000, labelName="Local ES", lineStyle="-.")
 
     plt.xlabel("System Capacity (bps/Hz)")
     plt.ylabel("CDF of Reward")
@@ -112,4 +129,5 @@ if __name__ == "__main__":
     # plotRewardPenaltyPDF("./simulation_data/data.txt", "RewardLogrewardPenalty")
     # plotRewardPenaltyPDF("./simulation_data/data.txt", "RewardSig-rewardPenalty")
     # plotMADQLRewardChange("./simulation_data/reward-data-008.txt")
-    plotCapacityCDFCompare("./simulation_data/data.txt")
+    # plotCapacityCDFCompare("./simulation_data/data.txt")
+    plot21LinkCDFCompare()
