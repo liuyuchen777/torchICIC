@@ -1,9 +1,7 @@
-import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
 
 from utils import loadData, cdf, pdf, average, mid
-
 
 """Element Plot"""
 
@@ -37,9 +35,9 @@ def windowAverage(data, N):
     """average on previous N time slot"""
     averageData = []
     for i in range(len(data)):
-        sumStart = i-N if (i-N) > 0 else 0
-        sumLen = N if (i-N) > 0 else i + 1
-        averageData.append(sum(data[sumStart:i+1])/sumLen)
+        sumStart = i - N if (i - N) > 0 else 0
+        sumLen = N if (i - N) > 0 else i + 1
+        averageData.append(sum(data[sumStart:i + 1]) / sumLen)
     return averageData
 
 
@@ -74,17 +72,22 @@ def plotDifferentAlpha(dataPath):
 def plotCapacityCDFCompare(dataPath):
     plotCapacityCDF(dataPath, dataName="3-Links-Test-Algorithm.MADQL-averageCapacity", dataNumber=2000,
                     labelName="MADQL", lineStyle="-")
-    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.RANDOM-averageCapacity", dataNumber=2000,
+    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.RANDOM-averageCapacity",
+                    dataNumber=2000,
                     labelName="Random", lineStyle="--")
-    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="power-Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
+    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="power-Algorithm.CELL_ES-averageCapacity",
+                    dataNumber=2000,
                     labelName="Power ES", lineStyle="-.")
-    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="beam-Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
+    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="beam-Algorithm.CELL_ES-averageCapacity",
+                    dataNumber=2000,
                     labelName="Beam ES", lineStyle=":")
-    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.CELL_ES-averageCapacity", dataNumber=2000,
+    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.CELL_ES-averageCapacity",
+                    dataNumber=2000,
                     labelName="Power and Beam ES", lineStyle=":")
 
     calAndPrintIndicator(dataPath, dataName="3-Links-Test-Algorithm.MADQL-averageCapacity", dataNumber=2000)
-    calAndPrintIndicator("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.CELL_ES-averageCapacity", dataNumber=2000)
+    calAndPrintIndicator("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.CELL_ES-averageCapacity",
+                         dataNumber=2000)
 
     plt.xlabel("System Capacity (bps/Hz)")
     plt.ylabel("CDF of Reward")
@@ -99,6 +102,13 @@ def plot21LinkCDFCompare():
                     dataNumber=2000, labelName="Random", lineStyle="--")
     plotCapacityCDF("./simulation_data/reward-data-017.txt", dataName="default-Algorithm.CELL_ES-averageCapacity",
                     dataNumber=2000, labelName="Local ES", lineStyle="-.")
+
+    calAndPrintIndicator("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.RANDOM-averageCapacity",
+                         dataNumber=2000)
+    calAndPrintIndicator("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.MADQL-averageCapacity",
+                         dataNumber=2000)
+    calAndPrintIndicator("./simulation_data/data.txt", dataName="default-Algorithm.CELL_ES-averageCapacity",
+                         dataNumber=2000)
 
     plt.xlabel("System Capacity (bps/Hz)")
     plt.ylabel("CDF of Reward")

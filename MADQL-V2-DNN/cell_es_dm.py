@@ -5,7 +5,7 @@ from utils import Algorithm, calCapacity, calLocalCapacity
 from config import *
 
 
-def beamCellES(env):
+def beamCellES(env, CUIndex):
     actions = []
     maxCapacity = 0.
     for beamformer1 in range(CODEBOOK_SIZE):
@@ -16,14 +16,14 @@ def beamCellES(env):
                     [random.randint(0, POWER_LEVEL - 1), beamformer2],
                     [random.randint(0, POWER_LEVEL - 1), beamformer3]
                 ]
-                tmpCapacity = sum(calCapacity(tmpActions, env))
+                tmpCapacity = sum(calLocalCapacity(tmpActions, env, CUIndex))
                 if tmpCapacity > maxCapacity:
                     maxCapacity = tmpCapacity
                     actions = tmpActions
     return actions
 
 
-def powerCellES(env):
+def powerCellES(env, CUIndex):
     actions = []
     maxCapacity = 0.
     for power1 in range(POWER_LEVEL):
@@ -35,7 +35,7 @@ def powerCellES(env):
                         [power2, random.randint(0, CODEBOOK_SIZE - 1)],
                         [power3, random.randint(0, CODEBOOK_SIZE - 1)]
                     ]
-                    tmpCapacity = sum(calCapacity(tmpActions, env))
+                    tmpCapacity = sum(calLocalCapacity(tmpActions, env, CUIndex))
                     if tmpCapacity > maxCapacity:
                         maxCapacity = tmpCapacity
                         actions = tmpActions
