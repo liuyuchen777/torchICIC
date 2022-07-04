@@ -1,15 +1,39 @@
 import matplotlib.pyplot as plt
+import matplotlib
 from scipy.signal import savgol_filter
+import numpy as np
+from matplotlib.pyplot import MultipleLocator
+import seaborn as sns
 
 from utils import loadData, cdf, pdf, average, mid
+
+sns.set()
 
 """Element Plot"""
 
 
-def plotCapacityCDF(dataPath, dataName, dataNumber, labelName, lineStyle):
+def plotCapacityCDF(dataPath, dataName, dataNumber, *args, **kwargs):
     data = loadData(dataPath, dataName)
     data = data[-1 * dataNumber:]
-    cdf(data, lineStyle=lineStyle, label=labelName)
+    sns.ecdfplot(data=data, *args, **kwargs)
+
+
+def plotCapacityCDFCenterThree(dataPath, dataName,  *args, **kwargs):
+    data = loadData(dataPath, dataName)
+    print(f"dimension x = {len(data)}, y = {len(data[0])}")
+    data = [sum(capacity[0:3]) / 3. for capacity in data]
+    sns.ecdfplot(data=data, *args, **kwargs)
+
+
+def plotCapacityCDFCenterThreeThreshold(dataPath, dataName, *args, **kwargs):
+    data = loadData(dataPath, dataName)
+    newData = []
+    for capacity in data:
+        temp = sum(capacity[0:3]) / 3.
+        if temp < 0.32:
+            continue
+        newData.append(temp)
+    sns.ecdfplot(data=newData, *args, **kwargs)
 
 
 def calAndPrintIndicator(dataPath, dataName, dataNumber):
@@ -18,13 +42,29 @@ def calAndPrintIndicator(dataPath, dataName, dataNumber):
     print(f"{dataName} average: {average(data)}, mid: {mid(data)}")
 
 
-def plotRewardChange(dataPath, dataName, lineStyle):
+def calAndPrintIndicatorCenterThree(dataPath, dataName):
+    data = loadData(path=dataPath, name=dataName)
+    data = [sum(capacity[0:3]) / 3. for capacity in data]
+    print(f"{dataName} average: {average(data)}, mid: {mid(data)}")
+
+
+def plotRewardChange(dataPath, dataName, *args, **kwargs):
     data = loadData(path=dataPath, name=dataName)
 
     data = savgolAverage(data, windowLen=701, polyOrder=5)
     timeSlot = range(len(data))
 
-    plt.plot(timeSlot, data, lineStyle=lineStyle)
+    plt.plot(timeSlot, data, *args, **kwargs)
+
+
+def plotRewardChangeCenterThree(dataPath, dataName, *args, **kwargs):
+    data = loadData(path=dataPath, name=dataName)
+    data = [sum(capacity[0:3]) / 3. for capacity in data]
+
+    data = savgolAverage(data, windowLen=701, polyOrder=5)
+    timeSlot = range(len(data))
+
+    plt.plot(timeSlot, data, *args, **kwargs)
 
 
 def savgolAverage(data, windowLen, polyOrder):
@@ -46,81 +86,129 @@ def windowAverage(data, N):
 
 def plotDifferentAlpha(dataPath):
     plotCapacityCDF(dataPath, dataName="alpha0.01-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    labelName="Alpha=0.01", lineStyle="-")
+                    label="Alpha=0.01", linestyle="-")
     plotCapacityCDF(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    labelName="Alpha=0.1", lineStyle="-")
-    plotCapacityCDF(dataPath, dataName="alpha0.5-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    labelName="Alpha=0.5", lineStyle="--")
+                    label="Alpha=0.1", linestyle="-")
     plotCapacityCDF(dataPath, dataName="alpha10-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    labelName="Alpha=1", lineStyle=":")
-    plotCapacityCDF(dataPath, dataName="alpha2-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    labelName="Alpha=2", lineStyle=":")
+                    label="Alpha=1", linestyle=":")
+    plotCapacityCDF(dataPath, dataName="alpha5-Algorithm.MADQL-averageCapacity", dataNumber=1000,
+                    label="Alpha=5", linestyle=":")
     plotCapacityCDF(dataPath, dataName="alpha1-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    labelName="Alpha=10", lineStyle="-.")
+                    label="Alpha=10", linestyle="-.")
 
     # calAndPrintIndicator(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity", dataNumber=500)
     # calAndPrintIndicator(dataPath, dataName="alpha0.5-Algorithm.MADQL-averageCapacity", dataNumber=500)
     # calAndPrintIndicator(dataPath, dataName="alpha10-Algorithm.MADQL-averageCapacity", dataNumber=500)
 
     plt.xlabel("System Capacity (bps/Hz)")
-    plt.ylabel("CDF of Reward")
+    plt.ylabel("CDF")
     plt.legend(loc='upper left')
-    plt.title("Average System Capacity CDF with Different Interference Penalty")
     plt.show()
 
 
-def plotCapacityCDFCompare(dataPath):
-    plotCapacityCDF(dataPath, dataName="3-Links-Test-Algorithm.MADQL-averageCapacity", dataNumber=2000,
-                    labelName="MADQL", lineStyle="-")
+def plot3LinkCDFCompare():
+    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="3-Links-Test-Algorithm.MADQL-averageCapacity", dataNumber=2000,
+                    label="MADQL", linestyle="-")
     plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.RANDOM-averageCapacity",
                     dataNumber=2000,
-                    labelName="Random", lineStyle="--")
+                    label="Random", linestyle="--")
     plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="power-Algorithm.CELL_ES-averageCapacity",
                     dataNumber=2000,
-                    labelName="Power ES", lineStyle="-.")
+                    label="Power ES", linestyle="-.")
     plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="beam-Algorithm.CELL_ES-averageCapacity",
                     dataNumber=2000,
-                    labelName="Beam ES", lineStyle=":")
+                    label="Beam ES", linestyle=":")
     plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.CELL_ES-averageCapacity",
                     dataNumber=2000,
-                    labelName="Power and Beam ES", lineStyle=":")
-
-    calAndPrintIndicator(dataPath, dataName="3-Links-Test-Algorithm.MADQL-averageCapacity", dataNumber=2000)
-    calAndPrintIndicator("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.CELL_ES-averageCapacity",
-                         dataNumber=2000)
+                    label="Power and Beam ES", linestyle=":")
 
     plt.xlabel("System Capacity (bps/Hz)")
-    plt.ylabel("CDF of Reward")
+    plt.ylabel("CDF")
     plt.legend(loc='lower right')
     plt.show()
 
 
 def plot21LinkCDFCompare():
-    plotCapacityCDF("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.MADQL-averageCapacity",
-                    dataNumber=2000, labelName="MADQL", lineStyle="-")
-    plotCapacityCDF("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.RANDOM-averageCapacity",
-                    dataNumber=2000, labelName="Random", lineStyle="--")
-    plotCapacityCDF("./simulation_data/reward-data-017.txt", dataName="default-Algorithm.CELL_ES-averageCapacity",
-                    dataNumber=2000, labelName="Local ES", lineStyle="-.")
+    matplotlib.rcParams.update({'font.size': 13})
 
-    calAndPrintIndicator("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.RANDOM-averageCapacity",
-                         dataNumber=2000)
-    calAndPrintIndicator("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.MADQL-averageCapacity",
-                         dataNumber=2000)
-    calAndPrintIndicator("./simulation_data/data.txt", dataName="default-Algorithm.CELL_ES-averageCapacity",
-                         dataNumber=2000)
+    plotCapacityCDFCenterThreeThreshold("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.MADQL-capacity",
+                                        label="MADQL", linestyle="-")
+    plotCapacityCDFCenterThree("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.RANDOM-capacity",
+                               label="Random", linestyle="--")
+    plotCapacityCDFCenterThree("./simulation_data/reward-data-017.txt", dataName="default-Algorithm.CELL_ES-capacity",
+                               label="Local ES", linestyle="-.")
+
+    # calAndPrintIndicatorCenterThree("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.RANDOM-capacity")
+    # calAndPrintIndicatorCenterThree("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.MADQL-capacity")
+    # calAndPrintIndicatorCenterThree("./simulation_data/reward-data-017.txt", dataName="default-Algorithm.CELL_ES-capacity")
 
     plt.xlabel("System Capacity (bps/Hz)")
-    plt.ylabel("CDF of Reward")
+    plt.ylabel("CDF")
     plt.legend(loc='lower right')
     plt.show()
 
 
-def plotMADQLRewardChange(dataPath):
-    plotRewardChange(dataPath, dataName="default-Algorithm.MADQL-averageCapacity", lineStyle="-")
+def plotDifferentAlphaRewardChangeCenterThree():
+    """this may take long time"""
+
+    dataPath = "./simulation_data/reward-data-010.txt"
+
+    plotRewardChangeCenterThree(dataPath, dataName="alpha0.01-Algorithm.MADQL-capacity",
+                    label="Alpha=0.01", linestyle="-")
+    plotRewardChangeCenterThree(dataPath, dataName="alpha0.1-Algorithm.MADQL-capacity",
+                    label="Alpha=0.1", linestyle="-")
+    plotRewardChangeCenterThree(dataPath, dataName="alpha10-Algorithm.MADQL-capacity",
+                    label="Alpha=1", linestyle=":")
+    plotRewardChangeCenterThree(dataPath, dataName="alpha5-Algorithm.MADQL-capacity",
+                    label="Alpha=5", linestyle=":")
+    plotRewardChangeCenterThree(dataPath, dataName="alpha1-Algorithm.MADQL-capacity",
+                    label="Alpha=10", linestyle="-.")
 
     plt.ylabel("System Capacity (bps/Hz)")
     plt.xlabel("Time Slot")
+    plt.legend()
+    plt.show()
+
+
+def plotDifferentAlphaRewardChange():
+    """this may take long time"""
+
+    dataPath = "./simulation_data/reward-data-010.txt"
+
+    plotRewardChange(dataPath, dataName="alpha0.01-Algorithm.MADQL-averageCapacity",
+                                label="Alpha=0.01", linestyle="-")
+    plotRewardChange(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity",
+                                label="Alpha=0.1", linestyle="-")
+    plotRewardChange(dataPath, dataName="alpha10-Algorithm.MADQL-averageCapacity",
+                                label="Alpha=1", linestyle=":")
+    plotRewardChange(dataPath, dataName="alpha5-Algorithm.MADQL-averageCapacity",
+                                label="Alpha=5", linestyle=":")
+    plotRewardChange(dataPath, dataName="alpha1-Algorithm.MADQL-averageCapacity",
+                                label="Alpha=10", linestyle="-.")
+
+    plt.ylabel("System Capacity (bps/Hz)")
+    plt.xlabel("Time Slot")
+    plt.legend()
+    plt.show()
+
+
+def plotMADQL3LinkRewardChange():
+    plotRewardChangeCenterThree(dataPath="./simulation_data/reward-data-008.txt",
+                                dataName="default-Algorithm.MADQL-capacity", label="MADQL")
+
+    plt.ylabel("System Capacity (bps/Hz)")
+    plt.xlabel("Time Slot")
+    plt.legend()
+    plt.show()
+
+
+def plotMADQL21LinkRewardChange():
+    plotRewardChangeCenterThree(dataPath="./simulation_data/reward-data-012.txt",
+                                dataName="50000-link21-alpha5-Algorithm.MADQL-capacity", label="MADQL")
+
+    plt.ylabel("System Capacity (bps/Hz)")
+    plt.xlabel("Time Slot")
+    plt.legend()
     plt.show()
 
 
@@ -132,12 +220,81 @@ def plotRewardPenaltyPDF(dataPath, dataName):
     plt.show()
 
 
+def calLinkAverage(data):
+    res = [0. for _ in range(len(data[0]))]
+    for row in data:
+        for index in range(len(row)):
+            res[index] += row[index]
+    res = [link / len(data) for link in res]
+    return res
+
+
+def plotLinksAverageCapacity21Link():
+
+    plt.figure(figsize=(15, 8))
+
+    madql = loadData("./simulation_data/reward-data-013.txt", "default-Algorithm.MADQL-capacity")
+    es = loadData("./simulation_data/reward-data-017.txt", "default-Algorithm.CELL_ES-capacity")
+    random = loadData("./simulation_data/reward-data-013.txt", "default-Algorithm.RANDOM-capacity")
+
+    madql = calLinkAverage(madql)
+    es = calLinkAverage(es)
+    random = calLinkAverage(random)
+
+    x = np.arange(len(madql))
+    total_width, n = 0.8, 3
+    width = total_width / n
+    x = x - (total_width - width) / 2
+
+    plt.bar(x, random, width=width, label="Random")
+    plt.bar(x + width, es, width=width, label="Local ES")
+    plt.bar(x + 2 * width, madql, width=width, label="MADQL")
+
+    x_major_locator = MultipleLocator(1)
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(x_major_locator)
+    plt.xlim(-0.5, 20.5)
+
+    plt.ylabel("Link Capacity (bps/Hz)")
+    plt.xlabel("Link Index")
+    plt.legend()
+    plt.show()
+
+
+def plotLinksAverageCapacity3Link():
+    madql = loadData("./simulation_data/reward-data-016.txt", "default-Algorithm.MADQL-capacity")
+    es = loadData("./simulation_data/reward-data-009.txt", "default-Algorithm.CELL_ES-capacity")
+    random = loadData("./simulation_data/reward-data-009.txt", "default-Algorithm.RANDOM-capacity")
+
+    madql = calLinkAverage(madql)
+    es = calLinkAverage(es)
+    random = calLinkAverage(random)
+
+    x = np.arange(len(madql))
+    total_width, n = 0.8, 3
+    width = total_width / n
+    x = x - (total_width - width) / 2
+
+    plt.bar(x, random, width=width, label="Random")
+    plt.bar(x + width, es, width=width, label="Local ES")
+    plt.bar(x + 2 * width, madql, width=width, label="MADQL")
+
+    x_major_locator = MultipleLocator(1)
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(x_major_locator)
+
+    plt.ylabel("Link Capacity (bps/Hz)")
+    plt.xlabel("Link Index")
+    plt.legend()
+    plt.show()
+
+
 if __name__ == "__main__":
-    # plotDifferentAlpha("./simulation_data/data.txt")
-    # plotMADQLRewardChange("./simulation_data/reward-data-003.txt")
-    # plotMADQLRewardChange("./simulation_data/data.txt")
-    # plotRewardPenaltyPDF("./simulation_data/data.txt", "RewardLogrewardPenalty")
-    # plotRewardPenaltyPDF("./simulation_data/data.txt", "RewardSig-rewardPenalty")
-    # plotMADQLRewardChange("./simulation_data/reward-data-008.txt")
-    # plotCapacityCDFCompare("./simulation_data/data.txt")
-    plot21LinkCDFCompare()
+    # plotDifferentAlpha("./simulation_data/reward-data-011.txt")
+    # plot21LinkCDFCompare()
+    # plot3LinkCDFCompare()
+    # plotLinksAverageCapacity21Link()
+    # plotLinksAverageCapacity3Link()
+    # plotMADQL21LinkRewardChange()
+    # plotMADQL3LinkRewardChange()
+    plotDifferentAlphaRewardChange()

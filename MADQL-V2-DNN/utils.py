@@ -153,7 +153,7 @@ def calLocalCapacity(actions, env, CUIndex):
 
 def cdf(x, plot=True, *args, **kwargs):
     x, y = sorted(x), np.arange(len(x)) / len(x)
-    plt.plot(x, y, *args, **kwargs) if plot else (x, y)
+    plt.plot(x, y, *args, **kwargs)
 
 
 def action2Index(action):

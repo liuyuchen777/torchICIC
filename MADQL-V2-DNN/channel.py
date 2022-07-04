@@ -49,7 +49,7 @@ def calDistance(sectorPosition, uePosition):
 
 
 class Channel:
-    def __init__(self, sectorPosition, uePosition, ricianFactor=RICIAN_FACTOR, isShadowing=False):
+    def __init__(self, sectorPosition, uePosition, ricianFactor=RICIAN_FACTOR, isShadowing=True):
         self.distance = calDistance(sectorPosition, uePosition)
         self.ricianFactor = dB2num(ricianFactor)
         self.pathLoss = self._calPathLoss_(isShadowing)
