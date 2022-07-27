@@ -1,13 +1,16 @@
 import matplotlib.pyplot as plt
+import matplotlib
 
 from descision_maker import setDecisionMaker
 from utils import setLogger, cdf, Algorithm
 from mobile_network import MobileNetwork, plotMobileNetwork
 
+matplotlib.rcParams.update({'font.size': 13})
+
 
 if __name__ == "__main__":
     setLogger()
-    EXECUTION_MODE = "TEST_CELL_ES"
+    EXECUTION_MODE = "TEST_RANDOM"
 
     if EXECUTION_MODE == "TEST_RANDOM":
         mn = MobileNetwork(loadNetwork="3-Links", totalTimeSlot=2000, printSlot=10)

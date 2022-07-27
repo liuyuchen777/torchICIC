@@ -11,7 +11,7 @@ class MobileNetwork:
     def __init__(self, loadNetwork="default", newNetwork=False, decisionMaker=Algorithm.RANDOM, loadModel=False,
                  trainNetwork=True, totalTimeSlot=TOTAL_TIME_SLOT, printSlot=PRINT_SLOT, savePrefix="default"):
         self.logger = logging.getLogger()
-        if loadNetwork != "default" and newNetwork == False:
+        if loadNetwork != "default" and not newNetwork:
             """load sector/UE position from local file"""
             self.sectors, self.UEs = loadMobileNetwork(loadNetwork)
         else:

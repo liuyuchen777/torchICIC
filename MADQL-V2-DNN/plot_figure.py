@@ -5,9 +5,9 @@ import numpy as np
 from matplotlib.pyplot import MultipleLocator
 import seaborn as sns
 
-from utils import loadData, cdf, pdf, average, mid
+from utils import loadData, pdf, average, mid
 
-sns.set()
+matplotlib.rcParams.update({'font.size': 13})
 
 """Element Plot"""
 
@@ -20,7 +20,6 @@ def plotCapacityCDF(dataPath, dataName, dataNumber, *args, **kwargs):
 
 def plotCapacityCDFCenterThree(dataPath, dataName,  *args, **kwargs):
     data = loadData(dataPath, dataName)
-    print(f"dimension x = {len(data)}, y = {len(data[0])}")
     data = [sum(capacity[0:3]) / 3. for capacity in data]
     sns.ecdfplot(data=data, *args, **kwargs)
 
@@ -36,9 +35,8 @@ def plotCapacityCDFCenterThreeThreshold(dataPath, dataName, *args, **kwargs):
     sns.ecdfplot(data=newData, *args, **kwargs)
 
 
-def calAndPrintIndicator(dataPath, dataName, dataNumber):
+def calAndPrintIndicator(dataPath, dataName):
     data = loadData(path=dataPath, name=dataName)
-    data = data[-1 * dataNumber:]
     print(f"{dataName} average: {average(data)}, mid: {mid(data)}")
 
 
@@ -90,24 +88,21 @@ def plotDifferentAlpha(dataPath):
     plotCapacityCDF(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity", dataNumber=1000,
                     label="Alpha=0.1", linestyle="-")
     plotCapacityCDF(dataPath, dataName="alpha10-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    label="Alpha=1", linestyle=":")
+                    label="Alpha=1.0", linestyle=":")
     plotCapacityCDF(dataPath, dataName="alpha5-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    label="Alpha=5", linestyle=":")
+                    label="Alpha=5.0", linestyle=":")
     plotCapacityCDF(dataPath, dataName="alpha1-Algorithm.MADQL-averageCapacity", dataNumber=1000,
-                    label="Alpha=10", linestyle="-.")
+                    label="Alpha=10.0", linestyle="-.")
 
-    # calAndPrintIndicator(dataPath, dataName="alpha0.1-Algorithm.MADQL-averageCapacity", dataNumber=500)
-    # calAndPrintIndicator(dataPath, dataName="alpha0.5-Algorithm.MADQL-averageCapacity", dataNumber=500)
-    # calAndPrintIndicator(dataPath, dataName="alpha10-Algorithm.MADQL-averageCapacity", dataNumber=500)
-
-    plt.xlabel("System Capacity (bps/Hz)")
+    plt.xlabel("Average System Capacity (bps/Hz)")
     plt.ylabel("CDF")
     plt.legend(loc='upper left')
     plt.show()
 
 
 def plot3LinkCDFCompare():
-    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="3-Links-Test-Algorithm.MADQL-averageCapacity", dataNumber=2000,
+    plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="3-Links-Test-Algorithm.MADQL-averageCapacity",
+                    dataNumber=2000,
                     label="MADQL", linestyle="-")
     plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.RANDOM-averageCapacity",
                     dataNumber=2000,
@@ -120,9 +115,15 @@ def plot3LinkCDFCompare():
                     label="Beam ES", linestyle=":")
     plotCapacityCDF("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.CELL_ES-averageCapacity",
                     dataNumber=2000,
-                    label="Power and Beam ES", linestyle=":")
+                    label="Joint ES", linestyle=":")
 
-    plt.xlabel("System Capacity (bps/Hz)")
+    calAndPrintIndicator("./simulation_data/reward-data-009.txt", dataName="3-Links-Test-Algorithm.MADQL-averageCapacity")
+    calAndPrintIndicator("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.RANDOM-averageCapacity")
+    calAndPrintIndicator("./simulation_data/reward-data-009.txt", dataName="power-Algorithm.CELL_ES-averageCapacity")
+    calAndPrintIndicator("./simulation_data/reward-data-009.txt", dataName="beam-Algorithm.CELL_ES-averageCapacity")
+    calAndPrintIndicator("./simulation_data/reward-data-009.txt", dataName="default-Algorithm.CELL_ES-averageCapacity")
+
+    plt.xlabel("Average System Capacity (bps/Hz)")
     plt.ylabel("CDF")
     plt.legend(loc='lower right')
     plt.show()
@@ -138,11 +139,11 @@ def plot21LinkCDFCompare():
     plotCapacityCDFCenterThree("./simulation_data/reward-data-017.txt", dataName="default-Algorithm.CELL_ES-capacity",
                                label="Local ES", linestyle="-.")
 
-    # calAndPrintIndicatorCenterThree("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.RANDOM-capacity")
-    # calAndPrintIndicatorCenterThree("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.MADQL-capacity")
-    # calAndPrintIndicatorCenterThree("./simulation_data/reward-data-017.txt", dataName="default-Algorithm.CELL_ES-capacity")
+    calAndPrintIndicatorCenterThree("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.MADQL-capacity")
+    calAndPrintIndicatorCenterThree("./simulation_data/reward-data-013.txt", dataName="default-Algorithm.RANDOM-capacity")
+    calAndPrintIndicatorCenterThree("./simulation_data/reward-data-017.txt", dataName="default-Algorithm.CELL_ES-capacity")
 
-    plt.xlabel("System Capacity (bps/Hz)")
+    plt.xlabel("Average System Capacity (bps/Hz)")
     plt.ylabel("CDF")
     plt.legend(loc='lower right')
     plt.show()
@@ -291,10 +292,10 @@ def plotLinksAverageCapacity3Link():
 
 if __name__ == "__main__":
     # plotDifferentAlpha("./simulation_data/reward-data-011.txt")
-    # plot21LinkCDFCompare()
+    plot21LinkCDFCompare()
     # plot3LinkCDFCompare()
     # plotLinksAverageCapacity21Link()
     # plotLinksAverageCapacity3Link()
     # plotMADQL21LinkRewardChange()
     # plotMADQL3LinkRewardChange()
-    plotDifferentAlphaRewardChange()
+    # plotDifferentAlphaRewardChange()
